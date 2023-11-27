@@ -11,7 +11,17 @@ class Work extends Model {
     use HasFactory, HasUuids;
 
 
+    public static function workExistsByDoi($doi) {
+        return $doi !== '' ? Work::where('doi',$doi)->exists() : false;
+    }
+
     public function authors(): BelongsToMany {
         return $this->belongsToMany(Author::class, 'author_works');
+    }
+
+    public function scopeDoi($query, $doi) {
+        if($doi !== '')
+            return $query->orWhere('doi',$doi);
+        return $query;
     }
 }

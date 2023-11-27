@@ -14,4 +14,8 @@ class AuthorWork extends Model {
         'Author_Id',
         'Work_Id',
     ];
+
+    public static function associationExists($work_id,$author_id) {
+        return AuthorWork::where('author_id',$author_id)->where('work_id',$work_id)->exists();
+    }
 }

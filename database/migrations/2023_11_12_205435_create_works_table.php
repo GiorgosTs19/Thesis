@@ -11,13 +11,13 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('works', function (Blueprint $table) {
             $table->uuid('id');
-            $table->string('Doi');
-            $table->string('Open_Alex_URL');
-            $table->string('Title');
-            $table->date('Publication_Date');
-            $table->string('Language');
-            $table->string('Type');
-            $table->boolean('Is_OA');
+            $table->string('doi')->nullable()->unique();
+            $table->string('open_alex_url')->unique();
+            $table->string('title');
+            $table->date('publication_date');
+            $table->string('language');
+            $table->string('type');
+            $table->boolean('is_oa');
             $table->timestamps();
         });
     }

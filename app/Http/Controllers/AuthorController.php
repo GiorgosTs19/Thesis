@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Author;
 use App\Models\AuthorWork;
+use App\Models\User;
 use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -38,11 +39,11 @@ class AuthorController extends Controller {
 
         if(!$Author_Query->exists()) {
             $newAuthor = new Author;
-            $newAuthor->Name = $author->display_name;
-            $newAuthor->OrcId = $parsed_orc_id;
-            $newAuthor->OpenAlexId = $parsed_id;
-            $newAuthor->Cited_By_Count =$author->cited_by_count;
-            $newAuthor->ScopusId = $parsed_scopus_id;
+            $newAuthor->display_name = $author->display_name;
+            $newAuthor->orc_id = $parsed_orc_id;
+            $newAuthor->open_alex_id = $parsed_id;
+            $newAuthor->cited_by_count =$author->cited_by_count;
+            $newAuthor->scopus_id = $parsed_scopus_id;
             $newAuthor->save();
             return [$newAuthor, $parsed_orc_id, $parsed_id, $parsed_scopus_id];
         }
@@ -51,39 +52,36 @@ class AuthorController extends Controller {
     }
 
     // A function to parse the Author's works
-    protected function parseWorks ($Author, $parsed_id) {
+    protected static function parseWorks ($Author, $parsed_id) {
         $works_response = Http::withOptions(['verify' => false])->get("https://api.openalex.org/works?filter=author.id:".$parsed_id."&mailto=it185302@it.teithe.gr");
         $works = json_decode($works_response->body())->results;
         foreach ($works as $work) {
             $work_open_access = $work->open_access;
             $work_url = $work->doi ?? $work->open_access->oa_url ?? 'Empty';
-//            var_dump($work);
+
             // Check if a work with this title already exists in the database, if so proceed to the next one
-            if(Work::where('Title',$work->title)->exists())
+            if(Work::workExistsByDoi($work->doi))
                 continue;
-//            var_dump(explode('/',$work->ids->openalex)[2]);
+
             // If not, create a new Work and save it to the database
             $newWork = new Work;
-            $newWork->Doi = $work_url;
-            $newWork->Title = $work->title;
-            $newWork->Publication_Date = $work->publication_date;
-            $newWork->Language = $work->language;
-            $newWork->Type = $work->type;
-            $newWork->Is_OA = $work_open_access->is_oa;
-            $newWork->Open_Alex_URL = explode('/',$work->ids->openalex)[3];
+            $newWork->doi = $work_url;
+            $newWork->title = $work->title;
+            $newWork->publication_date = $work->publication_date;
+            $newWork->language = $work->language;
+            $newWork->type = $work->type;
+            $newWork->is_oa = $work_open_access->is_oa;
+            $newWork->open_alex_url = explode('/',$work->ids->openalex)[3];
             $newWork->save();
 
+            $newWorkAuthors =
             // Create an entry to the intermediate table to connect the author to their works
             $newAuthorWork = new AuthorWork;
-            $newAuthorWork->Author_Id = $Author->id;
-            $newAuthorWork->Work_Id = $newWork->id;
+            $newAuthorWork->author_id = $Author->id;
+            $newAuthorWork->work_id = $newWork->id;
             $newAuthorWork->save();
         }
         return $works;
     }
 }
 
-//            var_dump($Author->works()->where('Title','Generalized Hirsch h-index for disclosing latent facts in citation networks')->get());
-//            $parsedWork = ['URl'=>$work_url, 'title'=>$work->title, 'ids'=>$work->ids, 'type'=>$work->type,
-//                'language'=>$work->language, 'open_access'=>$work_open_access->is_oa, 'publication_date'=>$work->publication_date,
-//            ];

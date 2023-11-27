@@ -11,11 +11,12 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('authors', function (Blueprint $table) {
             $table->uuid('id');
-            $table->string('Name');
-            $table->string('OrcId');
-            $table->string('ScopusId');
-            $table->string('OpenAlexId');
-            $table->integer('Cited_By_Count');
+            $table->string('display_name');
+            $table->string('orc_id')->nullable()->unique();
+            $table->string('scopus_id')->nullable()->unique();
+            $table->string('open_alex_id')->unique();
+            $table->boolean('is_user')->default(false);
+            $table->integer('cited_by_count')->nullable();
             $table->timestamps();
         });
     }

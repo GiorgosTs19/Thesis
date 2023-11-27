@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 class Controller extends BaseController {
     use AuthorizesRequests, ValidatesRequests;
 
-    public function getArticle(Request $request, $oaurl) {
+    public function getArticle(Request $request, $oaurl = 'W2741809807') {
         $url = 'https://api.openalex.org/works/'.($oaurl ?? 'W2741809807');
 
         $response = Http::withOptions(['verify' => false])->get($url.'&mailto=it185302@it.teithe.gr');
