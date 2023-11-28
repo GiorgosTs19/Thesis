@@ -56,25 +56,13 @@ class AuthorController extends Controller {
         $works_response = Http::withOptions(['verify' => false])->get("https://api.openalex.org/works?filter=author.id:".$parsed_id."&mailto=it185302@it.teithe.gr");
         $works = json_decode($works_response->body())->results;
         foreach ($works as $work) {
-            $work_open_access = $work->open_access;
-            $work_url = $work->doi ?? $work->open_access->oa_url ?? 'Empty';
 
             // Check if a work with this title already exists in the database, if so proceed to the next one
             if(Work::workExistsByDoi($work->doi))
                 continue;
 
-            // If not, create a new Work and save it to the database
-            $newWork = new Work;
-            $newWork->doi = $work_url;
-            $newWork->title = $work->title;
-            $newWork->publication_date = $work->publication_date;
-            $newWork->language = $work->language;
-            $newWork->type = $work->type;
-            $newWork->is_oa = $work_open_access->is_oa;
-            $newWork->open_alex_url = explode('/',$work->ids->openalex)[3];
-            $newWork->save();
+            $newWork = Work::createNewWork($work);
 
-            $newWorkAuthors =
             // Create an entry to the intermediate table to connect the author to their works
             $newAuthorWork = new AuthorWork;
             $newAuthorWork->author_id = $Author->id;

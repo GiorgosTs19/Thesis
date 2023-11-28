@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable {
@@ -48,10 +49,12 @@ class User extends Authenticatable {
 
     /**
      * @param $professor
+     * A professor associative array from the hard-coded professors in the seeder.
      * @param $ids 'An associative array containing the orc_id, scopus_id, open_alex_id'
      * @return User
+     * The newly created user.
      */
-    public static function createNewUser($professor, $ids){
+    public static function createNewUser($professor, $ids): User {
         $newUser = new User;
         $newUser->first_name = $professor['first'];
         $newUser->last_name = $professor['last'];
@@ -63,15 +66,14 @@ class User extends Authenticatable {
         return $newUser;
     }
 
-    public static function isAuthorAUserByOrcId($orc_id, $shouldRetrieve = false) {
+    /**
+     * @param $orc_id
+     * @return array
+     */
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUserByOrcId($orc_id): array {
         $user_query = User::where('orc_id',$orc_id);
         $user_exists = $user_query->exists();
-        if($user_exists) {
-            if(!$shouldRetrieve)
-                return $user_exists;
-            return $user_query->first();
-        }
-        return false;
+        return ['exists'=>$user_exists, 'author'=>$user_query->first()];
     }
 
     public function scopeOrcId($query, $id) {
