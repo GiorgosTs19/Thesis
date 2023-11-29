@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Http;
 use JetBrains\PhpStorm\ArrayShape;
+use function App\Providers\rocketDump;
 
 class Author extends Model {
     use HasFactory;
@@ -202,6 +203,7 @@ class Author extends Model {
             "&mailto=".$this->mailTo.'&per-page='.$this->perPage;
         $works_response = Http::withOptions(['verify' => false])->get($url);
         $parsed_response = json_decode($works_response->body());
+        $total_work_count = $parsed_response->meta->count;
         $works = $parsed_response->results;
 
         foreach ($works as $work) {
@@ -220,6 +222,6 @@ class Author extends Model {
             }
                 self::parseWorkAuthors($authors, $newWork);
             }
-        var_dump(sizeof($works).' works have been saved for '.$this->display_name);
+        rocketDump(sizeof($works).'/'.$total_work_count.' works parsed for '.$this->display_name, __FUNCTION__.' '.__FILE__.' '.__LINE__);
     }
 }
