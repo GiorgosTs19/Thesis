@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::create('authors', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->id();
             $table->string('display_name');
             $table->string('orc_id')->nullable()->unique();
             $table->string('scopus_id')->nullable()->unique();

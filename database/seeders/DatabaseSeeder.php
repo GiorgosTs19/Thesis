@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Author;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -48,6 +46,7 @@ class DatabaseSeeder extends Seeder {
             'id'=>'0000-0003-2366-1365',
             'email'=>'pchatzimisios@ihu.gr']
     ];
+
     public function run(): void {
         // Using a single transaction closure for all actions that will be performed, inserts, updates, deletes etc.
         // If anything goes wrong the transaction will be not be committed and the db will be rolled back.

@@ -72,7 +72,17 @@ class User extends Authenticatable {
      */
     #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUserByOrcId($orc_id): array {
         $user_query = User::where('orc_id',$orc_id);
-        $user_exists = $user_query->exists();
+        $user_exists = boolval($user_query->exists());
+        return ['exists'=>$user_exists, 'author'=>$user_query->first()];
+    }
+
+    /**
+     * @param $orc_id
+     * @return array
+     */
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUserByOpenAlexId($orc_id): array {
+        $user_query = User::where('open_alex_id',$orc_id);
+        $user_exists = boolval($user_query->exists());
         return ['exists'=>$user_exists, 'author'=>$user_query->first()];
     }
 

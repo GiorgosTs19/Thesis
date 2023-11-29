@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Work extends Model {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     /**
      * Creates a new work.
@@ -20,13 +19,15 @@ class Work extends Model {
      */
     public static function createNewWork ($work) {
         $work_open_access = $work->open_access;
-        $work_url = $work->doi ?? $work->open_access->oa_url ?? 'Empty';
+        $work_url = $work->doi ?? $work->open_access->oa_url;
 
         $newWork = new Work;
         $newWork->doi = $work_url;
-        $newWork->title = $work->title;
+        $newWork->title = $work->title ?? '';
         $newWork->publication_date = $work->publication_date;
-        $newWork->language = $work->language;
+        $newWork->publication_year = $work->publication_year;
+        $newWork->referenced_works_count = $work->referenced_works_count;
+        $newWork->language = $work->language ?? 'Unknown';
         $newWork->type = $work->type;
         $newWork->is_oa = $work_open_access->is_oa;
         $newWork->open_alex_url = explode('/',$work->ids->openalex)[3];
@@ -42,7 +43,7 @@ class Work extends Model {
      * A boolean indicating if a work with the given doi exists in the database.
      */
     public static function workExistsByDoi($doi): bool {
-        return $doi !== '' ? Work::where('doi',$doi)->exists() : false;
+        return !!Work::where('doi',$doi)->exists();
     }
 
     public function authors(): BelongsToMany {

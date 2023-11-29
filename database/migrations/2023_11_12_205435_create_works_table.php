@@ -10,11 +10,13 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::create('works', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->id();
             $table->string('doi')->nullable()->unique();
             $table->string('open_alex_url')->unique();
             $table->string('title');
             $table->date('publication_date');
+            $table->smallInteger('publication_year');
+            $table->integer('referenced_works_count');
             $table->string('language');
             $table->string('type');
             $table->boolean('is_oa');

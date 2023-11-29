@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Author;
 use App\Models\AuthorWork;
-use App\Models\User;
 use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;

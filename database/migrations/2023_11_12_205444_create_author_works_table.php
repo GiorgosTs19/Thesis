@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('author_work', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('author_id');
-            $table->foreignUuid('work_id');
+            $table->foreignId('author_id');
+            $table->foreignId('work_id');
             $table->timestamps();
         });
     }
