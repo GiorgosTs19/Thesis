@@ -50,11 +50,11 @@ class User extends Authenticatable {
     /**
      * @param $professor
      * A professor associative array from the hard-coded professors in the seeder.
-     * @param $ids 'An associative array containing the orc_id, scopus_id, open_alex_id'
+     * @param array $ids 'An associative array containing the orc_id, scopus_id, open_alex_id'
      * @return User
      * The newly created user.
      */
-    public static function createNewUser($professor, $ids): User {
+    public static function createNewUser($professor, array $ids): User {
         $newUser = new User;
         $newUser->first_name = $professor['first'];
         $newUser->last_name = $professor['last'];
