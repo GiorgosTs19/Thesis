@@ -9,6 +9,15 @@ use Illuminate\Notifications\Notifiable;
 use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property mixed $last_name
+ * @property mixed $first_name
+ * @property mixed $open_alex_id
+ * @property mixed $scopus_id
+ * @property mixed $email
+ * @property mixed $orc_id
+ * @method static orcId(string|null $orc_id)
+ */
 class User extends Authenticatable {
     use HasApiTokens, HasFactory, Notifiable;
 

@@ -6,6 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property mixed $doi
+ * @property mixed|string $title
+ * @property mixed $publication_date
+ * @property mixed $publication_year
+ * @property mixed|string $open_alex_url
+ * @property mixed $is_oa
+ * @property mixed $type
+ * @property mixed|string $language
+ * @property mixed $referenced_works_count
+ *
+ * @method static where(string $string, $doi)
+ */
 class Work extends Model {
     use HasFactory;
 
@@ -17,7 +30,7 @@ class Work extends Model {
      * @return Work
      * The newly created work.
      */
-    public static function createNewWork ($work) {
+    public static function createNewWork ($work): Work {
         $work_open_access = $work->open_access;
         $work_url = $work->doi ?? $work->open_access->oa_url;
 

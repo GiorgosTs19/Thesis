@@ -7,12 +7,14 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use function App\Providers\getResponseBody;
 
 class DatabaseSeeder extends Seeder {
     /**
      * Seed the application's database.
      */
     protected string $email_to = '&mailto=it185302@it.teithe.gr';
+    protected string $author_base_url = 'https://api.openalex.org/authors/orcid:';
     protected array $Professors = [
         // Κεραμόπουλος
         ['first'=>'Ευκλείδης',
@@ -67,21 +69,32 @@ class DatabaseSeeder extends Seeder {
         });
     }
 
-    protected function createUserFromOrcId($professor) {
-        $url = 'https://api.openalex.org/authors/orcid:'.$professor['id'].$this->email_to;
+    protected function createUserFromOrcId($professor): void {
+        // Retrieve all the author's data from the OpenAlex api
+        $url = $this->author_base_url.$professor['id'].$this->email_to;
         $author_response = Http::withOptions(['verify' => false])->get($url);
-        $author = json_decode($author_response->body());
+        $author = getResponseBody($author_response);
+
+        // Parse the ids of the author
         $orc_id = Author::parseOrcId('',$author);
         $scopus_id = Author::parseScopusId('',$author);
         $open_alex_id = Author::parseOpenAlexId('',$author);
+
+        // Add all the parsed ids in an array
         $ids = ['scopus_id'=>$scopus_id,'orc_id'=>$orc_id, 'open_alex_id'=>$open_alex_id];
+
+        // If no orc_id is present, return
         if($orc_id === '' || User::orcId($orc_id)->exists())
             return;
 
+        // Else create a new user.
         User::createNewUser($professor,$ids);
+
+        // If an author already exists for that user then return.
         if(Author::authorExistsByOpenAlexId($open_alex_id)['exists'])
             return;
 
+        // Else create a new author.
         Author::createAuthor($author,$ids, true);
     }
 }

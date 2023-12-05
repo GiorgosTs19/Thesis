@@ -5,10 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Http;
 use JetBrains\PhpStorm\ArrayShape;
+use function App\Providers\getResponseBody;
 use function App\Providers\rocketDump;
 
+/**
+ * @method static updateOrCreate(array $array, array $array1)
+ * @method static where(string $string, $orc_id)
+ * @method static user()
+ *
+ * @property mixed $is_user
+ */
 class Author extends Model {
     use HasFactory;
 
@@ -19,6 +28,7 @@ class Author extends Model {
     // An email is required for the OpenAlex api to function correctly.
     protected string $mailTo = 'it185302@it.teithe.gr';
 
+    protected $author_works_base_url = "https://api.openalex.org/works?filter=author.id:";
     protected $fillable = [
         'display_name',
         'orc_id',
@@ -112,7 +122,7 @@ class Author extends Model {
      * A key-value pair array with an "exists" key indicating if the author requested exists,
      *  an "author" key that will include the author ( if they exist ).
      */
-    public static function authorExistsByOrcId($orc_id) {
+    public static function authorExistsByOrcId($orc_id): array {
         $author_query = Author::where('orc_id',$orc_id);
         $author_exists = $author_query->exists();
         return ['exists'=>$author_exists, 'author'=>$author_query->first()];
@@ -129,7 +139,7 @@ class Author extends Model {
      * The newly created author.
      */
     public static function createAuthor($author, $ids, bool $is_user = false): Author {
-        return Author::updateOrCreate(
+        $newAuthor = Author::updateOrCreate(
             ['orc_id' => $ids['orc_id'],
                 'open_alex_id' => $ids['open_alex_id']],
             ['scopus_id'=>$ids['scopus_id'] !== '' ? $ids['scopus_id'] :  null,
@@ -138,15 +148,31 @@ class Author extends Model {
                 'is_user' => $is_user
             ]
         );
+
+        if(!property_exists($author,'counts_by_year'))
+            return $newAuthor;
+
+        foreach ($author->counts_by_year as $count_by_year) {
+            $newYearlyCitations = new AuthorStatistics;
+            $newYearlyCitations->author_id = $newAuthor->id;
+            $newYearlyCitations->year = $count_by_year->year;
+            $newYearlyCitations->works_count = $count_by_year->works_count;
+            $newYearlyCitations->cited_count = $count_by_year->cited_by_count;
+            $newYearlyCitations->save();
+        }
+        if($newAuthor->is_user === true)
+        rocketDump($newAuthor->statistics()->first()->year,[__FUNCTION__,__FILE__,__LINE__]);
+
+        return $newAuthor;
     }
 
-    protected static function parseWorkAuthors($authors,$work) {
+    protected static function parseWorkAuthors($authors,$work): void {
         foreach ($authors as $author) {
             $ids = ['open_alex_id' => self::parseOpenAlexId($author->id),
                 'orc_id' => self::parseOrcId($author->orcid),
                 'scopus_id'=> self::parseScopusId(property_exists($author, 'scopus') ? $author->scopus : '')];
 
-            // Check if an author exists by their Open Alex Id
+            // Check if an author exists by their Open Alex id
             ['exists' => $db_author_exists_oa, 'author' => $db_Author_oa] = self::authorExistsByOpenAlexId($ids['open_alex_id']);
             // Since for some reason Open Alex can sometimes be unreliable, check if an author exists by their orcId as well.
             ['exists' => $db_author_exists_orc, 'author' => $db_Author_orc] = self::authorExistsByOrcId($ids['orc_id']);
@@ -175,6 +201,14 @@ class Author extends Model {
     }
 
     /**
+     * Returns all the cited_counts by year associated with an author.
+     * @return HasMany
+     */
+    public function statistics(): HasMany {
+        return $this->hasMany(AuthorStatistics::class);
+    }
+
+    /**
      * Returns a boolean indicating if the author is also a user or not.
      * @return bool
      */
@@ -198,11 +232,11 @@ class Author extends Model {
      * saving all of them in the database, parsing all the authors associated with each one and creating a new author for any author that doesn't already exist.
      * It will also create an association for each work and for each of the authors that exist and are associated with them.
      */
-    public function parseWorks () {
-        $url = "https://api.openalex.org/works?filter=author.id:".$this->open_alex_id.
-            "&mailto=".$this->mailTo.'&per-page='.$this->perPage;
+    public function parseWorks ($prev_count = 0, $page = 1): void {
+        $url = $this->author_works_base_url.$this->open_alex_id.
+            "&mailto=".$this->mailTo.'&per-page='.$this->perPage.'&page='.$page;
         $works_response = Http::withOptions(['verify' => false])->get($url);
-        $parsed_response = json_decode($works_response->body());
+        $parsed_response = getResponseBody($works_response);
         $total_work_count = $parsed_response->meta->count;
         $works = $parsed_response->results;
 
@@ -222,6 +256,10 @@ class Author extends Model {
             }
                 self::parseWorkAuthors($authors, $newWork);
             }
-        rocketDump(sizeof($works).'/'.$total_work_count.' works parsed for '.$this->display_name, __FUNCTION__.' '.__FILE__.' '.__LINE__);
+        $have_been_parsed = $prev_count + sizeof($works);
+        rocketDump($have_been_parsed.'/'.$total_work_count.' works parsed for '.$this->display_name, [__FUNCTION__,__FILE__,__LINE__]);
+        if($have_been_parsed < $total_work_count) {
+            $this->parseWorks($have_been_parsed, ++$page);
+        }
     }
 }
