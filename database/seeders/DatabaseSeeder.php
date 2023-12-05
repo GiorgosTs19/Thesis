@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Http\Controllers\APIController;
+
+use App\Http\Controllers\UpdateController;
 use App\Models\Author;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use function App\Providers\getResponseBody;
 
 class DatabaseSeeder extends Seeder {
     /**
@@ -64,6 +63,7 @@ class DatabaseSeeder extends Seeder {
             foreach ($User_Authors as $user_Author) {
                 $user_Author->parseWorks();
             }
+            UpdateController::updateStatistics();
         });
     }
 }

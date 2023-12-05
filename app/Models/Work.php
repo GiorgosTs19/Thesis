@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -46,8 +47,8 @@ class Work extends Model {
             $newWork->is_oa = $work_open_access->is_oa;
             $newWork->open_alex_url = explode('/',$work->ids->openalex)[3];
             $newWork->save();
-        } catch (\Exception $error) {
-            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__]);
+        } catch (Exception $error) {
+            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
         }
 
         return $newWork;

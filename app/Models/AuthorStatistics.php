@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -21,20 +22,20 @@ class AuthorStatistics extends Model {
         'count'
         ];
 
-    public function author(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
-        return $this->belongsTo(Author::class);
-    }
-
     public static function yearExistsForAuthor($author_id,$year): bool {
         return AuthorStatistics::where('author_id',$author_id)->where('year',$year)->exists();
     }
 
-    public static function generateStatistics($author, $statistics): void {
+    public static function generateStatistics($id, $statistics): void {
         $newYearlyCitations = new AuthorStatistics;
-        $newYearlyCitations->author_id = $author->id;
+        $newYearlyCitations->author_id = $id;
         $newYearlyCitations->year = $statistics->year;
         $newYearlyCitations->works_count = $statistics->works_count;
         $newYearlyCitations->cited_count = $statistics->cited_by_count;
         $newYearlyCitations->save();
+    }
+
+    public function author(): BelongsTo {
+        return $this->belongsTo(Author::class);
     }
 }

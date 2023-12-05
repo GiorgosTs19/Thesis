@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Http\Controllers\APIController;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -61,29 +62,6 @@ class User extends Authenticatable {
     ];
 
     /**
-     * @param $professor
-     * A professor associative array from the hard-coded professors in the seeder.
-     * @param array $ids 'An associative array containing the orc_id, scopus_id, open_alex_id'
-     * @return User
-     * The newly created user.
-     */
-    public static function createNewUser($professor, array $ids): User {
-        $newUser = new User;
-        try {
-            $newUser->first_name = $professor['first'];
-            $newUser->last_name = $professor['last'];
-            $newUser->email = $professor['email'];
-            $newUser->orc_id = $ids['orc_id'];
-            $newUser->scopus_id = $ids['scopus_id'];
-            $newUser->open_alex_id = $ids['open_alex_id'];
-            $newUser->save();
-        } catch (\Exception $error ) {
-            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__]);
-        }
-        return $newUser;
-    }
-
-    /**
      * @param $orc_id
      * @return array
      */
@@ -103,19 +81,13 @@ class User extends Authenticatable {
         return ['exists'=>$user_exists, 'author'=>$user_query->first()];
     }
 
-    public function scopeOrcId($query, $id) {
-        if($id !== '')
-            return $query->orWhere('orc_id', $id);
-        return $query;
-    }
-
     /**
      * @param $professor
      * @return void
      * Create a new user and save it to the database, using info from the OpenAlex API.
      */
     public static function createFromOrcId($professor): void {
-        $author = APIController::authorRequest($professor);
+        $author = APIController::authorRequest($professor['id']);
 
         // Parse the ids of the author
         $orc_id = Author::parseOrcId('',$author);
@@ -135,5 +107,34 @@ class User extends Authenticatable {
         // If an author doesn't already exist for that user then create a new author.
         if(!Author::authorExistsByOpenAlexId($open_alex_id)['exists'])
             Author::createAuthor($author,$ids, true);
+    }
+
+    /**
+     * @param $professor
+     * A professor associative array from the hard-coded professors in the seeder.
+     * @param array $ids 'An associative array containing the orc_id, scopus_id, open_alex_id'
+     * @return User
+     * The newly created user.
+     */
+    public static function createNewUser($professor, array $ids): User {
+        $newUser = new User;
+        try {
+            $newUser->first_name = $professor['first'];
+            $newUser->last_name = $professor['last'];
+            $newUser->email = $professor['email'];
+            $newUser->orc_id = $ids['orc_id'];
+            $newUser->scopus_id = $ids['scopus_id'];
+            $newUser->open_alex_id = $ids['open_alex_id'];
+            $newUser->save();
+        } catch (Exception $error ) {
+            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
+        }
+        return $newUser;
+    }
+
+    public function scopeOrcId($query, $id) {
+        if($id !== '')
+            return $query->orWhere('orc_id', $id);
+        return $query;
     }
 }

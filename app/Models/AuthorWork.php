@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use function App\Providers\rocketDump;
@@ -9,6 +10,8 @@ use function App\Providers\rocketDump;
 /**
  * @property mixed $author_id
  * @property mixed $work_id
+ *
+ * @method static where(string $string, $author_id)
  */
 class AuthorWork extends Model {
     use HasFactory;
@@ -20,19 +23,7 @@ class AuthorWork extends Model {
         'Work_Id',
     ];
 
-    /**
-     * @param $work_id
-     * The work id to check the association for.
-     * @param $author_id
-     * The author id to check the association for.
-     * @return bool
-     * A boolean indicating if an association between the requested author and work already exists in the database.
-     */
-    public static function associationExists($work_id, $author_id): bool {
-        return AuthorWork::where('author_id',$author_id)->where('work_id',$work_id)->exists();
-    }
-
-    public static function associateAuthorToWork($author, $ids, $work, ): void {
+    public static function associateAuthorToWork($author, $ids, $work ): void {
         // Check if an author exists by their Open Alex id
         ['exists' => $db_author_exists_oa, 'author' => $db_Author_oa] = Author::authorExistsByOpenAlexId($ids['open_alex_id']);
         // Since for some reason Open Alex can sometimes be unreliable, check if an author exists by their orcId as well.
@@ -50,9 +41,21 @@ class AuthorWork extends Model {
                 $newAuthorWork->author_id = $db_author_exists_oa ? $db_Author_oa->id : ($db_author_exists_orc ? $db_Author_orc->id : $newAuthor->id);
                 $newAuthorWork->work_id = $work->id;
                 $newAuthorWork->save();
-            } catch (\Exception $error) {
-                rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__]);
+            } catch (Exception $error) {
+                rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
             }
         }
+    }
+
+    /**
+     * @param $work_id
+     * The work id to check the association for.
+     * @param $author_id
+     * The author id to check the association for.
+     * @return bool
+     * A boolean indicating if an association between the requested author and work already exists in the database.
+     */
+    public static function associationExists($work_id, $author_id): bool {
+        return AuthorWork::where('author_id',$author_id)->where('work_id',$work_id)->exists();
     }
 }

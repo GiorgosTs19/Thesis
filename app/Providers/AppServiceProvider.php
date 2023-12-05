@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
@@ -18,23 +19,32 @@ class AppServiceProvider extends ServiceProvider {
          * @return void
          * Logs the given message, and displays it on the console.
          */
-        function rocketDump($message, $callingFunction): void  {
+        function rocketDump($message, $callingFunction, $log_case='info', $display_meta_data = true): void  {
             $file_path = $callingFunction[1];
             $function_name = $callingFunction[0];
             $file_line = $callingFunction[2];
 
             // Find the last occurrence of needle in the path
-            $lastThesisIndex = strrpos($file_path, 'Thesis');
+            $lastThesisIndex = strrpos($file_path, 'Thesis_Project\\');
 
             // If needle was found in the path
             if ($lastThesisIndex !== false) {
                 // Extract the part of the path after the needle
-                $file_path = substr($file_path, $lastThesisIndex + strlen('Thesis'));
+                $file_path = substr($file_path, $lastThesisIndex + strlen('Thesis_Project\\'));
             }
 
-            $logMessage = "🚀 ~ $function_name(), $file_path, $file_line, $message ";
+            if($display_meta_data)
+                $logMessage = "$function_name(), $file_path, $file_line, $message ";
+            else
+                $logMessage = $message;
 
-            dump($logMessage);
+            $validLogCases = ['info', 'error', 'warning', 'debug'];
+
+            if (in_array($log_case, $validLogCases)) {
+                Log::$log_case($logMessage);
+            }
+
+            dump("🚀 ~ $logMessage");
         }
     }
 

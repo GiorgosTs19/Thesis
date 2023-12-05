@@ -50,60 +50,6 @@ class Author extends Model {
     }
 
     /**
-     * @param $id
-     * @param $author
-     * @return string|null
-     */
-    public static function parseOpenAlexId($id, $author=null): ?string {
-        if($author !== null)
-            return property_exists($author->ids, 'openalex') ? explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] : null;
-        if(strlen($id) === 0)
-            return null;
-        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
-        if(!is_array($parsed_id))
-            return $parsed_id;
-        if(sizeof($parsed_id) === 1)
-            return $parsed_id[0];
-        return $parsed_id[1];
-    }
-
-    /**
-     * @param $id
-     * @param $author
-     * @return string|null
-     */
-    public static function parseOrcId($id, $author=null): ?string {
-        if($author !== null)
-            return property_exists($author->ids, 'orcid') ? explode('/', parse_url($author->orcid, PHP_URL_PATH))[1] : null;
-        if(strlen($id) === 0)
-            return null;
-        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
-        if(!is_array($parsed_id))
-            return $parsed_id;
-        if(sizeof($parsed_id) === 1)
-            return $parsed_id[0];
-        return $parsed_id[1];
-    }
-
-    /**
-     * @param $id
-     * @param $author
-     * @return string|null
-     */
-    public static function parseScopusId($id, $author=null): ?string {
-        if($author !== null)
-            return property_exists($author->ids, 'scopus') ? explode('=', explode('&',$author->ids->scopus)[0])[1] : null;
-        if(strlen($id) === 0)
-            return null;
-        $parsed_id = explode('=', explode('&',$id)[0]);
-        if(!is_array($parsed_id))
-            return $parsed_id;
-        if(sizeof($parsed_id) === 1)
-            return $parsed_id[0];
-        return $parsed_id[1];
-    }
-
-    /**
      * @param $open_alex_id
      * @return array 'A key-value pair array with an "exists" key indicating if the author requested exists,
      *  an "author" key that will include the author ( if they exist ).
@@ -150,40 +96,21 @@ class Author extends Model {
                     'is_user' => $is_user
                 ]
             );
+
             if(!property_exists($author,'counts_by_year'))
                 return $newAuthor;
 
             foreach ($author->counts_by_year as $count_by_year) {
                 try {
-                    AuthorStatistics::generateStatistics($newAuthor, $count_by_year);
+                    AuthorStatistics::generateStatistics($newAuthor->id, $count_by_year);
                 } catch (Exception $error) {
-                    rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__]);
+                    rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
                 }
             }
-            if($newAuthor->is_user === true)
-            rocketDump($newAuthor->statistics()->first()->year,[__FUNCTION__,__FILE__,__LINE__]);
         } catch (Exception $error) {
-            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__]);
+            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
         }
         return $newAuthor;
-    }
-
-    protected static function parseWorkAuthors($authors,$work): void {
-        foreach ($authors as $author) {
-            $ids = ['open_alex_id' => self::parseOpenAlexId($author->id),
-                'orc_id' => self::parseOrcId($author->orcid),
-                'scopus_id'=> self::parseScopusId(property_exists($author, 'scopus') ? $author->scopus : '')];
-
-            AuthorWork::associateAuthorToWork($author, $ids, $work);
-        }
-    }
-
-    /**
-     * Returns all the works associated with an author.
-     * @return BelongsToMany
-     */
-    public function works(): BelongsToMany {
-        return $this->belongsToMany(Work::class);
     }
 
     /**
@@ -192,6 +119,14 @@ class Author extends Model {
      */
     public function statistics(): HasMany {
         return $this->hasMany(AuthorStatistics::class);
+    }
+
+    /**
+     * Returns all the works associated with an author.
+     * @return BelongsToMany
+     */
+    public function works(): BelongsToMany {
+        return $this->belongsToMany(Work::class);
     }
 
     /**
@@ -255,5 +190,77 @@ class Author extends Model {
         if($have_been_parsed_count < $total_work_count) {
             $this->parseWorks($have_been_parsed_count, ++$page);
         }
+    }
+
+    /**
+     * @param $authors
+     * An array of authors to be associated with the given work
+     * @param $work
+     * The work to be associated with the authors
+     * @return void
+     * Associates the given authors with the given work. Creates AuthorWorks records.
+     */
+    protected static function parseWorkAuthors($authors, $work): void {
+        foreach ($authors as $author) {
+            $ids = ['open_alex_id' => self::parseOpenAlexId($author->id),
+                'orc_id' => self::parseOrcId($author->orcid),
+                'scopus_id'=> self::parseScopusId(property_exists($author, 'scopus') ? $author->scopus : '')];
+
+            AuthorWork::associateAuthorToWork($author, $ids, $work);
+        }
+    }
+
+    /**
+     * @param $id
+     * @param $author
+     * @return string|null
+     */
+    public static function parseOpenAlexId($id, $author=null): ?string {
+        if($author !== null)
+            return property_exists($author->ids, 'openalex') ? explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] : null;
+        if(strlen($id) === 0)
+            return null;
+        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
+        if(!is_array($parsed_id))
+            return $parsed_id;
+        if(sizeof($parsed_id) === 1)
+            return $parsed_id[0];
+        return $parsed_id[1];
+    }
+
+    /**
+     * @param $id
+     * @param $author
+     * @return string|null
+     */
+    public static function parseOrcId($id, $author=null): ?string {
+        if($author !== null)
+            return property_exists($author->ids, 'orcid') ? explode('/', parse_url($author->orcid, PHP_URL_PATH))[1] : null;
+        if(strlen($id) === 0)
+            return null;
+        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
+        if(!is_array($parsed_id))
+            return $parsed_id;
+        if(sizeof($parsed_id) === 1)
+            return $parsed_id[0];
+        return $parsed_id[1];
+    }
+
+    /**
+     * @param $id
+     * @param $author
+     * @return string|null
+     */
+    public static function parseScopusId($id, $author=null): ?string {
+        if($author !== null)
+            return property_exists($author->ids, 'scopus') ? explode('=', explode('&',$author->ids->scopus)[0])[1] : null;
+        if(strlen($id) === 0)
+            return null;
+        $parsed_id = explode('=', explode('&',$id)[0]);
+        if(!is_array($parsed_id))
+            return $parsed_id;
+        if(sizeof($parsed_id) === 1)
+            return $parsed_id[0];
+        return $parsed_id[1];
     }
 }
