@@ -9,6 +9,15 @@ class AppServiceProvider extends ServiceProvider {
      * Register any application services.
      */
     public function register(): void {
+        /**
+         * @param $message
+         * The message to be logged and displayed.
+         * @param $callingFunction
+         * Information about the function that fired the log,
+         * the line that was called on and the file on which the function exists.
+         * @return void
+         * Logs the given message, and displays it on the console.
+         */
         function rocketDump($message, $callingFunction): void  {
             $file_path = $callingFunction[1];
             $function_name = $callingFunction[0];
@@ -26,10 +35,6 @@ class AppServiceProvider extends ServiceProvider {
             $logMessage = "🚀 ~ $function_name(), $file_path, $file_line, $message ";
 
             dump($logMessage);
-        }
-
-        function getResponseBody($response) {
-            return json_decode($response->body());
         }
     }
 
