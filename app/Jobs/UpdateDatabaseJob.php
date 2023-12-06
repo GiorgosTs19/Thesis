@@ -1,22 +1,73 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Jobs;
 
+use App\Http\Controllers\APIController;
 use App\Models\Author;
 use App\Models\AuthorStatistics;
-use App\Models\User;
-use Illuminate\Http\Request;
+use Exception;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{Artisan, DB};
 use function App\Providers\rocketDump;
 
-class UpdateController extends Controller {
+class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     /**
+     * Enable MaintenanceMode while the database is updating.
      * @return void
+     */
+    private function enableMaintenanceMode(): void {
+        // Enable maintenance mode
+        rocketDump('Turning On Maintenance mode',[__FUNCTION__,__FILE__,__LINE__]);
+        Artisan::call('down');
+    }
+
+    /**
+     * Disable MaintenanceMode after the database is done updating,
+     * or an error occurs during that process.
+     * @return void
+     */
+    private function disableMaintenanceMode(): void {
+        // Disable maintenance mode
+        rocketDump('Turning Off Maintenance mode',[__FUNCTION__,__FILE__,__LINE__]);
+        Artisan::call('up');
+    }
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct() {
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(): void {
+        $this->enableMaintenanceMode();
+        try {
+            rocketDump('Dispatching updateStatistics job',[__FUNCTION__,__FILE__,__LINE__]);
+            $this->updateStatistics();
+        } catch (Exception $err) {
+            rocketDump("Something went wrong while updating the database,".$err->getMessage(),[__FUNCTION__,__FILE__,__LINE__],'error');
+        }
+        finally {
+            $this->disableMaintenanceMode();
+        }
+    }
+
+    /**
      * Updates the statistics for the authors that are also users. For the time being,
      * only authors that are user have statistics associated to them.
+     * @return void
      */
-    public static function updateStatistics(): void {
+    private function updateStatistics(): void {
         DB::transaction(function () {
             // An array of the ids of the authors to be updated.
             $year_to_update = date('Y');
@@ -28,9 +79,9 @@ class UpdateController extends Controller {
             $completed = 0;
             foreach ($authorsStatistics as $author) {
                 $requestStatistic = Arr::first(APIController::authorRequest($author->open_alex_id,'open_alex')->counts_by_year,
-                function ($value) use ($year_to_update) {
-                    return $value->year == (int)$year_to_update;
-                });
+                    function ($value) use ($year_to_update) {
+                        return $value->year == (int)$year_to_update;
+                    });
 
                 $databaseStatistics = $author->statistics
                     ->where('year', $requestStatistic->year)

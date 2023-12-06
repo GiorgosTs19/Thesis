@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 
 use App\Http\Controllers\UpdateController;
+use App\Jobs\UpdateDatabaseJob;
 use App\Models\Author;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -63,7 +64,7 @@ class DatabaseSeeder extends Seeder {
             foreach ($User_Authors as $user_Author) {
                 $user_Author->parseWorks();
             }
-            UpdateController::updateStatistics();
+            dispatch(new UpdateDatabaseJob());
         });
     }
 }

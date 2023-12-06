@@ -41,7 +41,13 @@ class AppServiceProvider extends ServiceProvider {
             $validLogCases = ['info', 'error', 'warning', 'debug'];
 
             if (in_array($log_case, $validLogCases)) {
-                Log::$log_case($logMessage);
+                if ($log_case === 'error') {
+                    // Use red color for the error message
+                    Log::error("\033[0;31m$logMessage\033[0m");
+                } else {
+                    // Use default color for other log cases
+                    Log::$log_case($logMessage);
+                }
             }
 
             dump("🚀 ~ $logMessage");
