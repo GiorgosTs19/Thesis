@@ -15,8 +15,11 @@ return new class extends Migration {
             $table->string('orc_id')->nullable()->unique();
             $table->string('scopus_id')->nullable()->unique();
             $table->string('open_alex_id')->unique();
+            $table->string('works_url')->unique();
             $table->boolean('is_user')->default(false);
             $table->integer('cited_by_count')->nullable();
+            $table->dateTime('last_updated_date');
+            $table->dateTime('created_date');
             $table->timestamps();
         });
     }

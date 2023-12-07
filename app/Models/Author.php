@@ -21,8 +21,11 @@ use function App\Providers\rocketDump;
  * @property string open_alex_id
  * @property string orc_id
  * @property string scopus_id
- * @property int cited_by_count
  * @property boolean is_user
+ * @property int cited_by_count
+ * @property string works_url
+ * @property string last_updated_date
+ * @property string created_date
  */
 class Author extends Model {
     use HasFactory;
@@ -54,9 +57,10 @@ class Author extends Model {
      * @return array 'A key-value pair array with an "exists" key indicating if the author requested exists,
      *  an "author" key that will include the author ( if they exist ).
      */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExistsByOpenAlexId($open_alex_id): array {
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExistgit sByOpenAlexId($open_alex_id): array {
         $author_query =  Author::where('open_alex_id',$open_alex_id);
-        $author_exists = boolval(Author::where('open_alex_id',$open_alex_id)->exists());
+        rocketDump($open_alex_id, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        $author_exists = $author_query->exists();
         return ['exists'=>$author_exists, 'author'=>$author_query->first()];
     }
 
@@ -79,13 +83,18 @@ class Author extends Model {
      * An associative array of the available ids of the author ( ?orc_id, ?open_alex_id, ?scopus_id )
      * @param bool $is_user
      * A boolean indicating if the new author is also a user.
-     * @return Author
+     * @return Author|null
      * The newly created author.
      */
-    public static function createAuthor($author, $ids, bool $is_user = false): Author {
-        $newAuthor = new Author;
+    public static function createAuthor($author, $ids, bool $is_user = false): ?Author {
+//        $newAuthor = new Author;
+//        try {
+            $update_date_exists = property_exists($author,'updated_date');
+            $created_date_exists = property_exists($author,'created_date');
+            $works_api_url_exists = property_exists($author,'works_api_url');
+            if(!$update_date_exists || !$works_api_url_exists || !$created_date_exists)
+                return null;
 
-        try {
             $newAuthor = Author::updateOrCreate(
                 ['orc_id' => $ids['orc_id'],
                     'open_alex_id' => $ids['open_alex_id']
@@ -93,7 +102,10 @@ class Author extends Model {
                 ['scopus_id'=>$ids['scopus_id'] !== '' ? $ids['scopus_id'] :  null,
                     'cited_by_count' => property_exists($author,'cited_by_count') ? $author->cited_by_count : null,
                     'display_name' => $author->display_name,
-                    'is_user' => $is_user
+                    'is_user' => $is_user,
+                    'last_updated_date'=>$author->updated_date,
+                    'created_date'=>$author->created_date,
+                    'works_url'=>$author->works_api_url,
                 ]
             );
 
@@ -104,12 +116,12 @@ class Author extends Model {
                 try {
                     AuthorStatistics::generateStatistics($newAuthor->id, $count_by_year);
                 } catch (Exception $error) {
-                    rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
+                    rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
                 }
             }
-        } catch (Exception $error) {
-            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
-        }
+//        } catch (Exception $error) {
+//            rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
+//        }
         return $newAuthor;
     }
 
@@ -173,6 +185,7 @@ class Author extends Model {
             $associatedAuthors = $work->authorships;
             foreach ($associatedAuthors as $associatedAuthor) {
                 $author = $associatedAuthor->author;
+                rocketDump($author, 'info', [__FUNCTION__,__FILE__,__LINE__]);
                 $authors = [...$authors, $author];
             }
 
@@ -182,7 +195,7 @@ class Author extends Model {
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
         $have_been_parsed_count = $prev_count + sizeof($works);
-        rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name, [__FUNCTION__,__FILE__,__LINE__]);
+        rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name, 'info', [__FUNCTION__,__FILE__,__LINE__]);
 
         // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
         // then keep calling the function while incrementing the page parameter passed to the request,
@@ -216,8 +229,9 @@ class Author extends Model {
      * @return string|null
      */
     public static function parseOpenAlexId($id, $author=null): ?string {
-        if($author !== null)
+        if($author !== null) {
             return property_exists($author->ids, 'openalex') ? explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] : null;
+        }
         if(strlen($id) === 0)
             return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
@@ -234,8 +248,9 @@ class Author extends Model {
      * @return string|null
      */
     public static function parseOrcId($id, $author=null): ?string {
-        if($author !== null)
+        if($author !== null) {
             return property_exists($author->ids, 'orcid') ? explode('/', parse_url($author->orcid, PHP_URL_PATH))[1] : null;
+        }
         if(strlen($id) === 0)
             return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
@@ -252,8 +267,9 @@ class Author extends Model {
      * @return string|null
      */
     public static function parseScopusId($id, $author=null): ?string {
-        if($author !== null)
+        if($author !== null) {
             return property_exists($author->ids, 'scopus') ? explode('=', explode('&',$author->ids->scopus)[0])[1] : null;
+        }
         if(strlen($id) === 0)
             return null;
         $parsed_id = explode('=', explode('&',$id)[0]);

@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-
-use App\Http\Controllers\UpdateController;
 use App\Jobs\UpdateDatabaseJob;
 use App\Models\Author;
 use App\Models\User;
@@ -44,7 +42,37 @@ class DatabaseSeeder extends Seeder {
         ['first'=>'Περικλής',
         'last'=>'Χατζημίσιος',
         'id'=>'0000-0003-2366-1365',
-        'email'=>'pchatzimisios@ihu.gr']
+        'email'=>'pchatzimisios@ihu.gr'],
+        // Αντωνίου
+        ['first'=>'Ευστάθιος',
+        'last'=>'Αντωνίου',
+        'id'=>'0000-0001-6177-6169',
+        'email'=>'antoniou@ihu.gr'],
+        // Χατζημίσιος
+        ['first'=>'Παναγιώτης',
+        'last'=>'Αδαμίδης',
+        'id'=>'0000-0003-4020-1328',
+        'email'=>'adamidis@ihu.gr'],
+        // Ιωαννίδου
+        ['first'=>'Μελίνα',
+        'last'=>'Ιωαννίδου',
+        'id'=>'0000-0003-3594-7678',
+        'email'=>'melina@ihu.gr'],
+        // Κωτσάκης
+        ['first'=>'Ρήγας',
+        'last'=>'Κωτσάκης',
+        'id'=>'0000-0003-1587-2015',
+        'email'=>'rkotsakis@gmail.gr'],
+        // Κωτσάκης
+        ['first'=>'Ρήγας',
+        'last'=>'Κωτσάκης',
+        'id'=>'0000-0003-1587-2015',
+        'email'=>'rkotsakis@gmail.gr'],
+        // Παπαδοπούλου
+        ['first'=>'Μαρία',
+        'last'=>'Παπαδοπούλου',
+        'id'=>'0000-0002-9651-2144',
+        'email'=>'mspapa@ihu.gr'],
     ];
 
     public function run(): void {
@@ -53,17 +81,13 @@ class DatabaseSeeder extends Seeder {
         DB::transaction(function () {
             // Loop through all the given professors and create a user for each one.
             // This function will also create an author out of each user.
-            foreach ($this->Professors as $professor) {
-                User::createFromOrcId($professor);
-            }
+            foreach ($this->Professors as $professor) User::createFromOrcId($professor);
 
             // Retrieve all the authors that are also users.
             $User_Authors = Author::user()->get();
 
             // Loop through all the authors, retrieve their works and parse them.
-            foreach ($User_Authors as $user_Author) {
-                $user_Author->parseWorks();
-            }
+            foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
             dispatch(new UpdateDatabaseJob());
         });
     }

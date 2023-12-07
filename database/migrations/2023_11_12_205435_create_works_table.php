@@ -12,7 +12,6 @@ return new class extends Migration {
         Schema::create('works', function (Blueprint $table) {
             $table->id();
             $table->string('doi')->nullable()->unique();
-            $table->string('open_alex_url')->unique();
             $table->string('title');
             $table->date('publication_date');
             $table->smallInteger('publication_year');
@@ -20,6 +19,10 @@ return new class extends Migration {
             $table->string('language');
             $table->string('type');
             $table->boolean('is_oa');
+            $table->string('open_alex_url')->unique();
+            $table->string('cites_url')->nullable();
+            $table->dateTime('last_updated_date');
+            $table->dateTime('created_date');
             $table->timestamps();
         });
     }

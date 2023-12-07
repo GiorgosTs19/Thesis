@@ -88,7 +88,8 @@ class User extends Authenticatable {
      */
     public static function createFromOrcId($professor): void {
         $author = APIController::authorRequest($professor['id']);
-
+        if(!$author)
+            return;
         // Parse the ids of the author
         $orc_id = Author::parseOrcId('',$author);
         $scopus_id = Author::parseScopusId('',$author);
@@ -107,6 +108,7 @@ class User extends Authenticatable {
         // If an author doesn't already exist for that user then create a new author.
         if(!Author::authorExistsByOpenAlexId($open_alex_id)['exists'])
             Author::createAuthor($author,$ids, true);
+
     }
 
     /**
@@ -127,7 +129,7 @@ class User extends Authenticatable {
             $newUser->open_alex_id = $ids['open_alex_id'];
             $newUser->save();
         } catch (Exception $error ) {
-            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
+            rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
         return $newUser;
     }

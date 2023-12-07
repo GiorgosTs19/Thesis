@@ -14,9 +14,10 @@ class APIController extends Controller {
     // An email is required for the OpenAlex api to function correctly.
     protected static string $mailTo = 'it185302@it.teithe.gr';
     protected static string $author_works_base_url = "https://api.openalex.org/works?filter=author.id:";
-
     // Base URL to fire an OpenAlex getAuthorWorks api request
     protected static string $author_base_url = 'https://api.openalex.org/authors/';
+    // Base URL to fire an OpenAlex getAuthorWorks api request
+    protected static string $work_base_url = 'https://api.openalex.org/works/';
 
     public static function authorWorksRequest($open_alex_id, $page) {
         $url = self::$author_works_base_url.$open_alex_id.
@@ -37,6 +38,14 @@ class APIController extends Controller {
             'orc_id' => self::$author_base_url . 'orcid:' . $id . self::$mailTo,
             'open_alex' => self::$author_base_url . $id . self::$mailTo,
         };
+        $author_response = Http::withOptions(['verify' => false])->get($url);
+
+        return self::getResponseBody($author_response);
+    }
+
+    public static function workRequest($id) {
+        // Retrieve a work's data from the OpenAlex api
+        $url = self::$work_base_url . $id . self::$mailTo;
         $author_response = Http::withOptions(['verify' => false])->get($url);
         return self::getResponseBody($author_response);
     }

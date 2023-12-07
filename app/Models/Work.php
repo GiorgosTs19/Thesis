@@ -9,15 +9,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use function App\Providers\rocketDump;
 
 /**
- * @property mixed $doi
- * @property mixed|string $title
- * @property mixed $publication_date
- * @property mixed $publication_year
- * @property mixed|string $open_alex_url
- * @property mixed $is_oa
- * @property mixed $type
- * @property mixed|string $language
- * @property mixed $referenced_works_count
+ * @property string doi
+ * @property string title
+ * @property mixed publication_date
+ * @property int publication_year
+ * @property string open_alex_url
+ * @property boolean is_oa
+ * @property string type
+ * @property string language
+ * @property string cites_url
+ * @property int referenced_works_count
+ * @property string last_updated_date
+ * @property string created_date
  *
  * @method static where(string $string, $doi)
  */
@@ -46,9 +49,12 @@ class Work extends Model {
             $newWork->type = $work->type;
             $newWork->is_oa = $work_open_access->is_oa;
             $newWork->open_alex_url = explode('/',$work->ids->openalex)[3];
+            $newWork->cites_url = $work->cited_by_api_url;
+            $newWork->last_updated_date = $work->updated_date;
+            $newWork->created_date = $work->created_date;
             $newWork->save();
         } catch (Exception $error) {
-            rocketDump($error->getMessage(),[__FUNCTION__,__FILE__,__LINE__], 'error');
+            rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
 
         return $newWork;

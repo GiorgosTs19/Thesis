@@ -11,46 +11,61 @@ class AppServiceProvider extends ServiceProvider {
      */
     public function register(): void {
         /**
-         * @param $message
-         * The message to be logged and displayed.
-         * @param $callingFunction
-         * Information about the function that fired the log,
-         * the line that was called on and the file on which the function exists.
-         * @return void
          * Logs the given message, and displays it on the console.
+         * @param object|string $message
+         * The message to be logged and displayed.
+         * @param array $callingFunctionInfo
+         * An array that contains information about the function that fired the log,
+         * the line that was called on and the file on which said function was used.
+         * @param string $log_case
+         * The type of log to use, can be one of ['info', 'error', 'warning', 'debug'].
+         * @return void
          */
-        function rocketDump($message, $callingFunction, $log_case='info', $display_meta_data = true): void  {
-            $file_path = $callingFunction[1];
-            $function_name = $callingFunction[0];
-            $file_line = $callingFunction[2];
+        function rocketDump(object|string $message, string $log_case='info', array $callingFunctionInfo=[]): void  {
+            $meta = '';
+            $display_meta_data = sizeof($callingFunctionInfo) === 3;
+            if($display_meta_data) {
+                $function_name = $callingFunctionInfo[0];
+                $file_path = $callingFunctionInfo[1];
+                $file_line = $callingFunctionInfo[2];
+                // Find the last occurrence of needle in the path
+                $lastThesisProjectIndex = strrpos($file_path, 'Thesis_Project\\');
+                $lastThesisIndex = strrpos($file_path, 'Thesis\\');
 
-            // Find the last occurrence of needle in the path
-            $lastThesisIndex = strrpos($file_path, 'Thesis_Project\\');
-
-            // If needle was found in the path
-            if ($lastThesisIndex !== false) {
-                // Extract the part of the path after the needle
-                $file_path = substr($file_path, $lastThesisIndex + strlen('Thesis_Project\\'));
-            }
-
-            if($display_meta_data)
-                $logMessage = "$function_name(), $file_path, $file_line, $message ";
-            else
-                $logMessage = $message;
-
-            $validLogCases = ['info', 'error', 'warning', 'debug'];
-
-            if (in_array($log_case, $validLogCases)) {
-                if ($log_case === 'error') {
-                    // Use red color for the error message
-                    Log::error("\033[0;31m$logMessage\033[0m");
-                } else {
-                    // Use default color for other log cases
-                    Log::$log_case($logMessage);
+                // If needle was found in the path
+                if ($lastThesisProjectIndex !== false) {
+                    // Extract the part of the path after the needle
+                    $file_path = substr($file_path, $lastThesisProjectIndex + strlen('Thesis_Project\\'));
                 }
+                if ($lastThesisIndex !== false) {
+                    // Extract the part of the path after the needle
+                    $file_path = substr($file_path, $lastThesisIndex + strlen('Thesis\\'));
+                }
+
+                $meta = "$function_name(), $file_path, $file_line ";
             }
 
-            dump("🚀 ~ $logMessage");
+            if(is_string($message)) {
+                if($display_meta_data)
+                    $logMessage = $meta.$message;
+                else
+                    $logMessage = $message;
+
+                $validLogCases = ['info', 'error', 'warning', 'debug'];
+
+                if (in_array($log_case, $validLogCases)) {
+                    if ($log_case === 'error') {
+                        // Use red color for the error message
+                        Log::error("\033[0;31m$logMessage\033[0m");
+                    } else {
+                        // Use default color for other log cases
+                        Log::$log_case($logMessage);
+                    }
+                }
+                dump("🚀 ~ $logMessage");
+            } else {
+                dump("🚀 ~ ", $meta , $message);
+            }
         }
     }
 

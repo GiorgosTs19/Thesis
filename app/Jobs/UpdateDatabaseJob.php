@@ -2,18 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\APIController;
-use App\Models\Author;
-use App\Models\AuthorStatistics;
 use Exception;
+use App\Http\Controllers\APIController;
+use App\Models\{Author, AuthorStatistics};
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\{Artisan, DB};
+use Illuminate\Contracts\Queue\{ShouldBeUnique, ShouldQueue};
+use Illuminate\Queue\{InteractsWithQueue, SerializesModels};
+use Illuminate\Support\{Arr, Facades\Artisan, Facades\DB};
 use function App\Providers\rocketDump;
 
 class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
@@ -25,7 +21,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
      */
     private function enableMaintenanceMode(): void {
         // Enable maintenance mode
-        rocketDump('Turning On Maintenance mode',[__FUNCTION__,__FILE__,__LINE__]);
+        rocketDump('Turning On Maintenance mode');
         Artisan::call('down');
     }
 
@@ -36,7 +32,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
      */
     private function disableMaintenanceMode(): void {
         // Disable maintenance mode
-        rocketDump('Turning Off Maintenance mode',[__FUNCTION__,__FILE__,__LINE__]);
+        rocketDump('Turning Off Maintenance mode');
         Artisan::call('up');
     }
 
@@ -52,10 +48,10 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
     public function handle(): void {
         $this->enableMaintenanceMode();
         try {
-            rocketDump('Dispatching updateStatistics job',[__FUNCTION__,__FILE__,__LINE__]);
+            rocketDump('Dispatching updateStatistics job','info',[__FUNCTION__,__FILE__,__LINE__]);
             $this->updateStatistics();
         } catch (Exception $err) {
-            rocketDump("Something went wrong while updating the database,".$err->getMessage(),[__FUNCTION__,__FILE__,__LINE__],'error');
+            rocketDump("Something went wrong while updating the database,".$err->getMessage(),'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
         finally {
             $this->disableMaintenanceMode();
@@ -96,25 +92,24 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
                 $citation_count_differ = $requestStatistic->cited_by_count !== $databaseStatistics->cited_count;
 
                 if (!$works_count_differ && !$citation_count_differ) {
-                    rocketDump("No statistics updates required for $author->display_name for the year $requestStatistic->year" ,
-                        __FUNCTION__.' '.__FILE__.' '.__LINE__,'info',false);
+                    rocketDump("No statistics updates required for $author->display_name for the year $requestStatistic->year");
                     continue;
                 }
 
                 if ($works_count_differ) {
                     $databaseStatistics->works_count = $requestStatistic->works_count;
-                    rocketDump("Works count has been updated for $author->display_name " ,__FUNCTION__.' '.__FILE__.' '.__LINE__);
+                    rocketDump("Works count has been updated for $author->display_name ", 'info', [__FUNCTION__,__FILE__,__LINE__]);
                 }
 
                 if ($citation_count_differ) {
                     $databaseStatistics->cited_count = $requestStatistic->cited_by_count;
-                    rocketDump("Citation count has been updated for $author->display_name " ,__FUNCTION__.' '.__FILE__.' '.__LINE__);
+                    rocketDump("Citation count has been updated for $author->display_name ", 'info', [__FUNCTION__,__FILE__,__LINE__]);
                 }
 
                 $databaseStatistics->save();
 
                 $completed++;
-                rocketDump($completed."/$length completed" ,__FUNCTION__.' '.__FILE__.' '.__LINE__);
+                rocketDump($completed."/$length completed", 'info', [__FUNCTION__,__FILE__,__LINE__]);
             }
         });
     }
