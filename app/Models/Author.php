@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\APIController;
 use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use JetBrains\PhpStorm\ArrayShape;
 use function App\Providers\rocketDump;
+use App\Http\Controllers\APIController;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @method static updateOrCreate(array $array, array $array1)
@@ -242,8 +242,12 @@ class Author extends Model {
         $works = $author_works_response->results;
 
         foreach ($works as $work) {
+            // If both properties are absent move to the next work.
+//            if(!property_exists($work->ids,'doi' && !property_exists($work->open_access,'oa_url')))
+//                continue;
+
             // Check if a work with this title already exists in the database, if so proceed to the next one
-            if(Work::workExistsByDoi($work->doi))
+            if(Work::workExistsByDoi(property_exists($work->ids,'doi')?$work->ids->doi:$work->open_access->oa_url))
                 continue;
 
             // If not, create a new Work and save it to the database
@@ -264,7 +268,7 @@ class Author extends Model {
     }
 
     public function associateAuthorToWork($work): void {
-        if($this->associationExists($work->id)) {
+        if(!$this->associationExists($work->id)) {
             try {
                 $newAuthorWork = new AuthorWork;
                 $newAuthorWork->author_id = $this->id;

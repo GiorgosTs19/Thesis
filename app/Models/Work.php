@@ -37,7 +37,7 @@ class Work extends Model {
      */
     public static function createNewWork ($work): Work {
         $work_open_access = $work->open_access;
-        $work_url = $work->doi ?? $work->open_access->oa_url;
+        $work_url = $work->ids->doi ?? $work_open_access->oa_url;
         $newWork = new Work;
         try {
             $newWork->doi = $work_url;
@@ -72,7 +72,7 @@ class Work extends Model {
      * Associates the given authors with the given work. Creates AuthorWorks records.
      */
     public function parseAuthors($authorObjects): void {
-        foreach ($authorObjects as $authorObject) {
+        foreach ($authorObjects as $index => $authorObject) {
             $ids = ['scopus_id'=>property_exists($authorObject->author,'scopus') ? Author::parseScopusId($authorObject->author->scopus) : null,
                 'orc_id'=>Author::parseOrcId($authorObject->author->orcid),
                 'open_alex_id'=>Author::parseOpenAlexId($authorObject->author->id)];
@@ -88,6 +88,7 @@ class Work extends Model {
             if(!$author_is_user && !$db_author_exists)
                 $newAuthor = Author::createAuthor($authorObject, $ids);
 
+            rocketDump("Parsed $index/".sizeOf($authorObjects)." of work authors.", 'info', [__FUNCTION__,__FILE__,__LINE__]);
             $newAuthor->associateAuthorToWork($this);
         }
     }
