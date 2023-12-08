@@ -62,21 +62,16 @@ class User extends Authenticatable {
     ];
 
     /**
+     * @param $open_alex_id
+     * The OpenAlex id to search a user with
      * @param $orc_id
+     * The OrcId id to search a user with
      * @return array
+     * An array that contains a boolean as its first element, indicating if a user with a matching id was found,
+     * and the user ( it they exist, otherwise null ) as its second element.
      */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUserByOrcId($orc_id): array {
-        $user_query = User::where('orc_id',$orc_id);
-        $user_exists = boolval($user_query->exists());
-        return ['exists'=>$user_exists, 'author'=>$user_query->first()];
-    }
-
-    /**
-     * @param $orc_id
-     * @return array
-     */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUserByOpenAlexId($orc_id): array {
-        $user_query = User::where('open_alex_id',$orc_id);
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUser($open_alex_id, $orc_id): array {
+        $user_query = User::where('open_alex_id',$open_alex_id)->orWhere('orc_id',$orc_id);
         $user_exists = boolval($user_query->exists());
         return ['exists'=>$user_exists, 'author'=>$user_query->first()];
     }
@@ -87,6 +82,7 @@ class User extends Authenticatable {
      * Create a new user and save it to the database, using info from the OpenAlex API.
      */
     public static function createFromOrcId($professor): void {
+
         $author = APIController::authorRequest($professor['id']);
         if(!$author)
             return;
@@ -101,13 +97,13 @@ class User extends Authenticatable {
         // If no orc_id is present, return
         if($orc_id === '' || User::orcId($orc_id)->exists())
             return;
-
         // Else create a new user.
         User::createNewUser($professor,$ids);
 
         // If an author doesn't already exist for that user then create a new author.
-        if(!Author::authorExistsByOpenAlexId($open_alex_id)['exists'])
+//        if(!Author::authorExistsByOpenAlexId($open_alex_id)['exists']) {
             Author::createAuthor($author,$ids, true);
+//        }
 
     }
 

@@ -30,6 +30,8 @@ use function App\Providers\rocketDump;
 class Author extends Model {
     use HasFactory;
 
+    protected static string $author_works_base_url = "https://api.openalex.org/works?filter=author.id:";
+
     protected $fillable = [
         'display_name',
         'orc_id',
@@ -40,7 +42,9 @@ class Author extends Model {
     ];
 
     /**
+     * Static Utility Function
      * @param $external_id
+     * The external id to search the author with
      * @param string $external_id_name
      * The name of the external id that will be provided to search for the user
      * ( defaults to "orc_id" ).
@@ -54,63 +58,55 @@ class Author extends Model {
 
     /**
      * @param $open_alex_id
-     * @return array 'A key-value pair array with an "exists" key indicating if the author requested exists,
-     *  an "author" key that will include the author ( if they exist ).
-     */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExistgit sByOpenAlexId($open_alex_id): array {
-        $author_query =  Author::where('open_alex_id',$open_alex_id);
-        rocketDump($open_alex_id, 'info', [__FUNCTION__,__FILE__,__LINE__]);
-        $author_exists = $author_query->exists();
-        return ['exists'=>$author_exists, 'author'=>$author_query->first()];
-    }
-
-    /**
+     * The OpenAlex id to search an author with
      * @param $orc_id
+     * The OpenAlex id to search an author with
      * @return array
-     * A key-value pair array with an "exists" key indicating if the author requested exists,
-     *  an "author" key that will include the author ( if they exist ).
+     * An array that contains a boolean as its first element, indicating if an author with a matching id was found,
+     *  and the author ( it they exist, otherwise null ) as its second element.
      */
-    public static function authorExistsByOrcId($orc_id): array {
-        $author_query = Author::where('orc_id',$orc_id);
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExists($open_alex_id, $orc_id): array {
+        $author_query =  Author::where('open_alex_id',$open_alex_id)->orWhere('orc_id',$orc_id);
         $author_exists = $author_query->exists();
-        return ['exists'=>$author_exists, 'author'=>$author_query->first()];
+        return ['exists'=>(boolean)$author_exists, 'author'=>$author_query->first()];
     }
 
     /**
+     * Static Utility Function
      * @param $author
      * An author object straight from the response of an OpenAlex api call.
-     * @param $ids
+     * @param array $ids
      * An associative array of the available ids of the author ( ?orc_id, ?open_alex_id, ?scopus_id )
      * @param bool $is_user
      * A boolean indicating if the new author is also a user.
      * @return Author|null
      * The newly created author.
      */
-    public static function createAuthor($author, $ids, bool $is_user = false): ?Author {
-//        $newAuthor = new Author;
-//        try {
-            $update_date_exists = property_exists($author,'updated_date');
-            $created_date_exists = property_exists($author,'created_date');
-            $works_api_url_exists = property_exists($author,'works_api_url');
-            if(!$update_date_exists || !$works_api_url_exists || !$created_date_exists)
-                return null;
-
+    public static function createAuthor($author, array $ids = [], bool $is_user = false): ?Author {
+        $newAuthor = new Author;
+        if(!$is_user) {
+            $author = APIController::authorRequest($ids['open_alex_id'], 'open_alex');
+        }
+        try {
             $newAuthor = Author::updateOrCreate(
-                ['orc_id' => $ids['orc_id'],
+                [
                     'open_alex_id' => $ids['open_alex_id']
                 ],
                 ['scopus_id'=>$ids['scopus_id'] !== '' ? $ids['scopus_id'] :  null,
                     'cited_by_count' => property_exists($author,'cited_by_count') ? $author->cited_by_count : null,
                     'display_name' => $author->display_name,
                     'is_user' => $is_user,
-                    'last_updated_date'=>$author->updated_date,
-                    'created_date'=>$author->created_date,
-                    'works_url'=>$author->works_api_url,
+                    'orc_id' => $ids['orc_id'],
+                    'works_url'=>property_exists($author,'works_api_url') ? $author->works_api_url : self::$author_works_base_url.$ids['open_alex_id'],
+                    'last_updated_date'=>property_exists($author,'updated_date') ? $author->updated_date : null,
+                    'created_date'=>property_exists($author,'created_date') ? $author->created_date : null,
                 ]
             );
 
-            if(!property_exists($author,'counts_by_year'))
+            rocketDump("Author $newAuthor->display_name created", 'info', [__FUNCTION__,__FILE__,__LINE__]);
+            if(!property_exists($author,'counts_by_year')) {
                 return $newAuthor;
+            }
 
             foreach ($author->counts_by_year as $count_by_year) {
                 try {
@@ -119,113 +115,18 @@ class Author extends Model {
                     rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
                 }
             }
-//        } catch (Exception $error) {
-//            rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
-//        }
+        } catch (Exception $error) {
+            rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
+        }
         return $newAuthor;
     }
 
     /**
-     * Returns all the cited_counts by year associated with an author.
-     * @return HasMany
-     */
-    public function statistics(): HasMany {
-        return $this->hasMany(AuthorStatistics::class);
-    }
-
-    /**
-     * Returns all the works associated with an author.
-     * @return BelongsToMany
-     */
-    public function works(): BelongsToMany {
-        return $this->belongsToMany(Work::class);
-    }
-
-    /**
-     * Returns a boolean indicating if the author is also a user or not.
-     * @return bool
-     */
-    public function isUser(): bool {
-        return !!$this->is_user;
-    }
-
-    /**
-     * A local scope that can help filter out authors based on their "is_user" status.
-     * @param $query - The query that the scope should be chained to ( injected automatically )'
-     * @param $is_user - An optional parameter that can be passed to filter out the authors that are users or not,
-     * "1" for authors that are also users and "0" for those who are not.
-     * @return mixed
-     */
-    public function scopeUser($query, int $is_user = 1): mixed{
-        return $query->where('is_user',$is_user);
-    }
-
-    /**
-     * Retrieves all the works ( or a specified number of them ) from the OpenAlex API and parses them,
-     * saving all of them in the database, parsing all the authors associated with each one and creating a new author for any author that doesn't already exist.
-     * It will also create an association for each work and for each of the authors that exist and are associated with them.
-     */
-    public function parseWorks($prev_count = 0, $page = 1): void {
-        $author_works_response = APIController::authorWorksRequest($this->open_alex_id, $page);
-        $total_work_count = $author_works_response->meta->count;
-        $works = $author_works_response->results;
-
-        foreach ($works as $work) {
-            // Check if a work with this title already exists in the database, if so proceed to the next one
-            if(Work::workExistsByDoi($work->doi))
-                continue;
-
-            // If not, create a new Work and save it to the database
-            $newWork = Work::createNewWork($work);
-
-            // Initialize an empty array to add the work's authors
-            $authors = [];
-
-            // Add all the work's authors to an array, so they can all be associated with it on the next step
-            $associatedAuthors = $work->authorships;
-            foreach ($associatedAuthors as $associatedAuthor) {
-                $author = $associatedAuthor->author;
-                rocketDump($author, 'info', [__FUNCTION__,__FILE__,__LINE__]);
-                $authors = [...$authors, $author];
-            }
-
-            // Associate all authors from the array with the work being processed
-            self::parseWorkAuthors($authors, $newWork);
-        }
-        // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
-        // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
-        $have_been_parsed_count = $prev_count + sizeof($works);
-        rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name, 'info', [__FUNCTION__,__FILE__,__LINE__]);
-
-        // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
-        // then keep calling the function while incrementing the page parameter passed to the request,
-        // until all the author's works have been parsed and stored.
-        if($have_been_parsed_count < $total_work_count) {
-            $this->parseWorks($have_been_parsed_count, ++$page);
-        }
-    }
-
-    /**
-     * @param $authors
-     * An array of authors to be associated with the given work
-     * @param $work
-     * The work to be associated with the authors
-     * @return void
-     * Associates the given authors with the given work. Creates AuthorWorks records.
-     */
-    protected static function parseWorkAuthors($authors, $work): void {
-        foreach ($authors as $author) {
-            $ids = ['open_alex_id' => self::parseOpenAlexId($author->id),
-                'orc_id' => self::parseOrcId($author->orcid),
-                'scopus_id'=> self::parseScopusId(property_exists($author, 'scopus') ? $author->scopus : '')];
-
-            AuthorWork::associateAuthorToWork($author, $ids, $work);
-        }
-    }
-
-    /**
+     * Static Utility Function
      * @param $id
+     * The id to be parsed
      * @param $author
+     *  The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
     public static function parseOpenAlexId($id, $author=null): ?string {
@@ -243,8 +144,11 @@ class Author extends Model {
     }
 
     /**
+     * Static Utility Function
      * @param $id
+     * The id to be parsed.
      * @param $author
+     * The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
     public static function parseOrcId($id, $author=null): ?string {
@@ -261,9 +165,14 @@ class Author extends Model {
         return $parsed_id[1];
     }
 
+    // Class utility functions
+
     /**
+     * Static Utility Function
      * @param $id
+     * The id to be parsed
      * @param $author
+     * The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
     public static function parseScopusId($id, $author=null): ?string {
@@ -279,4 +188,102 @@ class Author extends Model {
             return $parsed_id[0];
         return $parsed_id[1];
     }
+
+    /**
+     * Relationship
+     * @return HasMany
+     * All the cited_counts by year associated with an author.
+     */
+    public function statistics(): HasMany {
+        return $this->hasMany(AuthorStatistics::class);
+    }
+
+    /**
+     * Class Utility Function
+     * @return bool
+     * A boolean indicating if the author is also a user or not.
+     */
+    public function isUser(): bool {
+        return !!$this->is_user;
+    }
+
+    /**
+     * Relationship
+     * @return BelongsToMany
+     * All the works associated with the author.
+     */
+    public function works(): BelongsToMany {
+        return $this->belongsToMany(Work::class);
+    }
+
+    /**
+     * Scope
+     * A local scope that can help filter out authors based on their "is_user" status.
+     * @param $query - The query that the scope should be chained to ( injected automatically )'
+     * @param $is_user - An optional parameter that can be passed to filter out the authors that are users or not,
+     * "1" for authors that are also users and "0" for those who are not.
+     * @return mixed
+     */
+    public function scopeUser($query, int $is_user = 1): mixed{
+        return $query->where('is_user',$is_user);
+    }
+
+    //
+
+    /**
+     * Class Utility Function
+     * Retrieves all the works ( or a specified number of them ) from the OpenAlex API and parses them,
+     * saving all of them in the database, parsing all the authors associated with each one and creating a new author for any author that doesn't already exist.
+     * It will also create an association for each work and for each of the authors that exist and are associated with them.
+     */
+    public function parseWorks($prev_count = 0, $page = 1): void {
+        $author_works_response = APIController::authorWorksRequest($this->open_alex_id, $page);
+        $total_work_count = $author_works_response->meta->count;
+        $works = $author_works_response->results;
+
+        foreach ($works as $work) {
+            // Check if a work with this title already exists in the database, if so proceed to the next one
+            if(Work::workExistsByDoi($work->doi))
+                continue;
+
+            // If not, create a new Work and save it to the database
+            Work::createNewWork($work);
+
+        }
+        // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
+        // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
+        $have_been_parsed_count = $prev_count + sizeof($works);
+        rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+
+        // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
+        // then keep calling the function while incrementing the page parameter passed to the request,
+        // until all the author's works have been parsed and stored.
+        if($have_been_parsed_count < $total_work_count) {
+            $this->parseWorks($have_been_parsed_count, ++$page);
+        }
+    }
+
+    public function associateAuthorToWork($work): void {
+        if($this->associationExists($work->id)) {
+            try {
+                $newAuthorWork = new AuthorWork;
+                $newAuthorWork->author_id = $this->id;
+                $newAuthorWork->work_id = $work->id;
+                $newAuthorWork->save();
+            } catch (Exception $error) {
+                rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+            }
+        }
+    }
+
+    /**
+     * @param $work_id
+     * The work id to check the association for.
+     * @return bool
+     * A boolean indicating if an association between the author and the given work already exists in the database.
+     */
+    public function associationExists($work_id): bool {
+        return AuthorWork::where('author_id',$this->id)->where('work_id',$work_id)->exists();
+    }
+
 }

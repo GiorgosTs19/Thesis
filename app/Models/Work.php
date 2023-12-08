@@ -53,14 +53,47 @@ class Work extends Model {
             $newWork->last_updated_date = $work->updated_date;
             $newWork->created_date = $work->created_date;
             $newWork->save();
+
+            // Associate all authors from the array with the work being processed
+            $newWork->parseAuthors($work->authorships);
         } catch (Exception $error) {
             rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
+
 
         return $newWork;
     }
 
     /**
+     * Static Utility Function
+     * @param $authorObjects
+     * An array of authors to be associated with the given work
+     * @return void
+     * Associates the given authors with the given work. Creates AuthorWorks records.
+     */
+    public function parseAuthors($authorObjects): void {
+        foreach ($authorObjects as $authorObject) {
+            $ids = ['scopus_id'=>property_exists($authorObject->author,'scopus') ? Author::parseScopusId($authorObject->author->scopus) : null,
+                'orc_id'=>Author::parseOrcId($authorObject->author->orcid),
+                'open_alex_id'=>Author::parseOpenAlexId($authorObject->author->id)];
+
+            // Check if an author is a user.
+            $author_is_user = User::isAuthorAUser($ids['open_alex_id'],$ids['orc_id'])['exists'];
+
+            $newAuthor = null;
+            // Check if an author exists by their Open Alex id or their OrcId
+            ['exists' => $db_author_exists, 'author' => $newAuthor] = Author::authorExists($ids['open_alex_id'],$ids['orc_id']);
+
+
+            if(!$author_is_user && !$db_author_exists)
+                $newAuthor = Author::createAuthor($authorObject, $ids);
+
+            $newAuthor->associateAuthorToWork($this);
+        }
+    }
+
+    /**
+     * Static Utility Function
      * @param $doi
      * The doi of the work to search against.
      * @return bool
@@ -70,11 +103,21 @@ class Work extends Model {
         return !!Work::where('doi',$doi)->exists();
     }
 
+    /**
+     * Relationship
+     * @return BelongsToMany
+     * All the authors that are associated with the work.
+     */
     public function authors(): BelongsToMany {
         return $this->belongsToMany(Author::class, 'author_works');
     }
 
-    public function scopeDoi($query, $doi) {
+    /**
+     * @param $query
+     * @param $doi
+     * @return mixed
+     */
+    public function scopeDoi($query, $doi): mixed {
         if($doi !== '')
             return $query->orWhere('doi',$doi);
         return $query;
