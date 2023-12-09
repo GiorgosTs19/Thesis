@@ -103,7 +103,7 @@ class Author extends Model {
                 ]
             );
 
-            rocketDump("Author $newAuthor->display_name created", 'info', [__FUNCTION__,__FILE__,__LINE__]);
+//            rocketDump("Author $newAuthor->display_name created", 'info', [__FUNCTION__,__FILE__,__LINE__]);
             if(!property_exists($author,'counts_by_year')) {
                 return $newAuthor;
             }
@@ -242,17 +242,12 @@ class Author extends Model {
         $works = $author_works_response->results;
 
         foreach ($works as $work) {
-            // If both properties are absent move to the next work.
-//            if(!property_exists($work->ids,'doi' && !property_exists($work->open_access,'oa_url')))
-//                continue;
-
             // Check if a work with this title already exists in the database, if so proceed to the next one
             if(Work::workExistsByDoi(property_exists($work->ids,'doi')?$work->ids->doi:$work->open_access->oa_url))
                 continue;
 
             // If not, create a new Work and save it to the database
             Work::createNewWork($work);
-
         }
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
@@ -291,3 +286,8 @@ class Author extends Model {
     }
 
 }
+
+// If both properties are absent move to the next work.
+//            if(!property_exists($work->ids,'doi' && !property_exists($work->open_access,'oa_url')))
+//                continue;
+//            rocketDump($work, 'info', [__FUNCTION__,__FILE__,__LINE__]);

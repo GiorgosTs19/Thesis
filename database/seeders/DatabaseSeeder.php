@@ -7,6 +7,7 @@ use App\Models\Author;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use function App\Providers\rocketDump;
 
 class DatabaseSeeder extends Seeder {
     /**
@@ -78,17 +79,19 @@ class DatabaseSeeder extends Seeder {
     public function run(): void {
         // Using a single transaction closure for all actions that will be performed, inserts, updates, deletes etc.
         // If anything goes wrong the transaction will be not be committed and the db will be rolled back.
-        DB::transaction(function () {
-            // Loop through all the given professors and create a user for each one.
-            // This function will also create an author out of each user.
             foreach ($this->Professors as $professor) User::createFromOrcId($professor);
 
             // Retrieve all the authors that are also users.
             $User_Authors = Author::user()->get();
 
             // Loop through all the authors, retrieve their works and parse them.
-            foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
+            foreach ($User_Authors as $user_Author) {
+                DB::transaction(function () use ($user_Author){
+                    // Loop through all the given professors and create a user for each one.
+                    // This function will also create an author out of each user.
+                        $user_Author->parseWorks();
+                });
+            }
             dispatch(new UpdateDatabaseJob());
-        });
     }
 }

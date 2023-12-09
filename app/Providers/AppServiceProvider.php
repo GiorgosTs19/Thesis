@@ -67,6 +67,10 @@ class AppServiceProvider extends ServiceProvider {
                 dump("🚀 ~ ", $meta , $message);
             }
         }
+
+        function logMemory(): void {
+            rocketDump((number_format(memory_get_usage() * (10 ** -6), 1)."MB / ".ini_get('memory_limit')));
+        }
     }
 
 

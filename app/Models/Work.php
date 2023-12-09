@@ -32,10 +32,10 @@ class Work extends Model {
      *
      * @param $work
      * A work object straight from an OpenAlex API call response.
-     * @return Work
+     * @return void
      * The newly created work.
      */
-    public static function createNewWork ($work): Work {
+    public static function createNewWork ($work): void {
         $work_open_access = $work->open_access;
         $work_url = $work->ids->doi ?? $work_open_access->oa_url;
         $newWork = new Work;
@@ -59,9 +59,6 @@ class Work extends Model {
         } catch (Exception $error) {
             rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
-
-
-        return $newWork;
     }
 
     /**
@@ -86,9 +83,9 @@ class Work extends Model {
 
 
             if(!$author_is_user && !$db_author_exists)
-                $newAuthor = Author::createAuthor($authorObject, $ids);
+                $newAuthor = Author::createAuthor($authorObject->author, $ids);
 
-            rocketDump("Parsed $index/".sizeOf($authorObjects)." of work authors.", 'info', [__FUNCTION__,__FILE__,__LINE__]);
+//            rocketDump("Parsed $index/".sizeOf($authorObjects)." of work authors.", 'info', [__FUNCTION__,__FILE__,__LINE__]);
             $newAuthor->associateAuthorToWork($this);
         }
     }
