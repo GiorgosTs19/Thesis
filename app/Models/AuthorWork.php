@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use function App\Providers\rocketDump;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property mixed $author_id

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Iterators\WorksIterator;
-use App\Models\Author;
 use App\Models\Work;
+use App\Models\Author;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Config;
+use App\Iterators\WorksIterator;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Config;
 
 class APIController {
     private static int $perPage;

@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\APIController;
-use App\Jobs\UpdateDatabaseJob;
 use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Arr;
 use function App\Providers\rocketDump;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property mixed year
@@ -27,23 +25,38 @@ class Statistic extends Model {
         'count'
         ];
 
-    public static function generateStatistics($id, $statistics, $asset_type): void {
+    /**
+     * Parses all the statistics contained in the Api response
+     * and generates statistics accordingly.
+     * @param $asset_id
+     * The id of the asset that the statistics refer to.
+     * @param $statistics
+     * The statistics array of the asset from the Api response.
+     * @param $asset_type
+     * The type of the asset that the statistics refer to.
+     * @return void
+     */
+    public static function generateStatistics($asset_id, $statistics, $asset_type): void {
         foreach ($statistics as $statistic) {
-            self::newStatistic($id, $statistic, $asset_type);
+            self::newStatistic($asset_id, $statistic, $asset_type);
         }
     }
 
     /**
-     * @param $id
+     * Create a new statistic
+     * @param $asset_id
+     * The id of the asset that the statistic refer to.
      * @param $statistic
+     * The statistic object from the Api response.
      * @param $asset_type
+     * The type of the asset that the statistic refer to.
      * @return void
      */
-    private static function newStatistic($id, $statistic, $asset_type): void
+    private static function newStatistic($asset_id, $statistic, $asset_type): void
     {
         try {
             $newYearlyCitations = new Statistic;
-            $newYearlyCitations->asset_id = $id;
+            $newYearlyCitations->asset_id = $asset_id;
             $newYearlyCitations->year = $statistic->year;
             $newYearlyCitations->works_count = property_exists($statistic, 'works_count') ? $statistic->works_count : null;
             $newYearlyCitations->cited_count = $statistic->cited_by_count;
@@ -59,10 +72,22 @@ class Statistic extends Model {
         self::newStatistic($id, $statistic, $asset_type);
     }
 
-    public function updateStatistic($asset, $statistics_array, $year_to_update) : void {
+    /** Updates the statistic based on the asset type of the statistic, checks for updates on the fields below :
+     * - Author :
+     *      - works_count
+     *      - cited_by_count
+     *  - Work :
+     *      - cited_by_count
+     * @param $asset
+     * The asset the statistic references to.
+     * @param $statistics_array
+     * The array of statistics for the asset.
+     * @return void
+     */
+    public function updateStatistic($asset, $statistics_array) : void {
         switch ($this->asset_type) {
             case Author::class : {
-                $requestStatistic = self::getLatestOpenAlexStatistic(Author::class, $statistics_array, $year_to_update);
+                $requestStatistic = self::getCurrentYearsOpenAlexStatistic(Author::class, $statistics_array);
 
                 $works_count_differ = $requestStatistic->works_count !== $this->works_count;
                 $citation_count_differ = $requestStatistic->cited_by_count !== $this->cited_count;
@@ -89,7 +114,7 @@ class Statistic extends Model {
                 break;
             }
             case Work::class : {
-                $requestStatistic = self::getLatestOpenAlexStatistic(Work::class, $statistics_array, $year_to_update);
+                $requestStatistic = self::getCurrentYearsOpenAlexStatistic(Work::class, $statistics_array);
                 $citation_count_differ = $requestStatistic->cited_by_count !== $this->cited_count;
 
                 if (!$citation_count_differ) {
@@ -108,7 +133,16 @@ class Statistic extends Model {
         }
     }
 
-    public static function getLatestOpenAlexStatistic($asset_type, $statistics_array, $year_to_update) {
+    /**
+     * @param $asset_type
+     * The type of asset the statistic refers to.
+     * @param $statistics_array
+     * The asset's array of statistics to extract the statistic from.
+     * @return mixed
+     * The asset's statistic for the current year ( if it exists ).
+     */
+    public static function getCurrentYearsOpenAlexStatistic($asset_type, $statistics_array) : mixed {
+        $year_to_update =  date('Y');
         return match ($asset_type) {
             Author::class => Arr::first($statistics_array,
                 function ($value) use ($year_to_update) {
@@ -122,6 +156,10 @@ class Statistic extends Model {
 
     }
 
+    /**
+     * @return BelongsTo
+     * The asset that the statistic refers to.
+     */
     public function asset(): BelongsTo {
         return $this->morphTo();
     }

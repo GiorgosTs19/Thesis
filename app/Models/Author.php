@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Exception;
+use JetBrains\PhpStorm\ArrayShape;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use JetBrains\PhpStorm\ArrayShape;
 use function App\Providers\rocketDump;
 use App\Http\Controllers\APIController;
 use Illuminate\Database\Eloquent\Model;
@@ -286,6 +286,15 @@ class Author extends Model {
         return AuthorWork::where('author_id',$this->id)->where('work_id',$work_id)->exists();
     }
 
+    /**
+     * Updates the author ( if any changes are detected on the OpenAlex's api response ).
+     * It compares the update date on the response, to the local last_updated_date ( last updated on the OpenAlex's database since the last local update )
+     * if the values are different, it will check for updates on the fields below and if any of them has changed, it will get updated:
+     * - cited_by_count,
+     * - works_count,
+     * - counts_by_year ( only for the current year )
+     * @return void
+     */
     public function updateSelf(): void {
         rocketDump($this->open_alex_id, 'info', [__FUNCTION__,__FILE__,__LINE__]);
         $requestAuthor = APIController::authorUpdateRequest($this->open_alex_id);
@@ -309,12 +318,12 @@ class Author extends Model {
             ->first();
 
         if (!$databaseStatistic) {
-            $requestStatistic = Statistic::getLatestOpenAlexStatistic(Author::class, $requestAuthor->counts_by_year, $year_to_update);
+            $requestStatistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $requestAuthor->counts_by_year);
             Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
             return;
         }
 
-        $databaseStatistic->updateStatistic($this, $requestAuthor->counts_by_year, $year_to_update);
+        $databaseStatistic->updateStatistic($this, $requestAuthor->counts_by_year);
     }
 
     /**

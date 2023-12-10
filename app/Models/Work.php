@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\APIController;
 use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Auth;
 use function App\Providers\logMemory;
 use function App\Providers\rocketDump;
+use App\Http\Controllers\APIController;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property string doi
@@ -34,6 +34,9 @@ class Work extends Model {
     use HasFactory;
 
     public static array $updateFields = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
+
+    protected $fillable = ['doi', 'title', 'publication_date', 'publication_year', 'referenced_works_count', 'language', 'type',
+    'is_oa','open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date'];
 
     /**
      * Creates a new work.
@@ -134,6 +137,15 @@ class Work extends Model {
         return $query;
     }
 
+    /**
+     * Updates the work ( if any changes are detected on the OpenAlex's api response ).
+     * It compares the update date on the response, to the local last_updated_date ( last updated on the OpenAlex's database since the last local update )
+     * if the values are different, it will check for updates on the fields below and if any of them has changed, it will get updated:
+     * - referenced_works_count,
+     * - is_oa,
+     * - counts_by_year ( only for the current year )
+     * @return void
+     */
     public function updateSelf() : void {
         $requestWork = APIController::workUpdateRequest($this->open_alex_id);
 
@@ -155,32 +167,36 @@ class Work extends Model {
         } catch (Exception $exception) {
             rocketDump($exception->getMessage(), 'error', [__FUNCTION__, __FILE__, __LINE__]);
         }
-
+        // Retrieve the current year
         $year_to_update =  date('Y');
+
+        // Check local db for the work's statistics for the current year
         $databaseStatistic = $this->statistics()
             ->where('year',$year_to_update)
             ->first();
 
+        // If there's no local record for this year's statistics for the current work,
+        // make the api call to ensure it doesn't exist on OpenAlex as well.
         if (!$databaseStatistic) {
-            $requestStatistic = Statistic::getLatestOpenAlexStatistic(Author::class,$requestWork->counts_by_year,$year_to_update);
+            $requestStatistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class,$requestWork->counts_by_year);
             // It seems like for some works there has not been any documented citations for the current year, or for years now,
             // so checking if the record we need exists in the first place
             if(!$requestStatistic) {
                 rocketDump("No statistics were found for $this->open_alex_id for the year $year_to_update", 'info');
                 return;
             }
-
+            // If there is, and for some reason it has not been parsed on a previous update, create the new statistic for the current year.
             Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
             return;
         }
-
-        $databaseStatistic->updateStatistic($this, $requestWork->counts_by_year, $year_to_update);
+        // If there is a local record check for any changes and update accordingly.
+        $databaseStatistic->updateStatistic($this, $requestWork->counts_by_year);
     }
 
     /**
      * Relationship
      * @return MorphMany
-     * All the cited_counts by year associated with an author.
+     * All the cited_counts by year associated with a work.
      */
     public function statistics(): MorphMany {
         return $this->morphMany(Statistic::class, 'asset');

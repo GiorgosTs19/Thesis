@@ -3,13 +3,13 @@
 namespace App\Jobs;
 
 use Exception;
-use App\Models\{Author, User, Work};
 use Illuminate\Bus\Queueable;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Contracts\Queue\{ShouldBeUnique, ShouldQueue};
-use Illuminate\Queue\{InteractsWithQueue, SerializesModels};
-use Illuminate\Support\Facades\{Artisan, DB};
+use App\Models\{Author, Work};
 use function App\Providers\rocketDump;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\{Artisan, DB};
+use Illuminate\Queue\{InteractsWithQueue, SerializesModels};
+use Illuminate\Contracts\Queue\{ShouldBeUnique, ShouldQueue};
 
 class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -49,8 +49,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
     }
 
     /**
-     * Updates the statistics for the authors that are also users. For the time being,
-     * only authors that are user have statistics associated to them.
+     * Initiate the update of the authors that are also users.
      * @return void
      */
     private function updateAuthors() : void {
@@ -69,6 +68,10 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
         });
     }
 
+    /**
+     * Initiate the update of all the database's works.
+     * @return void
+     */
     private function updateWorks() : void  {
         rocketDump('Starting Works update');
         DB::transaction(function () {

@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Jobs\UpdateDatabaseJob;
-use App\Models\Author;
-use App\Models\User;
 use Exception;
+use App\Models\User;
+use App\Models\Author;
 use Illuminate\Database\Seeder;
+use App\Jobs\UpdateDatabaseJob;
 use Illuminate\Support\Facades\DB;
 use function App\Providers\rocketDump;
 
@@ -21,25 +21,25 @@ class DatabaseSeeder extends Seeder {
         'id'=>'0000-0001-6566-6477',
         'email'=>'efkleidiskeramopoulos@gmail.com'],
         // Διαμαντάρας
-//        ['first'=>'Κωνσταντίνος',
-//        'last'=>'Διαμαντάρας',
-//        'id'=>'0000-0003-1373-4022',
-//        'email'=>'k.diamantaras@ihu.edu.gr'],
+        ['first'=>'Κωνσταντίνος',
+        'last'=>'Διαμαντάρας',
+        'id'=>'0000-0003-1373-4022',
+        'email'=>'k.diamantaras@ihu.edu.gr'],
         // Ηλιούδης
-//        ['first'=>'Χρήστος',
-//        'last'=>'Ηλιούδης',
-//        'id'=>'0000-0002-8084-4339',
-//        'email'=>'iliou@ihu.gr'],
+        ['first'=>'Χρήστος',
+        'last'=>'Ηλιούδης',
+        'id'=>'0000-0002-8084-4339',
+        'email'=>'iliou@ihu.gr'],
         // Σιδηρόπουλος
-//        ['first'=>'Αντώνης',
-//        'last'=>'Σιδηρόπουλος',
-//        'id'=>'0000-0002-3352-0868',
-//        'email'=>'asidirop@gmail.com'],
+        ['first'=>'Αντώνης',
+        'last'=>'Σιδηρόπουλος',
+        'id'=>'0000-0002-3352-0868',
+        'email'=>'asidirop@gmail.com'],
         // Ουγιάρογλου
-//        ['first'=>'Στέφανος',
-//        'last'=>'Ουγιάρογλου',
-//        'id'=>'0000-0003-1094-2520',
-//        'email'=>'stoug@ihu.gr'],
+        ['first'=>'Στέφανος',
+        'last'=>'Ουγιάρογλου',
+        'id'=>'0000-0003-1094-2520',
+        'email'=>'stoug@ihu.gr'],
         // Χατζημίσιος
 //        ['first'=>'Περικλής',
 //        'last'=>'Χατζημίσιος',

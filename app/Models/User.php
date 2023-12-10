@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Http\Controllers\APIController;
 use Exception;
+use Laravel\Sanctum\HasApiTokens;
+use JetBrains\PhpStorm\ArrayShape;
+use function App\Providers\rocketDump;
+use App\Http\Controllers\APIController;
+use Illuminate\Notifications\Notifiable;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use JetBrains\PhpStorm\ArrayShape;
-use Laravel\Sanctum\HasApiTokens;
-use function App\Providers\rocketDump;
 
 /**
  * @property mixed last_name
@@ -39,6 +39,7 @@ class User extends Authenticatable {
         'orc_id',
         'scopus_id',
         'open_alex_id',
+        'password'
     ];
 
     /**
