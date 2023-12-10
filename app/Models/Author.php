@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use JetBrains\PhpStorm\ArrayShape;
 use function App\Providers\rocketDump;
 use App\Http\Controllers\APIController;
@@ -33,7 +34,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Author extends Model {
     use HasFactory;
 
-    public static string $author_works_base_url;
+    public static array $updateFields = ['id', 'open_alex_id','last_updated_date', 'cited_by_count', 'works_count'];
+    /**
+     * @var array|bool|mixed|string|null
+     */
+    private static mixed $author_works_base_url;
     protected $fillable = [
         'display_name',
         'orc_id',
@@ -49,8 +54,7 @@ class Author extends Model {
 
     public function __construct(array $attributes = []) {
         parent::__construct($attributes);
-        $config = include('config/openAlex.php');
-        self::$author_works_base_url = $config['author_works_base_url'];
+        self::$author_works_base_url = Config::get('openAlex.author_works_base_url');
     }
 
     /**
@@ -305,7 +309,7 @@ class Author extends Model {
             ->first();
 
         if (!$databaseStatistic) {
-            $requestStatistic = Statistic::getLatestOpenAlexStatistic($this, Author::class, $requestAuthor->counts_by_year, $year_to_update);
+            $requestStatistic = Statistic::getLatestOpenAlexStatistic(Author::class, $requestAuthor->counts_by_year, $year_to_update);
             Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
             return;
         }

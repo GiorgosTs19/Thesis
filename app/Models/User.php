@@ -13,12 +13,12 @@ use Laravel\Sanctum\HasApiTokens;
 use function App\Providers\rocketDump;
 
 /**
- * @property mixed $last_name
- * @property mixed $first_name
- * @property mixed $open_alex_id
- * @property mixed $scopus_id
- * @property mixed $email
- * @property mixed $orc_id
+ * @property mixed last_name
+ * @property mixed first_name
+ * @property mixed open_alex_id
+ * @property mixed scopus_id
+ * @property mixed email
+ * @property mixed orc_id
  *
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)

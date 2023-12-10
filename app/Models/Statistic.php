@@ -27,44 +27,42 @@ class Statistic extends Model {
         'count'
         ];
 
-    public static function yearExistsForAuthor($author_id,$year): bool {
-        return Statistic::where('author_id',$author_id)->where('year',$year)->exists();
-    }
-
     public static function generateStatistics($id, $statistics, $asset_type): void {
         foreach ($statistics as $statistic) {
-            try {
-                $newYearlyCitations = new Statistic;
-                $newYearlyCitations->asset_id = $id;
-                $newYearlyCitations->year = $statistic->year;
-                $newYearlyCitations->works_count = property_exists($statistic,'works_count') ? $statistic->works_count : null;
-                $newYearlyCitations->cited_count = $statistic->cited_by_count;
-                $newYearlyCitations->asset_type = $asset_type;
-                $newYearlyCitations->save();
-            } catch (Exception $error) {
-                rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
-            }
+            self::newStatistic($id, $statistic, $asset_type);
         }
     }
 
-    public static function generateStatistic($id, $statistic, $asset_type): void {
+    /**
+     * @param $id
+     * @param $statistic
+     * @param $asset_type
+     * @return void
+     */
+    private static function newStatistic($id, $statistic, $asset_type): void
+    {
         try {
             $newYearlyCitations = new Statistic;
             $newYearlyCitations->asset_id = $id;
             $newYearlyCitations->year = $statistic->year;
-            $newYearlyCitations->works_count = property_exists($statistic,'works_count') ? $statistic->works_count : null;
+            $newYearlyCitations->works_count = property_exists($statistic, 'works_count') ? $statistic->works_count : null;
             $newYearlyCitations->cited_count = $statistic->cited_by_count;
             $newYearlyCitations->asset_type = $asset_type;
             $newYearlyCitations->save();
         } catch (Exception $error) {
-            rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
+            rocketDump($error->getMessage(), 'error', [__FUNCTION__, __FILE__, __LINE__]);
         }
+    }
+
+    public static function generateStatistic($id, $statistic, $asset_type): void {
+        rocketDump($statistic, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        self::newStatistic($id, $statistic, $asset_type);
     }
 
     public function updateStatistic($asset, $statistics_array, $year_to_update) : void {
         switch ($this->asset_type) {
             case Author::class : {
-                $requestStatistic = self::getLatestOpenAlexStatistic($asset, Author::class, $statistics_array, $year_to_update);
+                $requestStatistic = self::getLatestOpenAlexStatistic(Author::class, $statistics_array, $year_to_update);
 
                 $works_count_differ = $requestStatistic->works_count !== $this->works_count;
                 $citation_count_differ = $requestStatistic->cited_by_count !== $this->cited_count;
@@ -76,12 +74,12 @@ class Statistic extends Model {
 
                     if ($works_count_differ) {
                         $this->works_count = $requestStatistic->works_count;
-                        rocketDump("Works count has been updated for Author $asset->open_alex_id ", 'info', [__FUNCTION__,__FILE__,__LINE__]);
+                        rocketDump("Works count has been updated for Author $asset->open_alex_id");
                     }
 
                     if ($citation_count_differ) {
                         $this->cited_count = $requestStatistic->cited_by_count;
-                        rocketDump("Citation count has been updated for Author $asset->open_alex_id ", 'info', [__FUNCTION__,__FILE__,__LINE__]);
+                        rocketDump("Citation count has been updated for Author $asset->open_alex_id ");
                     }
 
                     $this->save();
@@ -91,7 +89,7 @@ class Statistic extends Model {
                 break;
             }
             case Work::class : {
-                $requestStatistic = self::getLatestOpenAlexStatistic($asset, Work::class, $statistics_array, $year_to_update);
+                $requestStatistic = self::getLatestOpenAlexStatistic(Work::class, $statistics_array, $year_to_update);
                 $citation_count_differ = $requestStatistic->cited_by_count !== $this->cited_count;
 
                 if (!$citation_count_differ) {
@@ -101,18 +99,16 @@ class Statistic extends Model {
                 try {
                     $this->cited_count = $requestStatistic->cited_by_count;
                     $this->save();
+                    rocketDump("Citation count has been updated for Work $asset->open_alex_id ");
                 } catch (Exception $exception) {
                     rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
                 }
-
-                rocketDump("Citation count has been updated for Work $asset->open_alex_id ", 'info', [__FUNCTION__,__FILE__,__LINE__]);
-
                 break;
             }
         }
     }
 
-    public static function getLatestOpenAlexStatistic($asset, $asset_type, $statistics_array, $year_to_update) {
+    public static function getLatestOpenAlexStatistic($asset_type, $statistics_array, $year_to_update) {
         return match ($asset_type) {
             Author::class => Arr::first($statistics_array,
                 function ($value) use ($year_to_update) {

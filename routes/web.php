@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\APIController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
@@ -18,3 +19,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/',[Controller::class, 'getArticle']);
 Route::get('/Author',[AuthorController::class, 'getAuthor']);
 Route::get('/Article/{?oaurl}', [Controller::class, 'getArticle']);
+
+Route::get('/Database/Update', [APIController::class,'initiateDatabaseUpdate']);

@@ -28,9 +28,6 @@ $app = new Illuminate\Foundation\Application(
 |
 */
 
-// Instantiate the APIController
-APIController::init();
-
 $app->singleton(
     Illuminate\Contracts\Http\Kernel::class,
     App\Http\Kernel::class

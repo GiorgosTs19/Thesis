@@ -33,6 +33,8 @@ use function App\Providers\rocketDump;
 class Work extends Model {
     use HasFactory;
 
+    public static array $updateFields = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
+
     /**
      * Creates a new work.
      *
@@ -75,7 +77,7 @@ class Work extends Model {
     /**
      * Static Utility Function
      * @param $authorObjects
-     * An array of authors to be associated with the given work
+     * An array of authors to be associated with the given workF
      * @return void
      * Associates the given authors with the given work. Creates AuthorWorks records.
      */
@@ -160,8 +162,14 @@ class Work extends Model {
             ->first();
 
         if (!$databaseStatistic) {
-            rocketDump($requestWork->counts_by_year, 'info', [__FUNCTION__,__FILE__,__LINE__]);
-            $requestStatistic = Statistic::getLatestOpenAlexStatistic($this, Author::class,$requestWork->counts_by_year,$year_to_update);
+            $requestStatistic = Statistic::getLatestOpenAlexStatistic(Author::class,$requestWork->counts_by_year,$year_to_update);
+            // It seems like for some works there has not been any documented citations for the current year, or for years now,
+            // so checking if the record we need exists in the first place
+            if(!$requestStatistic) {
+                rocketDump("No statistics were found for $this->open_alex_id for the year $year_to_update", 'info');
+                return;
+            }
+
             Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
             return;
         }

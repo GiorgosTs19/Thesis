@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\APIController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
@@ -10,6 +11,8 @@ class AppServiceProvider extends ServiceProvider {
      * Register any application services.
      */
     public function register(): void {
+        // Instantiate the APIController
+        APIController::init();
         /**
          * Logs the given message, and displays it on the console.
          * @param object|string|array $message
@@ -56,7 +59,7 @@ class AppServiceProvider extends ServiceProvider {
                 if (in_array($log_case, $validLogCases)) {
                     if ($log_case === 'error') {
                         // Use red color for the error message
-                        Log::error("\033[0;31m$logMessage\033[0m");
+                        Log::error($logMessage);
                     } else {
                         // Use default color for other log cases
                         Log::$log_case($logMessage);

@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder {
 //        'id'=>'0000-0003-1373-4022',
 //        'email'=>'k.diamantaras@ihu.edu.gr'],
         // Ηλιούδης
-        ['first'=>'Χρήστος',
-        'last'=>'Ηλιούδης',
-        'id'=>'0000-0002-8084-4339',
-        'email'=>'iliou@ihu.gr'],
+//        ['first'=>'Χρήστος',
+//        'last'=>'Ηλιούδης',
+//        'id'=>'0000-0002-8084-4339',
+//        'email'=>'iliou@ihu.gr'],
         // Σιδηρόπουλος
 //        ['first'=>'Αντώνης',
 //        'last'=>'Σιδηρόπουλος',
@@ -79,20 +79,21 @@ class DatabaseSeeder extends Seeder {
 
     public function run(): void {
         // Using a single transaction closure for all actions that will be performed, inserts, updates, deletes etc.
-        // If anything goes wrong the transaction will be not be committed and the db will be rolled back.\
+        // If anything goes wrong the transaction will be not be committed and the db will be rolled back.
         DB::transaction(function () {
             foreach ($this->Professors as $professor) User::createFromOrcId($professor);
 
             // Retrieve all the authors that are also users.
             $User_Authors = Author::user()->get();
+
             // Loop through all the authors, retrieve their works and parse them.
-            foreach ($User_Authors as $user_Author) {
-                    // Loop through all the given professors and create a user for each one.
-                    // This function will also create an author out of each user.
-                        $user_Author->parseWorks();
+            foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
+            try {
+                UpdateDatabaseJob::dispatchSync();
+            } catch (Exception $exception) {
+                rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
             }
         });
-        dispatch(new UpdateDatabaseJob());
     }
 
 }
