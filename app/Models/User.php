@@ -101,7 +101,7 @@ class User extends Authenticatable {
         User::createNewUser($professor,$ids);
 
         // If an author doesn't already exist for that user then create a new author.
-//        if(!Author::authorExistsByOpenAlexId($open_alex_id)['exists']) {
+        // if(!Author::authorExistsByOpenAlexId($open_alex_id)['exists']) {
             Author::createAuthor($author,$ids, true);
 //        }
 

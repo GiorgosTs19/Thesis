@@ -12,7 +12,7 @@ class AppServiceProvider extends ServiceProvider {
     public function register(): void {
         /**
          * Logs the given message, and displays it on the console.
-         * @param object|string $message
+         * @param object|string|array $message
          * The message to be logged and displayed.
          * @param array $callingFunctionInfo
          * An array that contains information about the function that fired the log,
@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider {
          * The type of log to use, can be one of ['info', 'error', 'warning', 'debug'].
          * @return void
          */
-        function rocketDump(object|string $message, string $log_case='info', array $callingFunctionInfo=[]): void  {
+        function rocketDump(object|string|array $message, string $log_case='info', array $callingFunctionInfo=[]): void  {
             $meta = '';
             $display_meta_data = sizeof($callingFunctionInfo) === 3;
             if($display_meta_data) {

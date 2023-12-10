@@ -2,46 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Iterators\WorksIterator;
+use App\Models\Author;
+use App\Models\Work;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use function App\Providers\rocketDump;
 
-class APIController extends Controller {
-    private static function getFieldsToFetch($request_type): string {
+class APIController {
+    private static int $perPage;
+    private static string $mailTo;
+    private static string $author_works_base_url;
+    private static string $author_base_url;
+    private static string $work_base_url;
+    private static array $required_work_fields;
+    private static array $required_author_fields;
+    private static array $required_author_update_fields;
+    private static array $required_work_update_fields;
+
+    // Load the urls and meta required for the request, from the openAlex.php config file.
+    public static function init(): void {
+        $config = include('config/openAlex.php');
+        self::$perPage = $config['perPage'];
+        self::$mailTo = $config['mailTo'];
+        self::$author_works_base_url = $config['author_works_base_url'];
+        self::$author_base_url = $config['author_base_url'];
+        self::$work_base_url = $config['work_base_url'];
+        self::$required_work_fields = $config['required_work_fields'];
+        self::$required_work_update_fields = $config['required_work_update_fields'];
+        self::$required_author_fields = $config['required_author_fields'];
+        self::$required_author_update_fields = $config['required_author_update_fields'];
+    }
+
+    public static function authorWorksRequest($open_alex_id, $page): array {
+        $base_url = self::$author_works_base_url.$open_alex_id.
+            self::$mailTo.'&per-page='.self::$perPage.'&page='.$page;
+        $url = $base_url.self::getFieldsToFetch(Work::class);
+        $works_response = self::getResponseBody(Http::withOptions(['verify' => false])->get($url));
+
+        return [new WorksIterator($works_response->results), $works_response->meta, sizeof($works_response->results)];
+    }
+
+    private static function getFieldsToFetch($request_type, $action = 'create'): string {
         $fields_string = match ($request_type) {
-            'author' => Arr::join(self::$required_author_fields,','),
-            'work' => Arr::join(self::$required_work_fields,','),
+            Author::class => match ($action) {
+                'create' => Arr::join(self::$required_author_fields, ','),
+                'update' => Arr::join(self::$required_author_update_fields, ',')},
+            Work::class => match ($action) {
+                'create' => Arr::join(self::$required_work_fields, ','),
+                'update' => Arr::join(self::$required_work_update_fields, ',')},
         };
         return "&select=$fields_string";
     }
-    // Limits the number of works that will be fetched for each author
-    private static int $perPage = 200;
-    // Basically retrieve the first $perPage number of works ( based on a default sorting )
-    private static int $page = 1;
-    // An email is required for the OpenAlex api to function correctly.
-    private static string $mailTo = 'it185302@it.teithe.gr';
-    // Base URL to fire an OpenAlex getAuthorWorks api request
-    private static string $author_works_base_url = "https://api.openalex.org/works?filter=author.id:";
-    // Base URL to fire an OpenAlex getAuthor api request
-    private static string $author_base_url = 'https://api.openalex.org/authors/';
-    // Base URL to fire an OpenAlex getWork api request
-    private static string $work_base_url = 'https://api.openalex.org/works/';
 
     private static function getResponseBody($response) {
         return json_decode($response->body());
-    }
-
-    private static array $required_work_fields = ['ids','open_access','title',
-        'publication_date', 'publication_year', 'referenced_works_count', 'language',
-        'type','updated_date', 'created_date','cited_by_api_url','authorships'];
-
-    public static function authorWorksRequest($open_alex_id, $page) {
-        $base_url = self::$author_works_base_url.$open_alex_id.
-            self::$mailTo.'&per-page='.self::$perPage.'&page='.$page;
-        $url = $base_url.self::getFieldsToFetch('work');
-        $works_response = Http::withOptions(['verify' => false])->get($url);
-        return self::getResponseBody($works_response);
     }
 
     public static function workRequest($id) {
@@ -51,8 +67,13 @@ class APIController extends Controller {
         return self::getResponseBody($author_response);
     }
 
-    private static array $required_author_fields = ['ids','display_name','cited_by_count',
-        'works_count', 'counts_by_year', 'works_api_url', 'updated_date', 'created_date'];
+    public static function workUpdateRequest($id) {
+        // Retrieve a work's data that is required for their update from the OpenAlex api
+        $base_url = self::$work_base_url . $id . self::$mailTo;
+        $url = $base_url.self::getFieldsToFetch(Work::class, 'update');
+        $work_update_response = Http::withOptions(['verify' => false])->get($url);
+        return self::getResponseBody($work_update_response);
+    }
 
     public static function authorRequest($id,$id_type = 'orc_id') {
         // Retrieve all the author's data from the OpenAlex api
@@ -60,9 +81,20 @@ class APIController extends Controller {
             'orc_id' => self::$author_base_url . 'orcid:' . $id . self::$mailTo,
             'open_alex' => self::$author_base_url . $id . self::$mailTo,
         };
-        $url = $base_url.self::getFieldsToFetch('author');
+        $url = $base_url.self::getFieldsToFetch(Author::class);
         $author_response = Http::withOptions(['verify' => false])->get($url);
 
         return self::getResponseBody($author_response);
+    }
+
+    public static function authorUpdateRequest($id) {
+        rocketDump($id, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        // Retrieve the author's data that is required for their update from the OpenAlex api
+        $base_url = self::$author_base_url . $id . self::$mailTo;
+        $url = $base_url.self::getFieldsToFetch(Author::class, 'update');
+        rocketDump($url, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        $author_update_response = Http::withOptions(['verify' => false])->get($url);
+
+        return self::getResponseBody($author_update_response);
     }
 }

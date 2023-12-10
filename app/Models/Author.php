@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use JetBrains\PhpStorm\ArrayShape;
 use function App\Providers\rocketDump;
 use App\Http\Controllers\APIController;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -26,20 +27,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string works_url
  * @property string last_updated_date
  * @property string created_date
+ * @property int $works_count
  */
+
 class Author extends Model {
     use HasFactory;
 
-    protected static string $author_works_base_url = "https://api.openalex.org/works?filter=author.id:";
-
+    public static string $author_works_base_url;
     protected $fillable = [
         'display_name',
         'orc_id',
         'scopus_id',
         'open_alex_id',
         'cited_by_count',
-        'is_user'
+        'is_user',
+        'works_count',
+        'created_date',
+        'last_updated_at',
+        'works_url'
     ];
+
+    public function __construct(array $attributes = []) {
+        parent::__construct($attributes);
+        $config = include('config/openAlex.php');
+        self::$author_works_base_url = $config['author_works_base_url'];
+    }
 
     /**
      * Static Utility Function
@@ -100,21 +112,16 @@ class Author extends Model {
                     'works_url'=>property_exists($author,'works_api_url') ? $author->works_api_url : self::$author_works_base_url.$ids['open_alex_id'],
                     'last_updated_date'=>property_exists($author,'updated_date') ? $author->updated_date : null,
                     'created_date'=>property_exists($author,'created_date') ? $author->created_date : null,
+                    'works_count' => $author->works_count
                 ]
             );
 
-//            rocketDump("Author $newAuthor->display_name created", 'info', [__FUNCTION__,__FILE__,__LINE__]);
+            Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
+
             if(!property_exists($author,'counts_by_year')) {
                 return $newAuthor;
             }
 
-            foreach ($author->counts_by_year as $count_by_year) {
-                try {
-                    AuthorStatistics::generateStatistics($newAuthor->id, $count_by_year);
-                } catch (Exception $error) {
-                    rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
-                }
-            }
         } catch (Exception $error) {
             rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
         }
@@ -190,15 +197,6 @@ class Author extends Model {
     }
 
     /**
-     * Relationship
-     * @return HasMany
-     * All the cited_counts by year associated with an author.
-     */
-    public function statistics(): HasMany {
-        return $this->hasMany(AuthorStatistics::class);
-    }
-
-    /**
      * Class Utility Function
      * @return bool
      * A boolean indicating if the author is also a user or not.
@@ -228,8 +226,6 @@ class Author extends Model {
         return $query->where('is_user',$is_user);
     }
 
-    //
-
     /**
      * Class Utility Function
      * Retrieves all the works ( or a specified number of them ) from the OpenAlex API and parses them,
@@ -237,11 +233,10 @@ class Author extends Model {
      * It will also create an association for each work and for each of the authors that exist and are associated with them.
      */
     public function parseWorks($prev_count = 0, $page = 1): void {
-        $author_works_response = APIController::authorWorksRequest($this->open_alex_id, $page);
-        $total_work_count = $author_works_response->meta->count;
-        $works = $author_works_response->results;
+        [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page);
+        $total_work_count = $meta->count;
 
-        foreach ($works as $work) {
+        foreach ($works->generator() as $work) {
             // Check if a work with this title already exists in the database, if so proceed to the next one
             if(Work::workExistsByDoi(property_exists($work->ids,'doi')?$work->ids->doi:$work->open_access->oa_url))
                 continue;
@@ -251,7 +246,7 @@ class Author extends Model {
         }
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
-        $have_been_parsed_count = $prev_count + sizeof($works);
+        $have_been_parsed_count = $prev_count + $works_count;
         rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name, 'info', [__FUNCTION__,__FILE__,__LINE__]);
 
         // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
@@ -261,6 +256,8 @@ class Author extends Model {
             $this->parseWorks($have_been_parsed_count, ++$page);
         }
     }
+
+    //
 
     public function associateAuthorToWork($work): void {
         if(!$this->associationExists($work->id)) {
@@ -285,9 +282,43 @@ class Author extends Model {
         return AuthorWork::where('author_id',$this->id)->where('work_id',$work_id)->exists();
     }
 
-}
+    public function updateSelf(): void {
+        rocketDump($this->open_alex_id, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        $requestAuthor = APIController::authorUpdateRequest($this->open_alex_id);
 
-// If both properties are absent move to the next work.
-//            if(!property_exists($work->ids,'doi' && !property_exists($work->open_access,'oa_url')))
-//                continue;
-//            rocketDump($work, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        if($requestAuthor->updated_date === $this->last_updated_date)
+            return;
+        try {
+            if($this->cited_by_count !== $requestAuthor->cited_by_count) $this->cited_by_count = $requestAuthor->cited_by_count;
+            if($this->works_count !== $requestAuthor->works_count) $this->works_count = $requestAuthor->works_count;
+
+            $this->last_updated_date = $requestAuthor->updated_date;
+
+            $this->save();
+        } catch (Exception $exception) {
+            rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+        }
+
+        $year_to_update =  date('Y');
+        $databaseStatistic = $this->statistics()
+            ->where('year',$year_to_update)
+            ->first();
+
+        if (!$databaseStatistic) {
+            $requestStatistic = Statistic::getLatestOpenAlexStatistic($this, Author::class, $requestAuthor->counts_by_year, $year_to_update);
+            Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
+            return;
+        }
+
+        $databaseStatistic->updateStatistic($this, $requestAuthor->counts_by_year, $year_to_update);
+    }
+
+    /**
+     * Relationship
+     * @return MorphMany
+     * All the cited_counts by year associated with an author.
+     */
+    public function statistics(): MorphMany {
+        return $this->morphMany(Statistic::class, 'asset');
+    }
+}

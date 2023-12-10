@@ -9,12 +9,13 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('author_statistics', function (Blueprint $table) {
+        Schema::create('statistics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('author_id');
             $table->unsignedSmallInteger('year');
-            $table->unsignedSmallInteger('works_count');
+            $table->unsignedSmallInteger('works_count')->nullable();
             $table->integer('cited_count');
+            $table->foreignId('asset_id');
+            $table->string('asset_type');
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('author_statistics');
+        Schema::dropIfExists('statistics');
     }
 };

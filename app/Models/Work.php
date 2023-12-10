@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\APIController;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Auth;
+use function App\Providers\logMemory;
 use function App\Providers\rocketDump;
 
 /**
@@ -21,6 +25,8 @@ use function App\Providers\rocketDump;
  * @property int referenced_works_count
  * @property string last_updated_date
  * @property string created_date
+ * @property mixed $id
+ * @property string $open_alex_id
  *
  * @method static where(string $string, $doi)
  */
@@ -48,14 +54,19 @@ class Work extends Model {
             $newWork->language = $work->language ?? 'Unknown';
             $newWork->type = $work->type;
             $newWork->is_oa = $work_open_access->is_oa;
-            $newWork->open_alex_url = explode('/',$work->ids->openalex)[3];
+            $newWork->open_alex_id = explode('/',$work->ids->openalex)[3];
+            $newWork->open_alex_url = $work->ids->openalex;
             $newWork->cites_url = $work->cited_by_api_url;
             $newWork->last_updated_date = $work->updated_date;
             $newWork->created_date = $work->created_date;
             $newWork->save();
 
+            // Generate the counts_by_year statics for the work
+            Statistic::generateStatistics($newWork->id,$work->counts_by_year,self::class);
+
             // Associate all authors from the array with the work being processed
             $newWork->parseAuthors($work->authorships);
+            logMemory();
         } catch (Exception $error) {
             rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
@@ -119,5 +130,51 @@ class Work extends Model {
         if($doi !== '')
             return $query->orWhere('doi',$doi);
         return $query;
+    }
+
+    public function updateSelf() : void {
+        $requestWork = APIController::workUpdateRequest($this->open_alex_id);
+
+        $shouldUpdate = $requestWork->updated_date !== $this->last_updated_date;
+        if(!$shouldUpdate)
+            return;
+        try {
+            $shouldUpdate_referenced_count = $requestWork->referenced_works_count !== $this->referenced_works_count;
+
+            if($shouldUpdate_referenced_count) $this->referenced_works_count = $requestWork->referenced_works_count;
+
+            $shouldUpdate_referenced_count = $requestWork->open_access->is_oa !== $this->is_oa;
+
+            if($shouldUpdate_referenced_count) $this->is_oa = $requestWork->open_access->is_oa;
+
+            $this->last_updated_date = $requestWork->updated_date;
+
+            $this->save();
+        } catch (Exception $exception) {
+            rocketDump($exception->getMessage(), 'error', [__FUNCTION__, __FILE__, __LINE__]);
+        }
+
+        $year_to_update =  date('Y');
+        $databaseStatistic = $this->statistics()
+            ->where('year',$year_to_update)
+            ->first();
+
+        if (!$databaseStatistic) {
+            rocketDump($requestWork->counts_by_year, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+            $requestStatistic = Statistic::getLatestOpenAlexStatistic($this, Author::class,$requestWork->counts_by_year,$year_to_update);
+            Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
+            return;
+        }
+
+        $databaseStatistic->updateStatistic($this, $requestWork->counts_by_year, $year_to_update);
+    }
+
+    /**
+     * Relationship
+     * @return MorphMany
+     * All the cited_counts by year associated with an author.
+     */
+    public function statistics(): MorphMany {
+        return $this->morphMany(Statistic::class, 'asset');
     }
 }

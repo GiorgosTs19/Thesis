@@ -17,9 +17,10 @@ return new class extends Migration {
             $table->string('scopus_id')->nullable()->unique();
             $table->string('works_url')->nullable()->unique();
             $table->boolean('is_user')->default(false);
+            $table->integer('cited_by_count')->nullable();
+            $table->integer('works_count')->nullable();
             $table->dateTime('created_date')->nullable();
             $table->dateTime('last_updated_date')->nullable();
-            $table->integer('cited_by_count')->nullable();
             $table->timestamps();
         });
     }
