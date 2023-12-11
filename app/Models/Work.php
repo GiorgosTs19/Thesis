@@ -38,6 +38,8 @@ class Work extends Model {
     protected $fillable = ['doi', 'title', 'publication_date', 'publication_year', 'referenced_works_count', 'language', 'type',
     'is_oa','open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date'];
 
+    protected $hidden = ['last_updated_date', 'created_date', 'created_at'];
+
     /**
      * Creates a new work.
      *

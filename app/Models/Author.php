@@ -52,6 +52,8 @@ class Author extends Model {
         'works_url'
     ];
 
+    protected $hidden = ['created_at', 'last_updated_date', 'created_date'];
+
     public function __construct(array $attributes = []) {
         parent::__construct($attributes);
         self::$author_works_base_url = Config::get('openAlex.author_works_base_url');
