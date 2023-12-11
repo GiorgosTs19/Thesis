@@ -7,10 +7,13 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Http;
+use Inertia\Inertia;
 
 class Controller extends BaseController {
     use AuthorizesRequests, ValidatesRequests;
-
+    public function showLogin() {
+        return Inertia::render('Login/Login');
+    }
     public function getArticle(Request $request, $oaurl = 'W2741809807') {
         $url = 'https://api.openalex.org/works/'.($oaurl ?? 'W2741809807');
 

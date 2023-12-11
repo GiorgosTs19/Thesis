@@ -15,6 +15,6 @@ use App\Http\Controllers\AuthorController;
 |
 */
 
-Route::get('/',[Controller::class, 'getArticle']);
+Route::get('/',[Controller::class, 'showLogin']);
 Route::get('/Author',[AuthorController::class, 'getAuthor']);
 Route::get('/Article/{?oaurl}', [Controller::class, 'getArticle']);
