@@ -12,7 +12,7 @@ use Inertia\Inertia;
 class Controller extends BaseController {
     use AuthorizesRequests, ValidatesRequests;
     public function showLogin() {
-        return Inertia::render('Login/Login');
+        return Inertia::render('Sign Up/SignUp');
     }
     public function getArticle(Request $request, $oaurl = 'W2741809807') {
         $url = 'https://api.openalex.org/works/'.($oaurl ?? 'W2741809807');
