@@ -336,4 +336,14 @@ class Author extends Model {
     public function statistics(): MorphMany {
         return $this->morphMany(Statistic::class, 'asset');
     }
+
+    public static function extractIds($author, $asset_type = 'request') {
+        return match ($asset_type){'request'=>['scopus_id'=>property_exists($author,'scopus') ? Author::parseScopusId($author->scopus) : null,
+            'orc_id'=>Author::parseOrcId($author->orcid),
+            'open_alex_id'=>Author::parseOpenAlexId($author->id)],
+            'database' => ['scopus_id'=>property_exists($author,'scopus_id') ? $author->scopus_id : null,
+                'orc_id'=>property_exists($author,'orc_id') ? $author->orc_id : null,
+                'open_alex_id'=>property_exists($author,'open_alex_id') ? $author->open_alex_id : null]
+        };
+    }
 }

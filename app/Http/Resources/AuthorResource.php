@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Author;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use function App\Providers\rocketDump;
 
 /**
  * @property mixed display_name
@@ -24,9 +26,10 @@ class AuthorResource extends JsonResource {
      */
 
     public function toArray(Request $request): array {
+        $ids = Author::extractIds($this,property_exists($this,'ids') ? 'request' : 'database');
         return [
             'name' => $this->display_name,
-            'open_alex_id' => $this->open_alex_id,
+            'open_alex_id' => $ids['open_alex'],
             'orc_id' => $this->orc_id,
             'scopus_id' => $this->scopus_id,
             'works_count' => $this->works_count,

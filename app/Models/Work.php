@@ -88,9 +88,7 @@ class Work extends Model {
      */
     public function parseAuthors($authorObjects): void {
         foreach ($authorObjects as $index => $authorObject) {
-            $ids = ['scopus_id'=>property_exists($authorObject->author,'scopus') ? Author::parseScopusId($authorObject->author->scopus) : null,
-                'orc_id'=>Author::parseOrcId($authorObject->author->orcid),
-                'open_alex_id'=>Author::parseOpenAlexId($authorObject->author->id)];
+            $ids = Author::extractIds($authorObject->author);
 
             // Check if an author is a user.
             $author_is_user = User::isAuthorAUser($ids['open_alex_id'],$ids['orc_id'])['exists'];

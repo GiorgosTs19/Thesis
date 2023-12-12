@@ -37,7 +37,7 @@ class APIController {
     public static function authorWorksRequest($open_alex_id, $page, $ignore_field_selection = false): array {
         $base_url = self::$author_works_base_url.$open_alex_id.
             self::$mailTo.self::$perPage.'&page='.$page;
-        $url = $base_url.($ignore_field_selection ? self::getFieldsToFetch(Work::class) : '' );
+        $url = $base_url.(!$ignore_field_selection ? self::getFieldsToFetch(Work::class) : '' );
         $works_response = self::getResponseBody(Http::withOptions(['verify' => false])->get($url));
 
         return [new WorksIterator($works_response->results), $works_response->meta, sizeof($works_response->results)];
@@ -61,7 +61,7 @@ class APIController {
 
     public static function workRequest($id, $ignore_field_selection = false) {
         // Retrieve a work's data from the OpenAlex api
-        $url = self::$work_base_url.$id.self::$mailTo.($ignore_field_selection ? self::getFieldsToFetch(Work::class) : '' );
+        $url = self::$work_base_url.$id.self::$mailTo.(!$ignore_field_selection ? self::getFieldsToFetch(Work::class) : '' );
         $author_response = Http::withOptions(['verify' => false])->get($url);
         return self::getResponseBody($author_response);
     }
@@ -80,8 +80,8 @@ class APIController {
             'orc_id' => self::$author_base_url . 'orcid:' . $id . self::$mailTo,
             'open_alex' => self::$author_base_url . $id . self::$mailTo,
         };
-        $url = $base_url.($ignore_field_selection ? self::getFieldsToFetch(Author::class) : '');
-        rocketDump($url, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        $url = $base_url.(!$ignore_field_selection ? self::getFieldsToFetch(Author::class) : '');
+//        rocketDump($url, 'info', [__FUNCTION__,__FILE__,__LINE__]);
         $author_response = Http::withOptions(['verify' => false])->get($url);
 
         return self::getResponseBody($author_response);

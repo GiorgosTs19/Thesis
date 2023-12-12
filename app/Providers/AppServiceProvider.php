@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider {
          * The type of log to use, can be one of ['info', 'error', 'warning', 'debug'].
          * @return void
          */
-        function rocketDump(object|string|array $message, string $log_case='info', array $callingFunctionInfo=[]): void  {
+        function rocketDump(object|string|array|null $message, string $log_case='info', array $callingFunctionInfo=[]): void  {
             $meta = '';
             $display_meta_data = sizeof($callingFunctionInfo) === 3;
             if($display_meta_data) {
