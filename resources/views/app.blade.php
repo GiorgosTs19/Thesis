@@ -6,8 +6,8 @@
     <title></title>
     @vite('resources/css/app.css')
     @vite('resources/js/app.jsx')
-    @routes
     @inertiaHead
+    @routes
 </head>
 <body class="h-full">
 @inertia

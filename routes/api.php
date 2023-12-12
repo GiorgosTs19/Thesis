@@ -18,5 +18,3 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-Route::get('/checkAuthorExists',[SignUpController::class,'checkAuthorExists'])->name('check_author_exists');
