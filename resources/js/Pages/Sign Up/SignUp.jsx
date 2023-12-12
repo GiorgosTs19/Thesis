@@ -29,35 +29,35 @@ function SignUp(props) {
     const [author, setAuthor] = useState({value:undefined,exists:false});
     const handleOptionChange = (option) => {
         setSelectedIdType(option);
-        setData({...data,idType:option});
+        setData({...data,id_type:option});
     };
 
     useEffect(() => {
         setData({...data, authorId: ''});
+        setAuthor({exists:false,value: undefined})
         setAuthorId('');
     }, [selectedIdType]);
 
 
     const handleInputChange = (e) => {
         let id = '';
-        switch (data.id_type) {
+        switch (selectedIdType) {
             case Options.OpenAlex.value : {
                 if(e.target.value.length > Options.OpenAlex.allowedLength) return;
                 id = e.target.value.replace(/[^0-9]/g, '');
                 break;
             }
-            case Options.OrcId : {
+            case Options.OrcId.value : {
                 const { value, selectionStart } = e.target;
 
                 const isBackspace = e.nativeEvent.inputType === 'deleteContentBackward';
 
                 const numericValue = value.replace(/[^0-9]/g, '');
 
-                let formattedValue = '';
 
-                formattedValue = numericValue.replace(/(.{4})/g, '$1-');
+                const formattedValue = numericValue.replace(/(.{4})/g, '$1-');
 
-                id = formattedValue = formattedValue.slice(0, Options.OrcId.allowedLength);
+                id = formattedValue.slice(0, Options.OrcId.allowedLength);
 
                 if (isBackspace && selectionStart % 5 === 0) {
                     e.target.setSelectionRange(selectionStart-1, selectionStart-1);
@@ -68,13 +68,14 @@ function SignUp(props) {
         setData({...data,authorId:id});
         setAuthorId(id);
     };
-console.log(processing)
+
     useEffect(()=>{
-        switch (data.id_type) {
+        switch (selectedIdType) {
             case Options.OpenAlex.value : {
                 if(authorId.length !== Options.OpenAlex.allowedLength)
                     return;
                 get(route('check_author_exists'),{
+                    onStart:()=>{console.log(data)},
                     onSuccess:res=> {
                         const props = res.props;
                         setAuthor({value: props.author, exists: props.exists})
@@ -86,11 +87,19 @@ console.log(processing)
             case Options.OrcId.value : {
                 if(authorId.length !== Options.OrcId.allowedLength)
                     return;
+                get(route('check_author_exists'),{
+                    onStart:()=>{console.log(data)},
+                    onSuccess:res=> {
+                        const props = res.props;
+                        setAuthor({value: props.author, exists: props.exists})
+                    },
+                    preserveState:true,preserveScroll:true
+                });
                 break;
             }
         }
     },[authorId]);
-    console.log(author)
+
     return (
         <div className="min-h-full">
             <Navigation/>
@@ -101,7 +110,7 @@ console.log(processing)
             </header>
             <div className="mt-8 w-full max-w-md px-6 pt-6 pb-0 bg-white rounded-md shadow-md m-auto flex flex-col">
                 <div className="flex items-center mb-4">
-                    <label className={`cursor-pointer relative text-gray-700 mr-2 transition duration-300 py-1 px-2 rounded-md flex-nowrap flex-1 text-center
+                    <label className={`cursor-pointer relative text-gray-700 mr-2 transition duration-300 py-1 px-2 rounded-md flex-nowrap flex-1 text-center align-middle
                     ${selectedIdType === Options.OpenAlex.value ? 'bg-sky-300' : ''}`}>
                         Open Alex
                         <div className="absolute inset-0 bg-blue-500 opacity-0 transition duration-300 transform scale-x-0"></div>
@@ -149,8 +158,11 @@ console.log(processing)
                 <div className={`mx-auto text-center ${author.value !== undefined ? 'opacity-100' : 'opacity-0'}`}>
                     <span className={'font-light text-sm text-zinc-500'}>{author.exists ? '1 result found' : 'No results were found.'}</span>
                     <div className={`mx-auto ${author.exists ? 'opacity-100' : 'opacity-0'}`}>{`${author.exists && ("Are you " + author.value.display_name + "?")}`}</div>
+                    {author.exists && <button className={'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded-xl shadow mt-4 '}>
+                        Sign up as {author.value.display_name.split(' ')[0]}
+                    </button>}
                 </div>
-                <div className={`mx-auto mb-4  ${processing ? 'opacity-100' : 'opacity-0'}`}>Fetching your information...</div>
+                <div className={`mx-auto my-4  ${processing ? 'opacity-100' : 'opacity-0'}`}>Fetching your information...</div>
             </div>
         </div>
     )
