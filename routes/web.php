@@ -20,7 +20,7 @@ Route::get('/Author',[AuthorController::class, 'getAuthor']);
 Route::get('/Article/{?oaurl}', [Controller::class, 'getArticle']);
 
 Route::prefix('author')->group(function () {
-    Route::get('/exists',[SignUpController::class,'checkAuthorExists'])->name('check_author_exists');
+    Route::get('/exists',[\App\Http\Controllers\SearchController::class,'checkAuthorExists'])->name('check_author_exists');
 });
 
 Route::prefix('work')->group(function () {
