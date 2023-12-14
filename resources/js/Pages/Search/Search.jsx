@@ -19,17 +19,14 @@ const placeholders = {
     OrcId:'0123-4567-8901-2345',
 }
 
-const assetTypes = {
-    Author:''
-};
 
 function Search(props) {
-    const [selectedIdType,setSelectedIdType] = useState(Options.OpenAlex);
+    const [selectedIdType,setSelectedIdType] = useState(Options.OpenAlex.value);
     const [selectedAssetType,setSelectedAssetType] = useState(1);
     const [assetId,setAssetId] = useState('');
 
     const { data, setData, get, processing, errors} = useForm({
-        asset_id:assetId,id_type:selectedIdType.value, asset_type:1
+        asset_id:assetId,id_type:selectedIdType, asset_type:1
     });
 
     const [asset, setAsset] = useState({value:undefined,exists:false});
@@ -51,7 +48,7 @@ function Search(props) {
 
     const handleInputChange = (e) => {
         let id = '';
-        switch (selectedIdType.value) {
+        switch (selectedIdType) {
             case Options.OpenAlex.value : {
                 if(e.target.value.length > Options.OpenAlex.allowedLength) return;
                 id = e.target.value.replace(/[^0-9]/g, '');
@@ -80,7 +77,7 @@ function Search(props) {
     };
 
     useEffect(()=>{
-        switch (selectedIdType.value) {
+        switch (selectedIdType) {
             case Options.OpenAlex.value : {
                 if(assetId.length !== Options.OpenAlex.allowedLength)
                     return;
@@ -110,12 +107,6 @@ function Search(props) {
         }
     },[assetId]);
 
-    const allowedAssets = Object.values(Options).find(item=> {
-        console.log('🚀 ~ ',item.value, selectedIdType.value)
-        return item.value === selectedIdType.value
-    }).allowedAssets;
-    const selectOptions =  allowedAssets.map(item=>
-    <option key={item.value} value={item}>{item.label}</option>)
 
     return (
         <div className="min-h-full">
@@ -128,7 +119,7 @@ function Search(props) {
             <div className="mt-8 w-full max-w-xs px-6 pt-6 pb-0 bg-white rounded-md shadow-md m-auto flex flex-col">
                 <div className="flex items-center mb-4">
                     <label className={`cursor-pointer relative text-gray-700 mr-2 transition duration-300 py-1 px-2 rounded-md flex-nowrap flex-1 text-center align-middle
-                    ${selectedIdType.value === Options.OpenAlex.value ? 'bg-sky-300' : ''}`}>
+                    ${selectedIdType === Options.OpenAlex.value ? 'bg-sky-300' : ''}`}>
                         Open Alex
                         <div className="absolute inset-0 bg-blue-500 opacity-0 transition duration-300 transform scale-x-0"></div>
                         <input
@@ -136,14 +127,14 @@ function Search(props) {
                             id="open_alex"
                             name="id_type"
                             className="hidden"
-                            checked={selectedIdType.value === Options.OpenAlex.value}
+                            checked={selectedIdType === Options.OpenAlex.value}
                             onChange={() => handleOptionChange(Options.OpenAlex.value)}
                         />
                     </label>
 
                     <label
                         className={`cursor-pointer relative text-gray-700 transition duration-300 py-1 px-2 rounded-md flex-1 text-center ${
-                            selectedIdType.value === Options.OrcId.value ? 'bg-sky-300' : ''}`}>
+                            selectedIdType === Options.OrcId.value ? 'bg-sky-300' : ''}`}>
                         OrcId
                         <div className="absolute inset-0 bg-blue-500 opacity-0 transition duration-300 transform scale-x-0"></div>
                         <input
@@ -151,23 +142,24 @@ function Search(props) {
                             id="orc_id"
                             name="id_type"
                             className="hidden"
-                            checked={selectedIdType.value === Options.OrcId.value}
+                            checked={selectedIdType === Options.OrcId.value}
                             onChange={() => handleOptionChange(Options.OrcId.value)}
                         />
                     </label>
                 </div>
 
-                {selectedIdType.value && (
+                {selectedIdType && (
                     <div className="mb-4 text-center">
-                        <label className="block font-light mt-5 text-sm text-zinc-500 mb-2">Provide {`${selectedAssetType === 1 ? 'an' : 'a'}  ${Object.values(Options).find(item=>item.value === selectedIdType.value).name}`} Id</label>
-                        <ExtendedInput value={assetId} onChange={handleInputChange} leadingElement={selectedIdType.value === Options.OpenAlex.value ? 'children' : null}
-                            placeholder={selectedIdType.value === Options.OpenAlex.value ? placeholders.OpenAlex : placeholders.OrcId} name={'asset_id'}
-                                       containerClassName={'w-56 mx-auto'} inputClassName={selectedIdType.value === Options.OpenAlex.value ? 'pl-28' : 'px-8'}
+                        <label className="block font-light mt-5 text-sm text-zinc-500 mb-2">Provide {`${selectedAssetType === 1 ? 'an' : 'a'}  ${Object.values(Options).find(item=>item.value === selectedIdType).name}`} Id</label>
+                        <ExtendedInput value={assetId} onChange={handleInputChange} leadingElement={selectedIdType === Options.OpenAlex.value ? 'children' : null}
+                            placeholder={selectedIdType === Options.OpenAlex.value ? placeholders.OpenAlex : placeholders.OrcId} name={'asset_id'}
+                                       containerClassName={'w-56 mx-auto'} inputClassName={selectedIdType === Options.OpenAlex.value ? 'pl-28' : 'px-8'}
                                        leadingElementClassName={'font-bold text-gray-400'}
                         >
                             <select id="asset_type" name="asset_type" className="h-full rounded-md border-0 bg-transparent py-0 px-2 text-gray-500
                                 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm" value={selectedAssetType} onChange={handleSelectChange}>
-                                {selectOptions}
+                                <option key={1} value={1}>Author</option>
+                                <option key={2} value={2}>Work</option>
                             </select>
                         </ExtendedInput>
                     </div>

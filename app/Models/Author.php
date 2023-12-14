@@ -19,16 +19,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @method static user()
  *
  * @property int id
- * @property string display_name
- * @property string open_alex_id
  * @property string orc_id
- * @property string scopus_id
  * @property boolean is_user
- * @property int cited_by_count
+ * @property string scopus_id
  * @property string works_url
- * @property string last_updated_date
- * @property string created_date
  * @property int $works_count
+ * @property int cited_by_count
+ * @property string display_name
+ * @property string created_date
+ * @property string open_alex_id
+ * @property string last_updated_date
  */
 
 class Author extends Model {
@@ -134,27 +134,39 @@ class Author extends Model {
         return $newAuthor;
     }
 
+    public static function extractIds($author, $asset_type = 'request') {
+        return match ($asset_type){'request'=>['scopus_id'=>property_exists($author,'scopus') ? Author::parseScopusId($author->scopus) : null,
+            'orc_id'=>Author::parseOrcId($author->orcid),
+            'open_alex_id'=>Author::parseOpenAlexId($author->id)],
+            'database' => ['scopus_id'=>property_exists($author,'scopus_id') ? $author->scopus_id : null,
+                'orc_id'=>property_exists($author,'orc_id') ? $author->orc_id : null,
+                'open_alex_id'=>property_exists($author,'open_alex_id') ? $author->open_alex_id : null]
+        };
+    }
+
     /**
      * Static Utility Function
      * @param $id
      * The id to be parsed
      * @param $author
-     *  The author object to retrieve the id from ( only when an id is not provided ).
+     * The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
-    public static function parseOpenAlexId($id, $author=null): ?string {
+    public static function parseScopusId($id, $author=null): ?string {
         if($author !== null) {
-            return property_exists($author->ids, 'openalex') ? explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] : null;
+            return property_exists($author->ids, 'scopus') ? explode('=', explode('&',$author->ids->scopus)[0])[1] : null;
         }
         if(strlen($id) === 0)
             return null;
-        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
+        $parsed_id = explode('=', explode('&',$id)[0]);
         if(!is_array($parsed_id))
             return $parsed_id;
         if(sizeof($parsed_id) === 1)
             return $parsed_id[0];
         return $parsed_id[1];
     }
+
+    // Class utility functions
 
     /**
      * Static Utility Function
@@ -178,23 +190,21 @@ class Author extends Model {
         return $parsed_id[1];
     }
 
-    // Class utility functions
-
     /**
      * Static Utility Function
      * @param $id
      * The id to be parsed
      * @param $author
-     * The author object to retrieve the id from ( only when an id is not provided ).
+     *  The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
-    public static function parseScopusId($id, $author=null): ?string {
+    public static function parseOpenAlexId($id, $author=null): ?string {
         if($author !== null) {
-            return property_exists($author->ids, 'scopus') ? explode('=', explode('&',$author->ids->scopus)[0])[1] : null;
+            return property_exists($author->ids, 'openalex') ? explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] : null;
         }
         if(strlen($id) === 0)
             return null;
-        $parsed_id = explode('=', explode('&',$id)[0]);
+        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
         if(!is_array($parsed_id))
             return $parsed_id;
         if(sizeof($parsed_id) === 1)
@@ -262,8 +272,6 @@ class Author extends Model {
             $this->parseWorks($have_been_parsed_count, ++$page);
         }
     }
-
-    //
 
     public function associateAuthorToWork($work): void {
         if(!$this->associationExists($work->id)) {
@@ -335,15 +343,5 @@ class Author extends Model {
      */
     public function statistics(): MorphMany {
         return $this->morphMany(Statistic::class, 'asset');
-    }
-
-    public static function extractIds($author, $asset_type = 'request') {
-        return match ($asset_type){'request'=>['scopus_id'=>property_exists($author,'scopus') ? Author::parseScopusId($author->scopus) : null,
-            'orc_id'=>Author::parseOrcId($author->orcid),
-            'open_alex_id'=>Author::parseOpenAlexId($author->id)],
-            'database' => ['scopus_id'=>property_exists($author,'scopus_id') ? $author->scopus_id : null,
-                'orc_id'=>property_exists($author,'orc_id') ? $author->orc_id : null,
-                'open_alex_id'=>property_exists($author,'open_alex_id') ? $author->open_alex_id : null]
-        };
     }
 }
