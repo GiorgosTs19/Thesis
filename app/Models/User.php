@@ -82,11 +82,17 @@ class User extends Authenticatable {
      * @return void
      * Create a new user and save it to the database, using info from the OpenAlex API.
      */
-    public static function createFromOrcId($professor): void {
+    public static function createUserFromId($professor): void {
 
-        $author = APIController::authorRequest($professor['id']);
+        $author = str_contains($professor['id'], '-') ? APIController::authorRequest($professor['id']) : APIController::authorFilterRequest($professor['id'], 'scopus', false, true);
         if(!$author)
             return;
+        if((is_array($author) && sizeof($author) === 0))
+            return;
+
+        if(is_array($author))
+            $author = $author[0];
+
         // Parse the ids of the author
         $orc_id = Author::parseOrcId('',$author);
         $scopus_id = Author::parseScopusId('',$author);
@@ -96,7 +102,7 @@ class User extends Authenticatable {
         $ids = ['scopus_id'=>$scopus_id,'orc_id'=>$orc_id, 'open_alex_id'=>$open_alex_id];
 
         // If no orc_id is present, return
-        if($orc_id === '' || User::orcId($orc_id)->exists())
+        if(User::orcId($orc_id)->exists())
             return;
         // Else create a new user.
         User::createNewUser($professor,$ids);

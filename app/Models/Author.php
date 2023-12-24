@@ -134,7 +134,7 @@ class Author extends Model {
         return $newAuthor;
     }
 
-    public static function extractIds($author, $asset_type = 'request') {
+    public static function extractIds($author, $asset_type = 'request'): array {
         return match ($asset_type){'request'=>['scopus_id'=>property_exists($author,'scopus') ? Author::parseScopusId($author->scopus) : null,
             'orc_id'=>Author::parseOrcId($author->orcid),
             'open_alex_id'=>Author::parseOpenAlexId($author->id)],
@@ -178,7 +178,7 @@ class Author extends Model {
      */
     public static function parseOrcId($id, $author=null): ?string {
         if($author !== null) {
-            return property_exists($author->ids, 'orcid') ? explode('/', parse_url($author->orcid, PHP_URL_PATH))[1] : null;
+            return property_exists($author->ids, 'orcid') ? explode('/', parse_url($author->ids->orcid, PHP_URL_PATH))[1] : null;
         }
         if(strlen($id) === 0)
             return null;
@@ -311,10 +311,10 @@ class Author extends Model {
 
         if($requestAuthor->updated_date === $this->last_updated_date)
             return;
-        try {
-            if($this->cited_by_count !== $requestAuthor->cited_by_count) $this->cited_by_count = $requestAuthor->cited_by_count;
-            if($this->works_count !== $requestAuthor->works_count) $this->works_count = $requestAuthor->works_count;
 
+        try {
+            $this->cited_by_count = $requestAuthor->cited_by_count;
+            $this->works_count = $requestAuthor->works_count;
             $this->last_updated_date = $requestAuthor->updated_date;
 
             $this->save();

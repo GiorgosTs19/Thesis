@@ -3,6 +3,7 @@
 return [
     // Limits the number of works that will be fetched for each author
     'perPage' => 200,
+
     // An email is required for the OpenAlex api to function correctly.
     'mailTo' => 'it185302@it.teithe.gr',
 
@@ -12,8 +13,14 @@ return [
     // Base URL to fire an OpenAlex getAuthor api request
     'author_base_url' => 'https://api.openalex.org/authors/',
 
+    // Base URL to fire an OpenAlex getAuthor ( by filtering properties ) api request
+    'author_base_filter_url' => 'https://api.openalex.org/authors?filter=',
+
     // Base URL to fire an OpenAlex getWork api request
     'work_base_url' => 'https://api.openalex.org/works/',
+
+    // Base URL to fire an OpenAlex getWork ( by filtering properties ) api request
+    'work_base_filter_url' => 'https://api.openalex.org/works?filter=',
 
     'required_work_fields' => ['ids','open_access','title','publication_date','publication_year','referenced_works_count',
         'language','type','updated_date','created_date','cited_by_api_url','authorships','counts_by_year'],
