@@ -22,6 +22,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  *
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)
+ * @method static openAlex(string|null $open_alex_id)
  */
 class User extends Authenticatable {
     use HasApiTokens, HasFactory, Notifiable;
@@ -83,8 +84,14 @@ class User extends Authenticatable {
      * Create a new user and save it to the database, using info from the OpenAlex API.
      */
     public static function createUserFromId($professor): void {
+        $author = null;
+        if(str_contains($professor['id'], '-'))
+            $author = APIController::authorRequest($professor['id']);
+        elseif (str_contains($professor['id'], 'A'))
+            $author = APIController::authorRequest($professor['id'], 'open_alex');
+        else
+            APIController::authorFilterRequest($professor['id'], 'scopus', false, true);
 
-        $author = str_contains($professor['id'], '-') ? APIController::authorRequest($professor['id']) : APIController::authorFilterRequest($professor['id'], 'scopus', false, true);
         if(!$author)
             return;
         if((is_array($author) && sizeof($author) === 0))
@@ -101,17 +108,13 @@ class User extends Authenticatable {
         // Add all the parsed ids in an array
         $ids = ['scopus_id'=>$scopus_id,'orc_id'=>$orc_id, 'open_alex_id'=>$open_alex_id];
 
-        // If no orc_id is present, return
-        if(User::orcId($orc_id)->exists())
+//        // If no orc_id is present, return
+        if(User::openAlex($open_alex_id)->exists())
             return;
         // Else create a new user.
         User::createNewUser($professor,$ids);
 
-        // If an author doesn't already exist for that user then create a new author.
-        // if(!Author::authorExistsByOpenAlexId($open_alex_id)['exists']) {
-            Author::createAuthor($author,$ids, true);
-//        }
-
+        Author::createAuthor($author,$ids, true);
     }
 
     /**
@@ -131,6 +134,7 @@ class User extends Authenticatable {
             $newUser->scopus_id = $ids['scopus_id'];
             $newUser->open_alex_id = $ids['open_alex_id'];
             $newUser->save();
+            rocketDump("User $newUser->last_name $newUser->first_name has been created", 'error', [__FUNCTION__,__FILE__,__LINE__]);
         } catch (Exception $error ) {
             rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
@@ -140,6 +144,12 @@ class User extends Authenticatable {
     public function scopeOrcId($query, $id) {
         if($id !== '')
             return $query->orWhere('orc_id', $id);
+        return $query;
+    }
+
+    public function scopeOpenAlex($query, $id) {
+        if($id !== '')
+            return $query->orWhere('open_alex_id', $id);
         return $query;
     }
 }

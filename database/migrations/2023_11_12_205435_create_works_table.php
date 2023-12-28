@@ -12,7 +12,7 @@ return new class extends Migration {
         Schema::create('works', function (Blueprint $table) {
             $table->id();
             $table->string('doi')->nullable()->unique();
-            $table->string('title');
+            $table->text('title');
             $table->date('publication_date');
             $table->unsignedSmallInteger('publication_year');
             $table->integer('referenced_works_count');

@@ -14,46 +14,49 @@ class DatabaseSeeder extends Seeder {
      * Seed the application's database.
      */
     protected array $Professors = [
-        ['email' => 'adamidis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Adamidis', 'id' => '0000-0003-4020-1328'],
-        ['email' => 'zafiris', 'first' => 'Zafiris', 'last' => 'Ampatzis', 'id' => '26664379600'],
-        ['email' => 'antoniou@ihu.gr', 'first' => 'Efstathios', 'last' => 'Antoniou', 'id' => '0000-0001-6177-6169'],
-        ['email' => 'asdre', 'first' => 'Katerina', 'last' => 'Asdre', 'id' => '12238972600'],
-        ['email' => 'bamnios@ihu.gr', 'first' => 'Georgios', 'last' => 'Bamnios', 'id' => '6506305726'],
-        ['email' => 'pchatzimisios@ihu.gr', 'first' => 'Periklis', 'last' => 'Chatzimisios', 'id' => '0000-0003-2366-1365'],
-        ['email' => 'ignatios', 'first' => 'Ignatios', 'last' => 'Deligiannis', 'id' => '6506578406'],
-        ['email' => 'dad', 'first' => 'Dimitrios', 'last' => 'Dervos', 'id' => '0000-0002-5441-0086'],
-        ['email' => 'k.diamantaras@ihu.edu.gr', 'first' => 'Konstantinos', 'last' => 'Diamantaras', 'id' => '7003525351'],
-        ['email' => 'ang1960@ihu.gr', 'first' => 'Aggelos', 'last' => 'Giakoumis', 'id' => '57188561623'],
-        ['email' => 'gouliana@it.teithe.gr', 'first' => 'Konstantinos', 'last' => 'Goulianas', 'id' => '9633984300'],
-        ['email' => 'ahatz@ihu.gr', 'first' => 'Argyrios', 'last' => 'Hatzopoulos', 'id' => '35596554500'],
-        ['email' => 'iliou@ihu.gr', 'first' => 'Christos', 'last' => 'Ilioudis', 'id' => '0000-0002-8084-4339'],
-        ['email' => 'melina@ihu.gr', 'first' => 'Melina', 'last' => 'Ioannidou', 'id' => '0000-0003-3594-7678'],
-        ['email' => 'aiosifidis@ihu.gr', 'first' => 'Athanasios', 'last' => 'Iossifides', 'id' => '0000-0002-0270-5026'],
-        ['email' => 'kazak', 'first' => 'Aristotelis', 'last' => 'Kazakopoulos', 'id' => '0000-0001-6566-6477'],
-        ['email' => 'efkleidiskeramopoulos@gmail.com', 'first' => 'Euclid', 'last' => 'Keramopoulos', 'id' => '6507122554'],
-        ['email' => 'ikiosker@ihu.gr', 'first' => 'Iordanis', 'last' => 'Kioskeridis', 'id' => '56193582400'],
-        ['email' => 'vkostoglvkostogl@ihu.gr', 'first' => 'Vasilis', 'last' => 'Kostoglou', 'id' => '55151440800'],
-        ['email' => 'rkotsakis@gmail.com', 'first' => 'Rigas', 'last' => 'Kotsakis', 'id' => '0000-0003-1587-2015'],
-        ['email' => 'manavis', 'first' => 'Christos', 'last' => 'Manavis', 'id' => '50661573500'],
-        ['email' => 'imarm@el.teithe.gr', 'first' => 'Ioannis', 'last' => 'Marmorkos', 'id' => '6507728837'],
-        ['email' => 'stoug@ihu.gr', 'first' => 'Stefanos', 'last' => 'Ougiaroglou', 'id' => '0000-0003-1094-2520'],
-        ['email' => 'dpapakos@ihu.gr', 'first' => 'Dimitrios', 'last' => 'Papakostas', 'id' => '6602211032'],
-        ['email' => 'msa@ihu.gr', 'first' => 'Michalis', 'last' => 'Salampasis', 'id' => '55888047700'],
-        ['email' => 'asidirop@gmail.com', 'first' => 'Antonis', 'last' => 'Sidiropoulos', 'id' => '55918072400'],
-        ['email' => 'spasos', 'first' => 'Michail', 'last' => 'Spasos', 'id' => '15119791700'],
-        ['email' => 'demos@ihu.gr', 'first' => 'Dimosthenis', 'last' => 'Stamatis', 'id' => '14720296900'],
-        ['email' => 'ktsiak', 'first' => 'Kyriakos', 'last' => 'Tsiakmakis', 'id' => '21935322700'],
-        ['email' => 'ptsekis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Tzekis', 'id' => '6507506177'],
-        ['email' => 'vitsas@it.teithe.gr', 'first' => 'Vasilis', 'last' => 'Vitsas', 'id' => '35619083600'],
-        ['email' => 'kokkonisgeo@gmail.com', 'first' => 'Georgios', 'last' => 'Kokkonis', 'id' => '0000-0002-9359-3604'],
-        ['email' => 'cbratsas@iee.ihu.gr', 'first' => 'Charalampos', 'last' => 'Bratsas', 'id' => '0000-0001-6400-3233'],
-        ['email' => 'mspapa@ihu.gr', 'first' => 'Maria', 'last' => 'Papadopoulou', 'id' => '0000-0002-9651-2144'],
+        ['email' => 'adamidis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Adamidis', 'id' => '0000-0003-4020-1328', 'found'=>false],
+        ['email' => 'amanatiadis@ihu.gr', 'first'=>'Dimitrios', 'last'=>'Amanatiadis', 'id' => 'A5048293553', 'found'=>true],
+        ['email' => 'zafiris', 'first' => 'Zafiris', 'last' => 'Ampatzis', 'id' => 'A5068848285', 'found' => true],
+        ['email' => 'antoniou@ihu.gr', 'first' => 'Efstathios', 'last' => 'Antoniou', 'id' => 'A5082819385', 'found'=>false],
+        ['email' => 'asdre', 'first' => 'Katerina', 'last' => 'Asdre', 'id' => 'A5042673538', 'found' => true],
+        ['email' => 'bamnios@ihu.gr', 'first' => 'Georgios', 'last' => 'Bamnios', 'id' => 'A5083200723', 'found'=> true],
+        ['email' => 'pchatzimisios@ihu.gr', 'first' => 'Periklis', 'last' => 'Chatzimisios', 'id' => '0000-0003-2366-1365','found' => true],
+        ['email' => 'ignatios', 'first' => 'Ignatios', 'last' => 'Deligiannis', 'id' => 'A5070715009', 'found' => true],
+        ['email' => 'dad', 'first' => 'Dimitrios', 'last' => 'Dervos', 'id' => 'A5032970498', 'found' => true],
+        ['email' => 'k.diamantaras@ihu.edu.gr', 'first' => 'Konstantinos', 'last' => 'Diamantaras', 'id' => '7003525351', 'found' => true],
+        ['email' => 'ang1960@ihu.gr', 'first' => 'Aggelos', 'last' => 'Giakoumis', 'id' => 'A5087310568', 'found' => true],
+        ['email' => 'gouliana@it.teithe.gr', 'first' => 'Konstantinos', 'last' => 'Goulianas', 'id' => 'A5042877061', 'found' => true],
+        ['email' => 'ahatz@ihu.gr', 'first' => 'Argyrios', 'last' => 'Hatzopoulos', 'id' => 'A5079366713', 'found' => true],
+        ['email' => 'iliou@ihu.gr', 'first' => 'Christos', 'last' => 'Ilioudis', 'id' => '0000-0002-8084-4339', 'found' => true],
+        ['email' => 'melina@ihu.gr', 'first' => 'Melina', 'last' => 'Ioannidou', 'id' => '0000-0003-3594-7678', 'found' => true],
+        ['email' => 'aiosifidis@ihu.gr', 'first' => 'Athanasios', 'last' => 'Iossifides', 'id' => 'A5067731479', 'found' => true],
+        ['email' => 'kazak', 'first' => 'Aristotelis', 'last' => 'Kazakopoulos', 'id' => '0000-0001-6566-6477', 'found' => true],
+        ['email' => 'efkleidiskeramopoulos@gmail.com', 'first' => 'Euclid', 'last' => 'Keramopoulos', 'id' => '0000-0001-6566-6477', 'found' => true],
+        ['email' => 'ikiosker@ihu.gr', 'first' => 'Iordanis', 'last' => 'Kioskeridis', 'id' => 'A5007174015', 'found' => true],
+        ['email' => 'vkostoglvkostogl@ihu.gr', 'first' => 'Vasilis', 'last' => 'Kostoglou', 'id' => '55151440800', 'found' => false],
+        ['email' => 'rkotsakis@gmail.com', 'first' => 'Rigas', 'last' => 'Kotsakis', 'id' => 'A5018429227', 'found' => false],
+        ['email' => 'manavis', 'first' => 'Christos', 'last' => 'Manavis', 'id' => 'A5086220824', 'found' => true],
+        ['email' => 'imarm@el.teithe.gr', 'first' => 'Ioannis', 'last' => 'Marmorkos', 'id' => 'A5004504481', 'found' => true],
+        ['email' => 'stoug@ihu.gr', 'first' => 'Stefanos', 'last' => 'Ougiaroglou', 'id' => '0000-0003-1094-2520', 'found' => true],
+        ['email' => 'dpapakos@ihu.gr', 'first' => 'Dimitrios', 'last' => 'Papakostas', 'id' => 'A5076153845', 'found' => true],
+        ['email' => 'msa@ihu.gr', 'first' => 'Michalis', 'last' => 'Salampasis', 'id' => '55888047700', 'found' => true],
+        ['email' => 'asidirop@gmail.com', 'first' => 'Antonis', 'last' => 'Sidiropoulos', 'id' => '55918072400', 'found' => true],
+        ['email' => 'spasos', 'first' => 'Michail', 'last' => 'Spasos', 'id' => '15119791700', 'found' => false],
+        ['email' => 'demos@ihu.gr', 'first' => 'Dimosthenis', 'last' => 'Stamatis', 'id' => '14720296900', 'found' => false],
+        ['email' => 'ktsiak', 'first' => 'Kyriakos', 'last' => 'Tsiakmakis', 'id' => 'A5001381818', 'found' => true],
+        ['email' => 'ptsekis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Tzekis', 'id' => 'A5069638558', 'found' => true],
+        ['email' => 'vitsas@it.teithe.gr', 'first' => 'Vasilis', 'last' => 'Vitsas', 'id' => 'A5019486808', 'found' => true],
+        ['email' => 'kokkonisgeo@gmail.com', 'first' => 'Georgios', 'last' => 'Kokkonis', 'id' => 'A5075149675', 'found' => true],
+        ['email' => 'cbratsas@iee.ihu.gr', 'first' => 'Charalampos', 'last' => 'Bratsas', 'id' => 'A5021462636', 'found' => true],
+        ['email' => 'mspapa@ihu.gr', 'first' => 'Maria', 'last' => 'Papadopoulou', 'id' => '0000-0002-9651-2144', 'found' => true],
     ];
 
     public function run(): void {
         // Using a single transaction closure for all actions that will be performed, inserts, updates, deletes etc.
         // If anything goes wrong the transaction will be not be committed and the db will be rolled back.
         DB::transaction(function () {
+            $started_time = date("H:i:s");
+            rocketDump("Seeding started at $started_time", 'info', [__FUNCTION__,__FILE__,__LINE__]);
             foreach ($this->Professors as $professor) User::createUserFromId($professor);
 
             // Retrieve all the authors that are also users.
@@ -61,6 +64,9 @@ class DatabaseSeeder extends Seeder {
 
             // Loop through all the authors, retrieve their works and parse them.
             foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
+
+            $ended_time = date("H:i:s");
+            rocketDump("Seeding ended at $ended_time", 'info', [__FUNCTION__,__FILE__,__LINE__]);
 
 //            try {
 //                UpdateDatabaseJob::dispatchSync();

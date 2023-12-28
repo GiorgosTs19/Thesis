@@ -82,9 +82,9 @@ class Work extends Model {
     /**
      * Static Utility Function
      * @param $authorObjects
-     * An array of authors to be associated with the given workF
+     * An array of authors to be associated with the given work
      * @return void
-     * Associates the given authors with the given work. Creates AuthorWorks records.
+     * Associates the given authors with the work. Creates AuthorWorks records.
      */
     public function parseAuthors($authorObjects): void {
         foreach ($authorObjects as $index => $authorObject) {
@@ -101,7 +101,6 @@ class Work extends Model {
             if(!$author_is_user && !$db_author_exists)
                 $newAuthor = Author::createAuthor($authorObject->author, $ids);
 
-//            rocketDump("Parsed $index/".sizeOf($authorObjects)." of work authors.", 'info', [__FUNCTION__,__FILE__,__LINE__]);
             $newAuthor->associateAuthorToWork($this);
         }
     }
@@ -120,7 +119,7 @@ class Work extends Model {
     /**
      * Relationship
      * @return BelongsToMany
-     * All the authors that are associated with the work.
+     * All the authors associated with the work.
      */
     public function authors(): BelongsToMany {
         return $this->belongsToMany(Author::class, 'author_works');
@@ -153,13 +152,9 @@ class Work extends Model {
         if(!$shouldUpdate)
             return;
         try {
-            $shouldUpdate_referenced_count = $requestWork->referenced_works_count !== $this->referenced_works_count;
+            $this->referenced_works_count = $requestWork->referenced_works_count;
 
-            if($shouldUpdate_referenced_count) $this->referenced_works_count = $requestWork->referenced_works_count;
-
-            $shouldUpdate_referenced_count = $requestWork->open_access->is_oa !== $this->is_oa;
-
-            if($shouldUpdate_referenced_count) $this->is_oa = $requestWork->open_access->is_oa;
+            $this->is_oa = $requestWork->open_access->is_oa;
 
             $this->last_updated_date = $requestWork->updated_date;
 

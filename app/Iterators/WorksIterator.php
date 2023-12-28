@@ -10,7 +10,6 @@ class WorksIterator implements Iterator  {
     private array $works;
 
     public function __construct(array $works) {
-        rocketDump($works, 'info', [__FUNCTION__,__FILE__,__LINE__]);
         $this->works = $works;
     }
 
