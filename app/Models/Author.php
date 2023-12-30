@@ -107,9 +107,7 @@ class Author extends Model {
         }
         try {
             $newAuthor = Author::updateOrCreate(
-                [
-                    'open_alex_id' => $ids['open_alex_id']
-                ],
+                ['open_alex_id' => $ids['open_alex_id']],
                 ['scopus_id'=>$ids['scopus_id'] !== '' ? $ids['scopus_id'] :  null,
                     'cited_by_count' => property_exists($author,'cited_by_count') ? $author->cited_by_count : null,
                     'display_name' => $author->display_name,
@@ -135,12 +133,20 @@ class Author extends Model {
     }
 
     public static function extractIds($author, $asset_type = 'request'): array {
-        return match ($asset_type){'request'=>['scopus_id'=>property_exists($author,'scopus') ? Author::parseScopusId($author->scopus) : null,
-            'orc_id'=>Author::parseOrcId($author->orcid),
-            'open_alex_id'=>Author::parseOpenAlexId($author->id)],
-            'database' => ['scopus_id'=>property_exists($author,'scopus_id') ? $author->scopus_id : null,
+        return match ($asset_type){
+            'request'=>
+            [
+                'scopus_id'=>property_exists($author,'scopus') ? Author::parseScopusId($author->scopus) : null,
+                'orc_id'=> property_exists($author,'orc_id') ? Author::parseOrcId($author->orcid) : null,
+                'open_alex_id'=>Author::parseOpenAlexId($author->id)
+            ],
+
+            'database' =>
+            [
+                'scopus_id'=>property_exists($author,'scopus_id') ? $author->scopus_id : null,
                 'orc_id'=>property_exists($author,'orc_id') ? $author->orc_id : null,
-                'open_alex_id'=>property_exists($author,'open_alex_id') ? $author->open_alex_id : null]
+                'open_alex_id'=>property_exists($author,'open_alex_id') ? $author->open_alex_id : null
+            ]
         };
     }
 
@@ -148,14 +154,9 @@ class Author extends Model {
      * Static Utility Function
      * @param $id
      * The id to be parsed
-     * @param $author
-     * The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
-    public static function parseScopusId($id, $author=null): ?string {
-        if($author !== null) {
-            return property_exists($author->ids, 'scopus') ? explode('=', explode('&',$author->ids->scopus)[0])[1] : null;
-        }
+    public static function parseScopusId($id): ?string {
         if(strlen($id) === 0)
             return null;
         $parsed_id = explode('=', explode('&',$id)[0]);
@@ -166,44 +167,57 @@ class Author extends Model {
         return $parsed_id[1];
     }
 
-    // Class utility functions
+    /**
+     * Static Utility Function
+     * @param $author
+     * The author object to retrieve the id from.
+     * @return string|null
+     */
+    public static function parseScopusIdFromObj($author): ?string {
+        if(!$author) return null;
+        return property_exists($author->ids, 'scopus')
+            ? explode('=', explode('&',$author->ids->scopus)[0])[1]
+            : null;
+    }
 
     /**
      * Static Utility Function
      * @param $id
      * The id to be parsed.
-     * @param $author
-     * The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
-    public static function parseOrcId($id, $author=null): ?string {
-        if($author !== null) {
-            return property_exists($author->ids, 'orcid') ? explode('/', parse_url($author->ids->orcid, PHP_URL_PATH))[1] : null;
-        }
-        if(strlen($id) === 0)
-            return null;
+    public static function parseOrcId($id): ?string {
+        if(strlen($id) === 0) return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
         if(!is_array($parsed_id))
             return $parsed_id;
         if(sizeof($parsed_id) === 1)
             return $parsed_id[0];
         return $parsed_id[1];
+    }
+
+    /**
+     * Static Utility Function
+     * @param $author
+     * The author object to retrieve the id from.
+     * @return string|null
+     */
+
+    public static function parseOrcIdFromObj($author): ?string {
+        if(!$author) return null;
+        return property_exists($author->ids, 'orcid')
+            ? explode('/', parse_url($author->ids->orcid, PHP_URL_PATH))[1]
+            : null;
     }
 
     /**
      * Static Utility Function
      * @param $id
      * The id to be parsed
-     * @param $author
-     *  The author object to retrieve the id from ( only when an id is not provided ).
      * @return string|null
      */
-    public static function parseOpenAlexId($id, $author=null): ?string {
-        if($author !== null) {
-            return property_exists($author->ids, 'openalex') ? explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] : null;
-        }
-        if(strlen($id) === 0)
-            return null;
+    public static function parseOpenAlexId($id): ?string {
+        if(strlen($id) === 0) return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
         if(!is_array($parsed_id))
             return $parsed_id;
@@ -212,6 +226,18 @@ class Author extends Model {
         return $parsed_id[1];
     }
 
+    /**
+     * Static Utility Function
+     * @param $author
+     * The author object to retrieve the id from;
+     * @return string|null
+     */
+    public static function parseOpenAlexIdFromObj($author): ?string {
+        if(!$author) return null;
+        return property_exists($author->ids, 'openalex') ?
+            explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] :
+            null;
+    }
     /**
      * Class Utility Function
      * @return bool
@@ -248,13 +274,14 @@ class Author extends Model {
      * saving all of them in the database, parsing all the authors associated with each one and creating a new author for any author that doesn't already exist.
      * It will also create an association for each work and for each of the authors that exist and are associated with them.
      */
-    public function parseWorks($prev_count = 0, $page = 1): void {
-        [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page);
+    public function parseWorks($prev_count = 0, $page = 1, $checkNew = false): void {
+        [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page, false,
+        $checkNew ? ['publication_year'=>date('Y')] : []);
         $total_work_count = $meta->count;
 
         foreach ($works->generator() as $work) {
             // Check if a work with this title already exists in the database, if so proceed to the next one
-            if(Work::workExistsByDoi(property_exists($work->ids,'doi')?$work->ids->doi:$work->open_access->oa_url))
+            if(Work::openAlex($work->id)->exists())
                 continue;
 
             // If not, create a new Work and save it to the database
@@ -263,13 +290,13 @@ class Author extends Model {
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
         $have_been_parsed_count = $prev_count + $works_count;
-        rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name, 'info', [__FUNCTION__,__FILE__,__LINE__]);
+        rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
 
         // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
         // then keep calling the function while incrementing the page parameter passed to the request,
         // until all the author's works have been parsed and stored.
         if($have_been_parsed_count < $total_work_count) {
-            $this->parseWorks($have_been_parsed_count, ++$page);
+            $this->parseWorks($have_been_parsed_count, ++$page, $checkNew);
         }
     }
 
@@ -306,8 +333,12 @@ class Author extends Model {
      * @return void
      */
     public function updateSelf(): void {
-        rocketDump($this->open_alex_id, 'info', [__FUNCTION__,__FILE__,__LINE__]);
         $requestAuthor = APIController::authorUpdateRequest($this->open_alex_id);
+
+        if($requestAuthor->works_count !== $this->works_count) {
+            rocketDump("New works found for $this->display_name");
+            $this->parseWorks(0, 1, true);
+        }
 
         if($requestAuthor->updated_date === $this->last_updated_date)
             return;
@@ -329,6 +360,8 @@ class Author extends Model {
 
         if (!$databaseStatistic) {
             $requestStatistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $requestAuthor->counts_by_year);
+            if(!$requestStatistic)
+                return;
             Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
             return;
         }

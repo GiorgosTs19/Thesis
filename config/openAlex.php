@@ -31,5 +31,4 @@ return [
         'works_count','counts_by_year','works_api_url','updated_date','created_date'],
 
     'required_author_update_fields' => ['cited_by_count','works_count','counts_by_year','updated_date'],
-
 ];

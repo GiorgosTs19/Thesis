@@ -65,14 +65,14 @@ class AppServiceProvider extends ServiceProvider {
                         Log::$log_case($logMessage);
                     }
                 }
+
                 dump("🚀 ~ $logMessage");
-            } else {
-                dump("🚀 ~ ", $meta , $message);
-            }
+            } else dump("🚀 ~ ", $meta , $message);
+
         }
 
         function logMemory(): void {
-            rocketDump((number_format(memory_get_usage() * (10 ** -6), 1)."MB / ".ini_get('memory_limit')));
+            rocketDump(number_format(memory_get_usage() * (10 ** -6), 1)."MB / ".ini_get('memory_limit'));
         }
     }
 

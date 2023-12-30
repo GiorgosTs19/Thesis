@@ -46,12 +46,13 @@ class APIController {
      * @param bool $ignore_field_selection
      * A boolean to indicate whether the fields ( specified in openAlex.php config file ) should be ignored.
      * This will cause the query to return all the fields of the associated assets.
-     * @param array $extra_filters
+     * @param array $additional_filters
      * An associative array of extra filters to be added to the query e.g ['publication_year'=>2023]
      * @return array
+     * The author's works assets ( if the id provided is valid and present in openAlex's database )
      */
-    public static function authorWorksRequest($open_alex_id, int $page = 1, bool $ignore_field_selection = false, array $extra_filters = []): array {
-        $base_url = self::$author_works_base_url.$open_alex_id.self::addExtraFilters($extra_filters).
+    public static function authorWorksRequest($open_alex_id, int $page = 1, bool $ignore_field_selection = false, array $additional_filters = []): array {
+        $base_url = self::$author_works_base_url.$open_alex_id.self::addAdditionalFilters($additional_filters).
             self::$mailTo.self::$perPage.'&page='.$page;
         $url = $base_url.(!$ignore_field_selection ? self::getFieldsToFetch(Work::class) : '' );
         $works_response = self::getResponseBody(Http::withOptions(['verify' => false])->get($url));
@@ -59,13 +60,13 @@ class APIController {
         return [new WorksIterator($works_response->results), $works_response->meta, sizeof($works_response->results)];
     }
 
-    private static function addExtraFilters($extra_filters): string {
-        if(sizeof($extra_filters) === 0)
+    private static function addAdditionalFilters($additional_filters): string {
+        if(sizeof($additional_filters) === 0)
             return '';
 
         $result = '';
 
-        foreach ($extra_filters as $key => $value) {
+        foreach ($additional_filters as $key => $value) {
             $result .= $key . ':' . $value . ',';
         }
 
@@ -116,11 +117,28 @@ class APIController {
         return self::getResponseBody($author_response);
     }
 
-    public static function authorFilterRequest($id,$id_type = 'orc_id', $ignore_field_selection = false, $singleEntity = false, $extra_filters = []) {
+    /**
+     * @param $id
+     * The author's id
+     * @param string $id_type
+     * The type of the id passed (scopus || orc_id)
+     * @param bool $ignore_field_selection
+     * A boolean to indicate whether the fields ( specified in openAlex.php config file ) should be ignored.
+     * * This will cause the query to return all the fields of the associated assets.
+     * @param bool $singleEntity
+     *  A boolean indicating whether to return only the first entity of the result ( when targeting a single asset, or the whole results array )
+     *  defaults to false
+     * @param array $additional_filters
+     *  An associative array of extra filters to be added to the query e.g ['publication_year'=>2023]
+     * @return mixed|null
+     * The author asset ( if the id provided is valid and present in openAlex's database )
+     */
+    public static function authorFilterRequest($id, string $id_type = 'orc_id',
+        bool $ignore_field_selection = false, bool $singleEntity = false, array $additional_filters = []): mixed {
         // Retrieve all the author's data from the OpenAlex api
         $base_url = match ($id_type) {
-            'orc_id' => self::$author_base_filter_url.'orcid:'.$id.self::addExtraFilters($extra_filters).self::$mailTo,
-            'scopus' => self::$author_base_filter_url.'scopus:'.$id.self::addExtraFilters($extra_filters).self::$mailTo
+            'orc_id' => self::$author_base_filter_url.'orcid:'.$id.self::addAdditionalFilters($additional_filters).self::$mailTo,
+            'scopus' => self::$author_base_filter_url.'scopus:'.$id.self::addAdditionalFilters($additional_filters).self::$mailTo
         };
         $url = $base_url.(!$ignore_field_selection ? self::getFieldsToFetch(Author::class) : '');
         $author_response = Http::withOptions(['verify' => false])->get($url);

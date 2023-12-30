@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $open_alex_id
  *
  * @method static where(string $string, $doi)
+ * @method static openAlex($id)
  */
 class Work extends Model {
     use HasFactory;
@@ -195,5 +196,12 @@ class Work extends Model {
      */
     public function statistics(): MorphMany {
         return $this->morphMany(Statistic::class, 'asset');
+    }
+
+    public function scopeOpenAlex($query, $id, $type = 'url') {
+        if($id !== '')
+            return match ($type) {'id'=>$query->orWhere('open_alex_id',$id), 'url'=>
+            $query->orWhere('open_alex_url',$id)};
+        return $query;
     }
 }

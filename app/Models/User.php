@@ -101,16 +101,17 @@ class User extends Authenticatable {
             $author = $author[0];
 
         // Parse the ids of the author
-        $orc_id = Author::parseOrcId('',$author);
-        $scopus_id = Author::parseScopusId('',$author);
-        $open_alex_id = Author::parseOpenAlexId('',$author);
+        $orc_id = Author::parseOrcIdFromObj($author);
+        $scopus_id = Author::parseScopusIdFromObj($author);
+        $open_alex_id = Author::parseOpenAlexIdFromObj($author);
 
         // Add all the parsed ids in an array
         $ids = ['scopus_id'=>$scopus_id,'orc_id'=>$orc_id, 'open_alex_id'=>$open_alex_id];
 
-//        // If no orc_id is present, return
+        // If a user with the same openAlex id exists. return;
         if(User::openAlex($open_alex_id)->exists())
             return;
+
         // Else create a new user.
         User::createNewUser($professor,$ids);
 

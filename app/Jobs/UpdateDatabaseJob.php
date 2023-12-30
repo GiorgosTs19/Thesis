@@ -17,21 +17,19 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
     /**
      * Create a new job instance.
      */
-    public function __construct() {
-        rocketDump('Work dispatched', 'info', [__FUNCTION__,__FILE__,__LINE__]);
-    }
+    public function __construct() {}
 
     /**
      * Execute the job.
      */
     public function handle(): void {
-        $this->enableMaintenanceMode();
         try {
-            rocketDump('Dispatching updateStatistics job','info',[__FUNCTION__,__FILE__,__LINE__]);
+            $this->enableMaintenanceMode();
+            rocketDump('Dispatching updateStatistics job');
             $this->updateAuthors();
             $this->updateWorks();
         } catch (Exception $err) {
-            rocketDump("Something went wrong while updating the database,".$err->getMessage(),'error', [__FUNCTION__,__FILE__,__LINE__]);
+            rocketDump("Something went wrong while updating the database,".$err->getMessage(),'error');
         }
         finally {
             $this->disableMaintenanceMode();
@@ -39,7 +37,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
     }
 
     /**
-     * Enable MaintenanceMode while the database is updating.
+     * Enable Maintenance Mode while the database is updating.
      * @return void
      */
     private function enableMaintenanceMode(): void {
@@ -63,7 +61,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
 
             foreach ($authors as $author) {
                 $author->updateSelf();
-                rocketDump('Author updates completed : '.++$completed."/$length completed");
+                rocketDump('Author updates : '.++$completed."/$length completed");
             }
         });
     }
@@ -81,13 +79,13 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
             $completed = 0;
             foreach ($works as $work) {
                 $work->updateSelf();
-                rocketDump('Work updates completed : '.++$completed."/$length completed");
+                rocketDump('Work updates : '.++$completed."/$length completed");
             }
         });
     }
 
     /**
-     * Disable MaintenanceMode after the database is done updating,
+     * Disable Maintenance Mode after the database is done updating,
      * or an error occurs during that process.
      * @return void
      */

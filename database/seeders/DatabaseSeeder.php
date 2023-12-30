@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Author;
+use Exception;
 use Illuminate\Database\Seeder;
 use App\Jobs\UpdateDatabaseJob;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ class DatabaseSeeder extends Seeder {
         ['email' => 'adamidis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Adamidis', 'id' => '0000-0003-4020-1328', 'found'=>false],
         ['email' => 'amanatiadis@ihu.gr', 'first'=>'Dimitrios', 'last'=>'Amanatiadis', 'id' => 'A5048293553', 'found'=>true],
         ['email' => 'zafiris', 'first' => 'Zafiris', 'last' => 'Ampatzis', 'id' => 'A5068848285', 'found' => true],
-        ['email' => 'antoniou@ihu.gr', 'first' => 'Efstathios', 'last' => 'Antoniou', 'id' => 'A5082819385', 'found'=>false],
+        ['email' => 'antoniou@ihu.gr', 'first' => 'Efstathios', 'last' => 'Antoniou', 'id' => 'A5082819385', 'found'=>true],
         ['email' => 'asdre', 'first' => 'Katerina', 'last' => 'Asdre', 'id' => 'A5042673538', 'found' => true],
         ['email' => 'bamnios@ihu.gr', 'first' => 'Georgios', 'last' => 'Bamnios', 'id' => 'A5083200723', 'found'=> true],
         ['email' => 'pchatzimisios@ihu.gr', 'first' => 'Periklis', 'last' => 'Chatzimisios', 'id' => '0000-0003-2366-1365','found' => true],
@@ -34,7 +35,7 @@ class DatabaseSeeder extends Seeder {
         ['email' => 'efkleidiskeramopoulos@gmail.com', 'first' => 'Euclid', 'last' => 'Keramopoulos', 'id' => '0000-0001-6566-6477', 'found' => true],
         ['email' => 'ikiosker@ihu.gr', 'first' => 'Iordanis', 'last' => 'Kioskeridis', 'id' => 'A5007174015', 'found' => true],
         ['email' => 'vkostoglvkostogl@ihu.gr', 'first' => 'Vasilis', 'last' => 'Kostoglou', 'id' => '55151440800', 'found' => false],
-        ['email' => 'rkotsakis@gmail.com', 'first' => 'Rigas', 'last' => 'Kotsakis', 'id' => 'A5018429227', 'found' => false],
+        ['email' => 'rkotsakis@gmail.com', 'first' => 'Rigas', 'last' => 'Kotsakis', 'id' => 'A5018429227', 'found' => true],
         ['email' => 'manavis', 'first' => 'Christos', 'last' => 'Manavis', 'id' => 'A5086220824', 'found' => true],
         ['email' => 'imarm@el.teithe.gr', 'first' => 'Ioannis', 'last' => 'Marmorkos', 'id' => 'A5004504481', 'found' => true],
         ['email' => 'stoug@ihu.gr', 'first' => 'Stefanos', 'last' => 'Ougiaroglou', 'id' => '0000-0003-1094-2520', 'found' => true],
@@ -56,23 +57,24 @@ class DatabaseSeeder extends Seeder {
         // If anything goes wrong the transaction will be not be committed and the db will be rolled back.
         DB::transaction(function () {
             $started_time = date("H:i:s");
-            rocketDump("Seeding started at $started_time", 'info', [__FUNCTION__,__FILE__,__LINE__]);
-            foreach ($this->Professors as $professor) User::createUserFromId($professor);
+            rocketDump("Seeding started at $started_time");
+//            foreach ($this->Professors as $professor) User::createUserFromId($professor);
+//
+//            // Retrieve all the authors that are also users.
+//            $User_Authors = Author::user()->get();
+//
+//            // Loop through all the authors, retrieve their works and parse them.
+//            foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
 
-            // Retrieve all the authors that are also users.
-            $User_Authors = Author::user()->get();
 
-            // Loop through all the authors, retrieve their works and parse them.
-            foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
 
+            try {
+                UpdateDatabaseJob::dispatchSync();
+            } catch (Exception $exception) {
+                rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+            }
             $ended_time = date("H:i:s");
-            rocketDump("Seeding ended at $ended_time", 'info', [__FUNCTION__,__FILE__,__LINE__]);
-
-//            try {
-//                UpdateDatabaseJob::dispatchSync();
-//            } catch (Exception $exception) {
-//                rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
-//            }
+            rocketDump("Seeding ended at $ended_time");
         });
     }
 

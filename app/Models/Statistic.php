@@ -52,8 +52,7 @@ class Statistic extends Model {
      * The type of the asset that the statistic refer to.
      * @return void
      */
-    private static function newStatistic($asset_id, $statistic, $asset_type): void
-    {
+    private static function newStatistic($asset_id, $statistic, $asset_type): void {
         try {
             $newYearlyCitations = new Statistic;
             $newYearlyCitations->asset_id = $asset_id;
@@ -68,7 +67,6 @@ class Statistic extends Model {
     }
 
     public static function generateStatistic($id, $statistic, $asset_type): void {
-        rocketDump($statistic, 'info', [__FUNCTION__,__FILE__,__LINE__]);
         self::newStatistic($id, $statistic, $asset_type);
     }
 
