@@ -35,6 +35,7 @@ class Author extends Model {
     use HasFactory;
 
     public static array $updateFields = ['id', 'open_alex_id','last_updated_date', 'cited_by_count', 'works_count'];
+
     /**
      * @var array|bool|mixed|string|null
      */
@@ -132,7 +133,15 @@ class Author extends Model {
         return $newAuthor;
     }
 
-    public static function extractIds($author, $asset_type = 'request'): array {
+    /**
+     * @param $author
+     * The author object to extract the ids from
+     * @param string $asset_type
+     * The type of the asset's origin ( OpenAlex api request => 'request', Local database => 'database' )
+     * @return array
+     * Am associative array of the ids extracted and parsed from the author object. This array can contain null values.
+     */
+    public static function extractIds($author, string $asset_type = 'request'): array {
         return match ($asset_type){
             'request'=>
             [
@@ -211,10 +220,11 @@ class Author extends Model {
     }
 
     /**
-     * Static Utility Function
+     * Given an Open Alex Author | Work url, extracts the id from the url.
      * @param $id
      * The id to be parsed
      * @return string|null
+     * The id extracted from the url.
      */
     public static function parseOpenAlexId($id): ?string {
         if(strlen($id) === 0) return null;
@@ -227,10 +237,11 @@ class Author extends Model {
     }
 
     /**
-     * Static Utility Function
+     * Given an Open Alex Author | Work object, extracts the id from the object.
      * @param $author
      * The author object to retrieve the id from;
      * @return string|null
+     * The id extracted from the object ( if it is present ).
      */
     public static function parseOpenAlexIdFromObj($author): ?string {
         if(!$author) return null;
@@ -268,13 +279,22 @@ class Author extends Model {
         return $query->where('is_user',$is_user);
     }
 
+
     /**
-     * Class Utility Function
-     * Retrieves all the works ( or a specified number of them ) from the OpenAlex API and parses them,
-     * saving all of them in the database, parsing all the authors associated with each one and creating a new author for any author that doesn't already exist.
-     * It will also create an association for each work and for each of the authors that exist and are associated with them.
+     * @param int $prev_count
+     * Keeps the amount of works already parsed ( used only if the function is called recursively, to keep track of parsed works ).
+     * @param int $page
+     * The page number used in the query ( used only if the function is called recursively, to fetch the next page of works )
+     * @param bool $checkNew
+     * A boolean indicating if the function should check for new works on the OpenAlex database.
+     * If set to true, the function will only request works published in the current year,
+     * Defaults to false.
+     * @return void
+     *  Retrieves all the works ( or a specified number of them ) from the OpenAlex API and parses them,
+     *  stores them in the database, parses all the authors associated with each one and creates a new author entry for any of them that doesn't already exist.
+     *  It will also create an association for each work and for each of the authors that exist and are associated with them.
      */
-    public function parseWorks($prev_count = 0, $page = 1, $checkNew = false): void {
+    public function parseWorks(int $prev_count = 0, int $page = 1, bool $checkNew = false): void {
         [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page, false,
         $checkNew ? ['publication_year'=>date('Y')] : []);
         $total_work_count = $meta->count;
@@ -300,6 +320,12 @@ class Author extends Model {
         }
     }
 
+    /**
+     * @param $work
+     * The work to be associated with the author.
+     * @return void
+     * Creates a row in the AuthorWorks table, associating the given work with an author.
+     */
     public function associateAuthorToWork($work): void {
         if(!$this->associationExists($work->id)) {
             try {

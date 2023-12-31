@@ -8,7 +8,6 @@ use Illuminate\Support\Arr;
 use App\Iterators\WorksIterator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
-use function App\Providers\rocketDump;
 
 class APIController {
     private static string $perPage;

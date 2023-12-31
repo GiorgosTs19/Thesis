@@ -107,7 +107,6 @@ class Work extends Model {
     }
 
     /**
-     * Static Utility Function
      * @param $doi
      * The doi of the work to search against.
      * @return bool
