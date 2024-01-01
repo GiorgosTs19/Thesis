@@ -12,9 +12,9 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('authors', function (Blueprint $table) {
             $table->id();
-            $table->string(Ids::OpenAlex_Id)->unique();
-            $table->string(Ids::OrcId_Id)->nullable()->unique();
-            $table->string(Ids::Scopus_Id)->nullable()->unique();
+            $table->string(Ids::OPEN_ALEX_ID)->unique();
+            $table->string(Ids::ORC_ID_ID)->nullable()->unique();
+            $table->string(Ids::SCOPUS_ID)->nullable()->unique();
             $table->string('display_name');
             $table->string('works_url')->nullable()->unique();
             $table->boolean('is_user')->default(false);

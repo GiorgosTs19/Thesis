@@ -27,12 +27,12 @@ class AuthorResource extends JsonResource {
 
     public function toArray(Request $request): array {
         $ids = Ids::extractIds($this,property_exists($this,'ids') ?
-            Requests::Request_Asset : Requests::Database_Asset);
+            Requests::REQUEST_ASSET : Requests::DATABASE_ASSET);
         return [
             'name' => $this->display_name,
-            Ids::OpenAlex_Id => $ids[Ids::OpenAlex],
-            Ids::OrcId_Id => $this->orc_id,
-            Ids::Scopus_Id => $this->scopus_id,
+            Ids::OPEN_ALEX_ID => $ids[Ids::OPEN_ALEX],
+            Ids::ORC_ID_ID => $this->orc_id,
+            Ids::SCOPUS_ID => $this->scopus_id,
             'works_count' => $this->works_count,
             'cited_by_count' => $this->cited_by_count,
             'is_user' => $this->is_user,

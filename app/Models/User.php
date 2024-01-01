@@ -66,36 +66,32 @@ class User extends Authenticatable {
 
     /**
      * @param $open_alex_id
-     * The OpenAlex id to search a user with
-     * @param $orc_id
-     * The OrcId id to search a user with
+     * The OpenAlex id of an author to check if they're a user.
      * @return array
      * An array that contains a boolean as its first element, indicating if a user with a matching id was found,
      * and the user ( it they exist, otherwise null ) as its second element.
      */
     #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUser($open_alex_id): array {
-        $user_query = User::where(Ids::OpenAlex_Id,$open_alex_id);
+        $user_query = User::where(Ids::OPEN_ALEX_ID,$open_alex_id);
         $user_exists = boolval($user_query->exists());
         return ['exists'=>$user_exists, 'author'=>$user_query->first()];
     }
 
     /**
      * @param $professor
+     * The Professor object to extract the info from.
      * @return void
      * Create a new user and save it to the database, using info from the OpenAlex API.
      */
     public static function createUserFromId($professor): void {
-        $author = null;
         // Check what type of id is used to fetch the author's info from OpenAlex api.
-        // If the id contains '-', then OrcId id is used.
-        if(str_contains($professor['id'], '-'))
-            $author = APIController::authorRequest($professor['id']);
-        // If the id starts/contains 'A', then OpenAlex id is used.
-        elseif (str_contains($professor['id'], 'A'))
-            $author = APIController::authorRequest($professor['id']);
-        // If the id is just numbers, then scopus is used.
-        else
-            $author = APIController::authorFilterRequest($professor['id'], false, true);
+        $id_type = Ids::getIdType($professor['id']);
+
+        $author = match ($id_type) {
+            Ids::ORC_ID, Ids::OPEN_ALEX => APIController::authorRequest($professor['id']),
+            // Using a filter request since OpenAlex can only find Authors by scopus using filters.
+            Ids::SCOPUS => APIController::authorFilterRequest($professor['id'], false, true)
+        };
 
         if(!$author)
             return;
@@ -111,7 +107,7 @@ class User extends Authenticatable {
         $open_alex_id = Ids::parseOpenAlexIdFromObj($author);
 
         // Add all the parsed ids in an array
-        $ids = [Ids::Scopus_Id => $scopus_id, Ids::OrcId_Id => $orc_id, Ids::OpenAlex_Id => $open_alex_id];
+        $ids = [Ids::SCOPUS_ID => $scopus_id, Ids::ORC_ID_ID => $orc_id, Ids::OPEN_ALEX_ID => $open_alex_id];
 
         // If a user with the same openAlex id exists. return;
         if(User::openAlex($open_alex_id)->exists())
@@ -136,11 +132,11 @@ class User extends Authenticatable {
             $newUser->first_name = $professor['first'];
             $newUser->last_name = $professor['last'];
             $newUser->email = $professor['email'];
-            $newUser->orc_id = $ids[Ids::OrcId_Id];
-            $newUser->scopus_id = $ids[Ids::Scopus_Id];
-            $newUser->open_alex_id = $ids[Ids::OpenAlex_Id];
+            $newUser->orc_id = $ids[Ids::ORC_ID_ID];
+            $newUser->scopus_id = $ids[Ids::SCOPUS_ID];
+            $newUser->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
             $newUser->save();
-            rocketDump("User $newUser->last_name $newUser->first_name has been created", 'error', [__FUNCTION__,__FILE__,__LINE__]);
+            rocketDump("User $newUser->last_name $newUser->first_name has been created");
         } catch (Exception $error ) {
             rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
         }
@@ -149,13 +145,13 @@ class User extends Authenticatable {
 
     public function scopeOrcId($query, $id) {
         if($id !== '')
-            return $query->orWhere(Ids::OrcId_Id, $id);
+            return $query->orWhere(Ids::ORC_ID_ID, $id);
         return $query;
     }
 
     public function scopeOpenAlex($query, $id) {
         if($id !== '')
-            return $query->orWhere(Ids::OpenAlex_Id, $id);
+            return $query->orWhere(Ids::OPEN_ALEX_ID, $id);
         return $query;
     }
 }

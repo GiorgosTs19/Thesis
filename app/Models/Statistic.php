@@ -91,7 +91,6 @@ class Statistic extends Model {
                 $citation_count_differ = $requestStatistic->cited_by_count !== $this->cited_count;
                 try {
                     if (!$works_count_differ && !$citation_count_differ) {
-                        rocketDump("No statistics updates required for Author $asset->open_alex_id for the year $requestStatistic->year");
                         return;
                     }
 
@@ -116,7 +115,6 @@ class Statistic extends Model {
                 $citation_count_differ = $requestStatistic->cited_by_count !== $this->cited_count;
 
                 if (!$citation_count_differ) {
-                    rocketDump("No statistics updates required for Work $asset->open_alex_id for the year $requestStatistic->year");
                     return;
                 }
                 try {

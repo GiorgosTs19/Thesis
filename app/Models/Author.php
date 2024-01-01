@@ -35,12 +35,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Author extends Model {
     use HasFactory;
 
-    public static array $updateFields = ['id', 'open_alex_id','last_updated_date', 'cited_by_count', 'works_count'];
-
     /**
      * @var array|bool|mixed|string|null
      */
-    private static mixed $author_works_base_url;
+    private static mixed $AUTHOR_WORKS_BASE_URL;
+
+    public static array $UPDATE_FIELDS = [
+        'id',
+        'open_alex_id',
+        'last_updated_date',
+        'cited_by_count',
+        'works_count'
+    ];
+
     protected $fillable = [
         'display_name',
         'orc_id',
@@ -58,7 +65,7 @@ class Author extends Model {
 
     public function __construct(array $attributes = []) {
         parent::__construct($attributes);
-        self::$author_works_base_url = Config::get('openAlex.author_works_base_url');
+        self::$AUTHOR_WORKS_BASE_URL = Config::get('openAlex.author_works_base_url');
     }
 
     /**
@@ -86,7 +93,7 @@ class Author extends Model {
      *  and the author ( it they exist, otherwise null ) as its second element.
      */
     #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExists($open_alex_id): array {
-        $author_query =  Author::where(Ids::OpenAlex_Id,$open_alex_id);
+        $author_query =  Author::where(Ids::OPEN_ALEX_ID,$open_alex_id);
         $author_exists = $author_query->exists();
         return ['exists'=>(boolean)$author_exists, 'author'=>$author_query->first()];
     }
@@ -105,17 +112,17 @@ class Author extends Model {
     public static function createAuthor($author, array $ids = [], bool $is_user = false): ?Author {
         $newAuthor = new Author;
         if(!$is_user) {
-            $author = APIController::authorRequest($ids[Ids::OpenAlex_Id]);
+            $author = APIController::authorRequest($ids[Ids::OPEN_ALEX_ID]);
         }
         try {
             $newAuthor = Author::updateOrCreate(
-                [Ids::OpenAlex_Id => $ids[Ids::OpenAlex_Id]],
-                [Ids::Scopus_Id=>$ids[Ids::Scopus_Id] !== '' ? $ids[Ids::Scopus_Id] :  null,
-                    Ids::OrcId_Id => $ids[Ids::OrcId_Id],
+                [Ids::OPEN_ALEX_ID => $ids[Ids::OPEN_ALEX_ID]],
+                [Ids::SCOPUS_ID=>$ids[Ids::SCOPUS_ID] !== '' ? $ids[Ids::SCOPUS_ID] :  null,
+                    Ids::ORC_ID_ID => $ids[Ids::ORC_ID_ID],
                     'cited_by_count' => property_exists($author,'cited_by_count') ? $author->cited_by_count : null,
                     'display_name' => $author->display_name,
                     'is_user' => $is_user,
-                    'works_url'=>property_exists($author,'works_api_url') ? $author->works_api_url : self::$author_works_base_url.$ids['open_alex_id'],
+                    'works_url'=>property_exists($author,'works_api_url') ? $author->works_api_url : self::$AUTHOR_WORKS_BASE_URL.$ids['open_alex_id'],
                     'last_updated_date'=>property_exists($author,'updated_date') ? $author->updated_date : null,
                     'created_date'=>property_exists($author,'created_date') ? $author->created_date : null,
                     'works_count' => $author->works_count

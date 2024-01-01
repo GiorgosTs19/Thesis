@@ -5,9 +5,10 @@ namespace App\Jobs;
 use Exception;
 use Illuminate\Bus\Queueable;
 use App\Models\{Author, Work};
+use App\Utility\SystemManager;
+use Illuminate\Support\Facades\DB;
 use function App\Providers\rocketDump;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Support\Facades\{Artisan, DB};
 use Illuminate\Queue\{InteractsWithQueue, SerializesModels};
 use Illuminate\Contracts\Queue\{ShouldBeUnique, ShouldQueue};
 
@@ -24,26 +25,25 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
      */
     public function handle(): void {
         try {
-            $this->enableMaintenanceMode();
-            rocketDump('Dispatching updateStatistics job');
-            $this->updateAuthors();
-            $this->updateWorks();
+            SystemManager::enableMaintenanceMode();
+
+            $started_time = date("H:i:s");
+            rocketDump("Database Update started at $started_time");
+
+            DB::transaction(function () {
+                $this->updateAuthors();
+                $this->updateWorks();
+            });
+
+            $ended_time = date("H:i:s");
+            rocketDump("Database Update ended at $ended_time");
+
         } catch (Exception $err) {
             rocketDump("Something went wrong while updating the database,".$err->getMessage(),'error');
         }
         finally {
-            $this->disableMaintenanceMode();
+            SystemManager::disableMaintenanceMode();
         }
-    }
-
-    /**
-     * Enable Maintenance Mode while the database is updating.
-     * @return void
-     */
-    private function enableMaintenanceMode(): void {
-        // Enable maintenance mode
-        rocketDump('Turning On Maintenance mode');
-        Artisan::call('down');
     }
 
     /**
@@ -54,7 +54,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
         DB::transaction(function () {
             rocketDump('Starting Authors update');
             // An array of the ids of the authors to be updated.
-            $authors = Author::user()->get(Author::$updateFields);
+            $authors = Author::user()->get(Author::$UPDATE_FIELDS);
 
             $length = sizeof($authors);
             $completed = 0;
@@ -74,7 +74,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
         rocketDump('Starting Works update');
         DB::transaction(function () {
             // An array of the ids of the authors to be updated.
-            $works = Work::all(Work::$updateFields);
+            $works = Work::all(Work::$UPDATE_FIELDS);
             $length = sizeof($works);
             $completed = 0;
             foreach ($works as $work) {
@@ -82,16 +82,5 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
                 rocketDump('Work updates : '.++$completed."/$length completed");
             }
         });
-    }
-
-    /**
-     * Disable Maintenance Mode after the database is done updating,
-     * or an error occurs during that process.
-     * @return void
-     */
-    private function disableMaintenanceMode(): void {
-        // Disable maintenance mode
-        rocketDump('Turning Off Maintenance mode');
-        Artisan::call('up');
     }
 }

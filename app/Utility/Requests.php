@@ -5,13 +5,13 @@ namespace App\Utility;
 use Illuminate\Support\Facades\Http;
 
 class Requests {
-    const Create_Action = 'create';
+    const CREATE_ACTION = 'create';
 
-    const Update_Action = 'update';
+    const UPDATE_ACTION = 'update';
 
-    const Database_Asset = 'database';
+    const DATABASE_ASSET = 'database';
 
-    const Request_Asset = 'request';
+    const REQUEST_ASSET = 'request';
 
     public static function get($url): \GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\Response {
         return Http::withOptions(['verify' => false])->get($url);

@@ -35,9 +35,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Work extends Model {
     use HasFactory;
 
-    const AuthorWorksTable = 'author_works';
+    const AUTHOR_WORKS_TABLE = 'author_works';
 
-    public static array $updateFields = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
+    public static array $UPDATE_FIELDS = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
 
     protected $fillable = ['doi', 'title', 'publication_date', 'publication_year', 'referenced_works_count', 'language', 'type',
     'is_oa','open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date'];
@@ -65,7 +65,7 @@ class Work extends Model {
             $newWork->language = $work->language ?? 'Unknown';
             $newWork->type = $work->type;
             $newWork->is_oa = $work_open_access->is_oa;
-            $newWork->open_alex_id = explode('/',$work->ids->openalex)[3];
+            $newWork->open_alex_id = Ids::parseOpenAlexId($work->ids->openalex);
             $newWork->open_alex_url = $work->ids->openalex;
             $newWork->cites_url = $work->cited_by_api_url;
             $newWork->last_updated_date = $work->updated_date;
@@ -95,11 +95,11 @@ class Work extends Model {
             $ids = Ids::extractIds($authorObject->author);
 
             // Check if an author is a user.
-            $author_is_user = User::isAuthorAUser($ids[Ids::OpenAlex_Id])['exists'];
+            $author_is_user = User::isAuthorAUser($ids[Ids::OPEN_ALEX_ID])['exists'];
 
             $newAuthor = null;
             // Check if an author exists by their Open Alex id or their OrcId
-            ['exists' => $db_author_exists, 'author' => $newAuthor] = Author::authorExists($ids[Ids::OpenAlex_Id]);
+            ['exists' => $db_author_exists, 'author' => $newAuthor] = Author::authorExists($ids[Ids::OPEN_ALEX_ID]);
 
             if(!$author_is_user && !$db_author_exists)
                 $newAuthor = Author::createAuthor($authorObject->author, $ids);
@@ -124,7 +124,7 @@ class Work extends Model {
      * All the authors associated with the work.
      */
     public function authors(): BelongsToMany {
-        return $this->belongsToMany(Author::class, self::AuthorWorksTable);
+        return $this->belongsToMany(Author::class, self::AUTHOR_WORKS_TABLE);
     }
 
     /**
