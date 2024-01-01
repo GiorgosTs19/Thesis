@@ -1,5 +1,6 @@
 <?php
 
+use App\Utility\Ids;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,10 +12,10 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('authors', function (Blueprint $table) {
             $table->id();
+            $table->string(Ids::OpenAlex_Id)->unique();
+            $table->string(Ids::OrcId_Id)->nullable()->unique();
+            $table->string(Ids::Scopus_Id)->nullable()->unique();
             $table->string('display_name');
-            $table->string('open_alex_id')->unique();
-            $table->string('orc_id')->nullable()->unique();
-            $table->string('scopus_id')->nullable()->unique();
             $table->string('works_url')->nullable()->unique();
             $table->boolean('is_user')->default(false);
             $table->integer('cited_by_count')->nullable();

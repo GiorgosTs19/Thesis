@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Exception;
+use App\Utility\Ids;
 use Illuminate\Support\Facades\Auth;
 use function App\Providers\logMemory;
 use function App\Providers\rocketDump;
@@ -33,6 +34,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Work extends Model {
     use HasFactory;
+
+    const AuthorWorksTable = 'author_works';
 
     public static array $updateFields = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
 
@@ -89,15 +92,14 @@ class Work extends Model {
      */
     public function parseAuthors($authorObjects): void {
         foreach ($authorObjects as $index => $authorObject) {
-            $ids = Author::extractIds($authorObject->author);
+            $ids = Ids::extractIds($authorObject->author);
 
             // Check if an author is a user.
-            $author_is_user = User::isAuthorAUser($ids['open_alex_id'],$ids['orc_id'])['exists'];
+            $author_is_user = User::isAuthorAUser($ids[Ids::OpenAlex_Id])['exists'];
 
             $newAuthor = null;
             // Check if an author exists by their Open Alex id or their OrcId
-            ['exists' => $db_author_exists, 'author' => $newAuthor] = Author::authorExists($ids['open_alex_id'],$ids['orc_id']);
-
+            ['exists' => $db_author_exists, 'author' => $newAuthor] = Author::authorExists($ids[Ids::OpenAlex_Id]);
 
             if(!$author_is_user && !$db_author_exists)
                 $newAuthor = Author::createAuthor($authorObject->author, $ids);
@@ -122,7 +124,7 @@ class Work extends Model {
      * All the authors associated with the work.
      */
     public function authors(): BelongsToMany {
-        return $this->belongsToMany(Author::class, 'author_works');
+        return $this->belongsToMany(Author::class, self::AuthorWorksTable);
     }
 
     /**

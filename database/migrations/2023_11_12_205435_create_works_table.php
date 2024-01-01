@@ -1,5 +1,6 @@
 <?php
 
+use App\Utility\Ids;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +21,7 @@ return new class extends Migration {
             $table->string('type');
             $table->boolean('is_oa');
             $table->string('open_alex_url')->unique();
-            $table->string('open_alex_id')->unique();
+            $table->string(Ids::OpenAlex_Id)->unique();
             $table->string('cites_url')->nullable();
             $table->dateTime('last_updated_date');
             $table->dateTime('created_date');

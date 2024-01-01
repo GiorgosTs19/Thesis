@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Exception;
+use App\Utility\Ids;
 use Laravel\Sanctum\HasApiTokens;
 use JetBrains\PhpStorm\ArrayShape;
 use function App\Providers\rocketDump;
@@ -72,8 +73,8 @@ class User extends Authenticatable {
      * An array that contains a boolean as its first element, indicating if a user with a matching id was found,
      * and the user ( it they exist, otherwise null ) as its second element.
      */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUser($open_alex_id, $orc_id): array {
-        $user_query = User::where('open_alex_id',$open_alex_id)->orWhere('orc_id',$orc_id);
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUser($open_alex_id): array {
+        $user_query = User::where(Ids::OpenAlex_Id,$open_alex_id);
         $user_exists = boolval($user_query->exists());
         return ['exists'=>$user_exists, 'author'=>$user_query->first()];
     }
@@ -85,12 +86,16 @@ class User extends Authenticatable {
      */
     public static function createUserFromId($professor): void {
         $author = null;
+        // Check what type of id is used to fetch the author's info from OpenAlex api.
+        // If the id contains '-', then OrcId id is used.
         if(str_contains($professor['id'], '-'))
             $author = APIController::authorRequest($professor['id']);
+        // If the id starts/contains 'A', then OpenAlex id is used.
         elseif (str_contains($professor['id'], 'A'))
-            $author = APIController::authorRequest($professor['id'], 'open_alex');
+            $author = APIController::authorRequest($professor['id']);
+        // If the id is just numbers, then scopus is used.
         else
-            APIController::authorFilterRequest($professor['id'], 'scopus', false, true);
+            $author = APIController::authorFilterRequest($professor['id'], false, true);
 
         if(!$author)
             return;
@@ -101,12 +106,12 @@ class User extends Authenticatable {
             $author = $author[0];
 
         // Parse the ids of the author
-        $orc_id = Author::parseOrcIdFromObj($author);
-        $scopus_id = Author::parseScopusIdFromObj($author);
-        $open_alex_id = Author::parseOpenAlexIdFromObj($author);
+        $orc_id = Ids::parseOrcIdFromObj($author);
+        $scopus_id = Ids::parseScopusIdFromObj($author);
+        $open_alex_id = Ids::parseOpenAlexIdFromObj($author);
 
         // Add all the parsed ids in an array
-        $ids = ['scopus_id'=>$scopus_id,'orc_id'=>$orc_id, 'open_alex_id'=>$open_alex_id];
+        $ids = [Ids::Scopus_Id => $scopus_id, Ids::OrcId_Id => $orc_id, Ids::OpenAlex_Id => $open_alex_id];
 
         // If a user with the same openAlex id exists. return;
         if(User::openAlex($open_alex_id)->exists())
@@ -131,9 +136,9 @@ class User extends Authenticatable {
             $newUser->first_name = $professor['first'];
             $newUser->last_name = $professor['last'];
             $newUser->email = $professor['email'];
-            $newUser->orc_id = $ids['orc_id'];
-            $newUser->scopus_id = $ids['scopus_id'];
-            $newUser->open_alex_id = $ids['open_alex_id'];
+            $newUser->orc_id = $ids[Ids::OrcId_Id];
+            $newUser->scopus_id = $ids[Ids::Scopus_Id];
+            $newUser->open_alex_id = $ids[Ids::OpenAlex_Id];
             $newUser->save();
             rocketDump("User $newUser->last_name $newUser->first_name has been created", 'error', [__FUNCTION__,__FILE__,__LINE__]);
         } catch (Exception $error ) {
@@ -144,13 +149,13 @@ class User extends Authenticatable {
 
     public function scopeOrcId($query, $id) {
         if($id !== '')
-            return $query->orWhere('orc_id', $id);
+            return $query->orWhere(Ids::OrcId_Id, $id);
         return $query;
     }
 
     public function scopeOpenAlex($query, $id) {
         if($id !== '')
-            return $query->orWhere('open_alex_id', $id);
+            return $query->orWhere(Ids::OpenAlex_Id, $id);
         return $query;
     }
 }

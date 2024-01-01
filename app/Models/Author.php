@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utility\Ids;
 use Exception;
 use JetBrains\PhpStorm\ArrayShape;
 use Illuminate\Support\Facades\Auth;
@@ -84,8 +85,8 @@ class Author extends Model {
      * An array that contains a boolean as its first element, indicating if an author with a matching id was found,
      *  and the author ( it they exist, otherwise null ) as its second element.
      */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExists($open_alex_id, $orc_id): array {
-        $author_query =  Author::where('open_alex_id',$open_alex_id)->orWhere('orc_id',$orc_id);
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExists($open_alex_id): array {
+        $author_query =  Author::where(Ids::OpenAlex_Id,$open_alex_id);
         $author_exists = $author_query->exists();
         return ['exists'=>(boolean)$author_exists, 'author'=>$author_query->first()];
     }
@@ -104,16 +105,16 @@ class Author extends Model {
     public static function createAuthor($author, array $ids = [], bool $is_user = false): ?Author {
         $newAuthor = new Author;
         if(!$is_user) {
-            $author = APIController::authorRequest($ids['open_alex_id'], 'open_alex');
+            $author = APIController::authorRequest($ids[Ids::OpenAlex_Id]);
         }
         try {
             $newAuthor = Author::updateOrCreate(
-                ['open_alex_id' => $ids['open_alex_id']],
-                ['scopus_id'=>$ids['scopus_id'] !== '' ? $ids['scopus_id'] :  null,
+                [Ids::OpenAlex_Id => $ids[Ids::OpenAlex_Id]],
+                [Ids::Scopus_Id=>$ids[Ids::Scopus_Id] !== '' ? $ids[Ids::Scopus_Id] :  null,
+                    Ids::OrcId_Id => $ids[Ids::OrcId_Id],
                     'cited_by_count' => property_exists($author,'cited_by_count') ? $author->cited_by_count : null,
                     'display_name' => $author->display_name,
                     'is_user' => $is_user,
-                    'orc_id' => $ids['orc_id'],
                     'works_url'=>property_exists($author,'works_api_url') ? $author->works_api_url : self::$author_works_base_url.$ids['open_alex_id'],
                     'last_updated_date'=>property_exists($author,'updated_date') ? $author->updated_date : null,
                     'created_date'=>property_exists($author,'created_date') ? $author->created_date : null,
@@ -121,134 +122,16 @@ class Author extends Model {
                 ]
             );
 
-            Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
-
             if(!property_exists($author,'counts_by_year')) {
                 return $newAuthor;
             }
-
+            Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
         } catch (Exception $error) {
             rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
         }
         return $newAuthor;
     }
 
-    /**
-     * @param $author
-     * The author object to extract the ids from
-     * @param string $asset_type
-     * The type of the asset's origin ( OpenAlex api request => 'request', Local database => 'database' )
-     * @return array
-     * Am associative array of the ids extracted and parsed from the author object. This array can contain null values.
-     */
-    public static function extractIds($author, string $asset_type = 'request'): array {
-        return match ($asset_type){
-            'request'=>
-            [
-                'scopus_id'=>property_exists($author,'scopus') ? Author::parseScopusId($author->scopus) : null,
-                'orc_id'=> property_exists($author,'orc_id') ? Author::parseOrcId($author->orcid) : null,
-                'open_alex_id'=>Author::parseOpenAlexId($author->id)
-            ],
-
-            'database' =>
-            [
-                'scopus_id'=>property_exists($author,'scopus_id') ? $author->scopus_id : null,
-                'orc_id'=>property_exists($author,'orc_id') ? $author->orc_id : null,
-                'open_alex_id'=>property_exists($author,'open_alex_id') ? $author->open_alex_id : null
-            ]
-        };
-    }
-
-    /**
-     * Static Utility Function
-     * @param $id
-     * The id to be parsed
-     * @return string|null
-     */
-    public static function parseScopusId($id): ?string {
-        if(strlen($id) === 0)
-            return null;
-        $parsed_id = explode('=', explode('&',$id)[0]);
-        if(!is_array($parsed_id))
-            return $parsed_id;
-        if(sizeof($parsed_id) === 1)
-            return $parsed_id[0];
-        return $parsed_id[1];
-    }
-
-    /**
-     * Static Utility Function
-     * @param $author
-     * The author object to retrieve the id from.
-     * @return string|null
-     */
-    public static function parseScopusIdFromObj($author): ?string {
-        if(!$author) return null;
-        return property_exists($author->ids, 'scopus')
-            ? explode('=', explode('&',$author->ids->scopus)[0])[1]
-            : null;
-    }
-
-    /**
-     * Static Utility Function
-     * @param $id
-     * The id to be parsed.
-     * @return string|null
-     */
-    public static function parseOrcId($id): ?string {
-        if(strlen($id) === 0) return null;
-        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
-        if(!is_array($parsed_id))
-            return $parsed_id;
-        if(sizeof($parsed_id) === 1)
-            return $parsed_id[0];
-        return $parsed_id[1];
-    }
-
-    /**
-     * Static Utility Function
-     * @param $author
-     * The author object to retrieve the id from.
-     * @return string|null
-     */
-
-    public static function parseOrcIdFromObj($author): ?string {
-        if(!$author) return null;
-        return property_exists($author->ids, 'orcid')
-            ? explode('/', parse_url($author->ids->orcid, PHP_URL_PATH))[1]
-            : null;
-    }
-
-    /**
-     * Given an Open Alex Author | Work url, extracts the id from the url.
-     * @param $id
-     * The id to be parsed
-     * @return string|null
-     * The id extracted from the url.
-     */
-    public static function parseOpenAlexId($id): ?string {
-        if(strlen($id) === 0) return null;
-        $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
-        if(!is_array($parsed_id))
-            return $parsed_id;
-        if(sizeof($parsed_id) === 1)
-            return $parsed_id[0];
-        return $parsed_id[1];
-    }
-
-    /**
-     * Given an Open Alex Author | Work object, extracts the id from the object.
-     * @param $author
-     * The author object to retrieve the id from;
-     * @return string|null
-     * The id extracted from the object ( if it is present ).
-     */
-    public static function parseOpenAlexIdFromObj($author): ?string {
-        if(!$author) return null;
-        return property_exists($author->ids, 'openalex') ?
-            explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] :
-            null;
-    }
     /**
      * Class Utility Function
      * @return bool

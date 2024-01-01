@@ -2,7 +2,8 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Author;
+use App\Utility\Ids;
+use App\Utility\Requests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,12 +26,13 @@ class AuthorResource extends JsonResource {
      */
 
     public function toArray(Request $request): array {
-        $ids = Author::extractIds($this,property_exists($this,'ids') ? 'request' : 'database');
+        $ids = Ids::extractIds($this,property_exists($this,'ids') ?
+            Requests::Request_Asset : Requests::Database_Asset);
         return [
             'name' => $this->display_name,
-            'open_alex_id' => $ids['open_alex'],
-            'orc_id' => $this->orc_id,
-            'scopus_id' => $this->scopus_id,
+            Ids::OpenAlex_Id => $ids[Ids::OpenAlex],
+            Ids::OrcId_Id => $this->orc_id,
+            Ids::Scopus_Id => $this->scopus_id,
             'works_count' => $this->works_count,
             'cited_by_count' => $this->cited_by_count,
             'is_user' => $this->is_user,

@@ -58,21 +58,19 @@ class DatabaseSeeder extends Seeder {
         DB::transaction(function () {
             $started_time = date("H:i:s");
             rocketDump("Seeding started at $started_time");
-//            foreach ($this->Professors as $professor) User::createUserFromId($professor);
-//
-//            // Retrieve all the authors that are also users.
-//            $User_Authors = Author::user()->get();
-//
-//            // Loop through all the authors, retrieve their works and parse them.
-//            foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
+            foreach ($this->Professors as $professor) User::createUserFromId($professor);
 
+            // Retrieve all the authors that are also users.
+            $User_Authors = Author::user()->get();
 
+            // Loop through all the authors, retrieve their works and parse them.
+            foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
 
-            try {
-                UpdateDatabaseJob::dispatchSync();
-            } catch (Exception $exception) {
-                rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
-            }
+//            try {
+//                UpdateDatabaseJob::dispatchSync();
+//            } catch (Exception $exception) {
+//                rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+//            }
             $ended_time = date("H:i:s");
             rocketDump("Seeding ended at $ended_time");
         });
