@@ -115,10 +115,13 @@ class Author extends Model {
             $author = APIController::authorRequest($ids[Ids::OPEN_ALEX_ID]);
         }
         try {
+            // If an author with this OpenAlex id already exists, update them,
+            // in any other case, create a new entry.
             $newAuthor = Author::updateOrCreate(
                 [Ids::OPEN_ALEX_ID => $ids[Ids::OPEN_ALEX_ID]],
-                [Ids::SCOPUS_ID=>$ids[Ids::SCOPUS_ID] !== '' ? $ids[Ids::SCOPUS_ID] :  null,
-                    Ids::ORC_ID_ID => $ids[Ids::ORC_ID_ID],
+                [
+                    Ids::SCOPUS_ID => $ids[Ids::SCOPUS_ID] ??  null,
+                    Ids::ORC_ID_ID => $ids[Ids::ORC_ID_ID] ?? null,
                     'cited_by_count' => property_exists($author,'cited_by_count') ? $author->cited_by_count : null,
                     'display_name' => $author->display_name,
                     'is_user' => $is_user,
@@ -132,6 +135,7 @@ class Author extends Model {
             if(!property_exists($author,'counts_by_year')) {
                 return $newAuthor;
             }
+
             Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
         } catch (Exception $error) {
             rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);

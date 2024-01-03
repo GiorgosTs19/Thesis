@@ -26,14 +26,14 @@ class Statistic extends Model {
         ];
 
     /**
-     * Parses all the statistics contained in the Api response
-     * and generates statistics accordingly.
+     * Parses all the statistics contained in the API response
+     * and generates statistics entries.
      * @param $asset_id
-     * The id of the asset that the statistics refer to.
+     * The id of the asset.
      * @param $statistics
-     * The statistics array of the asset from the Api response.
+     * The asset's statistics array from the API response.
      * @param $asset_type
-     * The type of the asset that the statistics refer to.
+     * The type of asset ( Model::class ).
      * @return void
      */
     public static function generateStatistics($asset_id, $statistics, $asset_type): void {
@@ -45,11 +45,11 @@ class Statistic extends Model {
     /**
      * Create a new statistic
      * @param $asset_id
-     * The id of the asset that the statistic refer to.
+     * The id of the asset.
      * @param $statistic
-     * The statistic object from the Api response.
+     * The statistic object from the API response.
      * @param $asset_type
-     * The type of the asset that the statistic refer to.
+     * The type of asset ( Model::class ).
      * @return void
      */
     private static function newStatistic($asset_id, $statistic, $asset_type): void {
@@ -66,8 +66,17 @@ class Statistic extends Model {
         }
     }
 
-    public static function generateStatistic($id, $statistic, $asset_type): void {
-        self::newStatistic($id, $statistic, $asset_type);
+    /**
+     * @param $asset_id
+     * The asset's id.
+     * @param $statistic
+     * The statistic object from the API response.
+     * @param $asset_type
+     * The type of asset ( Model::class ).
+     * @return void
+     */
+    public static function generateStatistic($asset_id, $statistic, $asset_type): void {
+        self::newStatistic($asset_id, $statistic, $asset_type);
     }
 
     /** Updates the statistic based on the asset type of the statistic, checks for updates on the fields below :
@@ -131,9 +140,9 @@ class Statistic extends Model {
 
     /**
      * @param $asset_type
-     * The type of asset the statistic refers to.
+     * The type of asset ( Model::class ).
      * @param $statistics_array
-     * The asset's array of statistics to extract the statistic from.
+     * The asset's array of statistics.
      * @return mixed
      * The asset's statistic for the current year ( if it exists ).
      */
@@ -149,12 +158,11 @@ class Statistic extends Model {
                     return $value->year == (int)$year_to_update;
                 })
         };
-
     }
 
     /**
      * @return BelongsTo
-     * The asset that the statistic refers to.
+     * The statistic's asset.
      */
     public function asset(): BelongsTo {
         return $this->morphTo();

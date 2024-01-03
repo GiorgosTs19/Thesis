@@ -2,7 +2,7 @@
 
 namespace App\Utility;
 
-use App\Models\Author;
+use function App\Providers\rocketDump;
 
 class Ids {
     /**
@@ -98,7 +98,7 @@ class Ids {
         if(strlen($id) === 0)
             return null;
         $parsed_id = explode('=', explode('&',$id)[0]);
-        if(!is_array($parsed_id))
+        if(is_string($parsed_id))
             return $parsed_id;
         if(sizeof($parsed_id) === 1)
             return $parsed_id[0];
@@ -114,7 +114,7 @@ class Ids {
     public static function parseOrcId($id): ?string {
         if(strlen($id) === 0) return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
-        if(!is_array($parsed_id))
+        if(is_string($parsed_id))
             return $parsed_id;
         if(sizeof($parsed_id) === 1)
             return $parsed_id[0];
@@ -160,7 +160,8 @@ class Ids {
     public static function parseOpenAlexId($id): ?string {
         if(strlen($id) === 0) return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
-        if(!is_array($parsed_id))
+        dump($parsed_id);
+        if(is_string($parsed_id))
             return $parsed_id;
         if(sizeof($parsed_id) === 1)
             return $parsed_id[0];
