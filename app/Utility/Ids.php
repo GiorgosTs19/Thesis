@@ -2,8 +2,6 @@
 
 namespace App\Utility;
 
-use function App\Providers\rocketDump;
-
 class Ids {
     /**
      * ID type string for OrcId ids.

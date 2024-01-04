@@ -3,10 +3,11 @@
 namespace Database\Seeders;
 
 use Exception;
+use App\Utility\SystemManager;
 use Illuminate\Database\Seeder;
 use App\Jobs\UpdateDatabaseJob;
 use App\Jobs\InitializeDatabaseJob;
-use function App\Providers\rocketDump;
+use function App\Providers\_log;
 
 class DatabaseSeeder extends Seeder {
 
@@ -19,7 +20,7 @@ class DatabaseSeeder extends Seeder {
         try {
             InitializeDatabaseJob::dispatchSync();
         } catch (Exception $exception) {
-            rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+            _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
         }
     }
 
@@ -27,7 +28,7 @@ class DatabaseSeeder extends Seeder {
         try {
             UpdateDatabaseJob::dispatchSync();
         } catch (Exception $exception) {
-            rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+            _log($exception->getMessage(), SystemManager::ERROR_LOG,SystemManager::LOG_META);
         }
     }
 }

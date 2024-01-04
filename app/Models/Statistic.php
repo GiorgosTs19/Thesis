@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Utility\SystemManager;
 use Exception;
 use Illuminate\Support\Arr;
-use function App\Providers\rocketDump;
+use function App\Providers\_log;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -62,7 +63,7 @@ class Statistic extends Model {
             $newYearlyCitations->asset_type = $asset_type;
             $newYearlyCitations->save();
         } catch (Exception $error) {
-            rocketDump($error->getMessage(), 'error', [__FUNCTION__, __FILE__, __LINE__]);
+            _log($error->getMessage(), SystemManager::ERROR_LOG, [__FUNCTION__, __FILE__, __LINE__]);
         }
     }
 
@@ -105,17 +106,17 @@ class Statistic extends Model {
 
                     if ($works_count_differ) {
                         $this->works_count = $requestStatistic->works_count;
-                        rocketDump("Works count has been updated for Author $asset->open_alex_id");
+                        _log("Works count has been updated for Author $asset->open_alex_id");
                     }
 
                     if ($citation_count_differ) {
                         $this->cited_count = $requestStatistic->cited_by_count;
-                        rocketDump("Citation count has been updated for Author $asset->open_alex_id ");
+                        _log("Citation count has been updated for Author $asset->open_alex_id ");
                     }
 
                     $this->save();
                 } catch (Exception $exception) {
-                    rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+                    _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
                 }
                 break;
             }
@@ -129,9 +130,9 @@ class Statistic extends Model {
                 try {
                     $this->cited_count = $requestStatistic->cited_by_count;
                     $this->save();
-                    rocketDump("Citation count has been updated for Work $asset->open_alex_id ");
+                    _log("Citation count has been updated for Work $asset->open_alex_id ");
                 } catch (Exception $exception) {
-                    rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+                    _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
                 }
                 break;
             }

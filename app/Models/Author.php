@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use App\Utility\Ids;
 use Exception;
+use App\Utility\Ids;
+use App\Utility\SystemManager;
+use function App\Providers\_log;
 use JetBrains\PhpStorm\ArrayShape;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use function App\Providers\rocketDump;
 use App\Http\Controllers\APIController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -138,7 +139,7 @@ class Author extends Model {
 
             Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
         } catch (Exception $error) {
-            rocketDump($error->getMessage(), 'error',[__FUNCTION__,__FILE__,__LINE__]);
+            _log($error->getMessage(), SystemManager::ERROR_LOG,SystemManager::LOG_META);
         }
         return $newAuthor;
     }
@@ -204,7 +205,7 @@ class Author extends Model {
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
         $have_been_parsed_count = $prev_count + $works_count;
-        rocketDump($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
+        _log($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
 
         // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
         // then keep calling the function while incrementing the page parameter passed to the request,
@@ -228,7 +229,7 @@ class Author extends Model {
                 $newAuthorWork->work_id = $work->id;
                 $newAuthorWork->save();
             } catch (Exception $error) {
-                rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+                _log($error->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
             }
         }
     }
@@ -253,10 +254,11 @@ class Author extends Model {
      * @return void
      */
     public function updateSelf(): void {
+
         $requestAuthor = APIController::authorUpdateRequest($this->open_alex_id);
 
         if($requestAuthor->works_count !== $this->works_count) {
-            rocketDump("New works found for $this->display_name");
+            _log("New works found for $this->display_name");
             $this->parseWorks(0, 1, true);
         }
 
@@ -270,7 +272,7 @@ class Author extends Model {
 
             $this->save();
         } catch (Exception $exception) {
-            rocketDump($exception->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+            _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
         }
 
         $year_to_update =  date('Y');

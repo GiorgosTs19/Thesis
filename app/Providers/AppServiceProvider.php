@@ -2,14 +2,17 @@
 
 namespace App\Providers;
 
-use App\Http\Controllers\APIController;
+use App\Utility\SystemManager;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\APIController;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
+
     /**
      * Register any application services.
      */
+
     public function register(): void {
         // Instantiate the APIController
         APIController::init();
@@ -24,7 +27,7 @@ class AppServiceProvider extends ServiceProvider {
          * The type of log to use, can be one of ['info', 'error', 'warning', 'debug'].
          * @return void
          */
-        function rocketDump(object|string|array|null $message, string $log_case='info', array $callingFunctionInfo=[]): void  {
+        function _log(object|string|array|null $message, string $log_case = SystemManager::INFO_LOG, array $callingFunctionInfo = []): void  {
             $meta = '';
             $display_meta_data = sizeof($callingFunctionInfo) === 3;
             if($display_meta_data) {
@@ -54,10 +57,10 @@ class AppServiceProvider extends ServiceProvider {
                 else
                     $logMessage = $message;
 
-                $validLogCases = ['info', 'error', 'warning', 'debug'];
+                $validLogCases = [SystemManager::INFO_LOG, SystemManager::ERROR_LOG, SystemManager::WARNING_LOG, SystemManager::DEBUG_LOG];
 
                 if (in_array($log_case, $validLogCases)) {
-                    if ($log_case === 'error') {
+                    if ($log_case === SystemManager::ERROR_LOG) {
                         // Use red color for the error message
                         Log::error($logMessage);
                     } else {
@@ -65,14 +68,12 @@ class AppServiceProvider extends ServiceProvider {
                         Log::$log_case($logMessage);
                     }
                 }
-
                 dump("🚀 ~ $logMessage");
             } else dump("🚀 ~ ", $meta , $message);
-
         }
 
         function logMemory(): void {
-            rocketDump(number_format(memory_get_usage() * (10 ** -6), 1)."MB / ".ini_get('memory_limit'));
+            _log(number_format(memory_get_usage() * (10 ** -6), 1)."MB / ".ini_get('memory_limit'));
         }
     }
 

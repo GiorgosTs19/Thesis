@@ -7,8 +7,8 @@ use App\Models\User;
 use App\Models\Author;
 use Illuminate\Bus\Queueable;
 use App\Utility\SystemManager;
+use function App\Providers\_log;
 use Illuminate\Support\Facades\DB;
-use function App\Providers\rocketDump;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -66,7 +66,7 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
     public function handle(): void {
         try {
             $started_time = date("H:i:s");
-            rocketDump("Database Initialization started at $started_time");
+            _log("Database Initialization started at $started_time");
 
             SystemManager::enableMaintenanceMode();
 
@@ -81,11 +81,11 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
             });
 
         } catch (Exception $err) {
-            rocketDump("Something went wrong while updating the database,".$err->getMessage(),'error');
+            _log("Something went wrong while updating the database,".$err->getMessage(),SystemManager::ERROR_LOG);
         }
         finally {
             $ended_time = date("H:i:s");
-            rocketDump("Database Initialization ended at $ended_time");
+            _log("Database Initialization ended at $ended_time");
 
             SystemManager::disableMaintenanceMode();
         }

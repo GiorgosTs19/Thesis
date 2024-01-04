@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Utility\SystemManager;
 use Exception;
 use App\Utility\Ids;
 use Laravel\Sanctum\HasApiTokens;
 use JetBrains\PhpStorm\ArrayShape;
-use function App\Providers\rocketDump;
+use function App\Providers\_log;
 use App\Http\Controllers\APIController;
 use Illuminate\Notifications\Notifiable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -136,9 +137,9 @@ class User extends Authenticatable {
             $newUser->scopus_id = $ids[Ids::SCOPUS_ID];
             $newUser->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
             $newUser->save();
-            rocketDump("User $newUser->last_name $newUser->first_name has been created");
+            _log("User $newUser->last_name $newUser->first_name has been created");
         } catch (Exception $error ) {
-            rocketDump($error->getMessage(), 'error', [__FUNCTION__,__FILE__,__LINE__]);
+            _log($error->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
         }
         return $newUser;
     }

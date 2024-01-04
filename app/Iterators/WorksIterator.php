@@ -4,7 +4,6 @@ namespace App\Iterators;
 
 use Generator;
 use Iterator;
-use function App\Providers\rocketDump;
 
 class WorksIterator implements Iterator  {
     private array $works;
