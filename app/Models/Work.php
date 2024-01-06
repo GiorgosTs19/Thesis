@@ -94,7 +94,7 @@ class Work extends Model {
             $ids = Ids::extractIds($authorObject->author);
 
             // Check if an author is a user.
-            $author_is_user = User::isAuthorAUser($ids[Ids::OPEN_ALEX_ID])['exists'];
+            $author_is_user = User::authorIsUser($ids[Ids::OPEN_ALEX_ID])['exists'];
 
             $newAuthor = null;
             // Check if an author exists by their Open Alex id or their OrcId

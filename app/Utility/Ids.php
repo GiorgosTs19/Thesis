@@ -44,12 +44,12 @@ class Ids {
     const SCOPUS_FILTER_PREFIX = 'scopus:';
 
     /**
-     * @param $id
+     * @param string $id
      * The id to check.
      * @return string
      * The type of the id passed to the function ( Ids::OrcId || Ids::OpenAlex || Ids::Scopus )
      */
-    public static function getIdType($id): string {
+    public static function getIdType(string $id): string {
         // If the id contains '-', then OrcId id is used.
         if(str_contains($id, '-'))
             return self::ORC_ID;
@@ -87,12 +87,12 @@ class Ids {
     }
 
     /**
-     * @param $id
+     * @param string $id
      * The id to be parsed
      * @return string|null
      * The parsed Scopus id.
      */
-    public static function parseScopusId($id): ?string {
+    public static function parseScopusId(string $id): ?string {
         if(strlen($id) === 0)
             return null;
         $parsed_id = explode('=', explode('&',$id)[0]);
@@ -104,12 +104,12 @@ class Ids {
     }
 
     /**
-     * @param $id
+     * @param string $id
      * The id to be parsed.
      * @return string|null
      * The parsed OrcId id.
      */
-    public static function parseOrcId($id): ?string {
+    public static function parseOrcId(string $id): ?string {
         if(strlen($id) === 0) return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
         if(is_string($parsed_id))
@@ -150,15 +150,14 @@ class Ids {
 
     /**
      * Given an Open Alex Author | Work url, extracts the id from the url.
-     * @param $id
+     * @param string $id
      * The id to be parsed
      * @return string|null
      * The id extracted from the url.
      */
-    public static function parseOpenAlexId($id): ?string {
+    public static function parseOpenAlexId(string $id): ?string {
         if(strlen($id) === 0) return null;
         $parsed_id = explode('/', parse_url($id, PHP_URL_PATH));
-        dump($parsed_id);
         if(is_string($parsed_id))
             return $parsed_id;
         if(sizeof($parsed_id) === 1)

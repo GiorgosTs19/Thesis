@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder {
 
     public function run(): void {
         self::InitializeDatabase();
-        self::UpdateDatabase();
+//        self::UpdateDatabase();
     }
 
     private function InitializeDatabase (): void {

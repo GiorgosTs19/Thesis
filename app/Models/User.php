@@ -65,36 +65,43 @@ class User extends Authenticatable {
     ];
 
     /**
-     * @param $open_alex_id
+     * @param string $open_alex_id
      * The OpenAlex id of an author to check if they're a user.
      * @return array
      * An array that contains a boolean as its first element, indicating if a user with a matching id was found,
      * and the user ( it they exist, otherwise null ) as its second element.
      */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function isAuthorAUser($open_alex_id): array {
-        $user_query = User::where(Ids::OPEN_ALEX_ID,$open_alex_id);
+    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorIsUser(string $open_alex_id): array {
+        $user_query = self::where(Ids::OPEN_ALEX_ID,$open_alex_id);
         $user_exists = boolval($user_query->exists());
         return ['exists'=>$user_exists, 'author'=>$user_query->first()];
     }
 
     /**
-     * @param $professor
-     * The Professor object to extract the info from.
+     * @param array $professor
+     * The professor object to be used to retrieve info from the OpenAlex API.
+     * $professor #ArrayShape
+     * 'email' (string): The user's email address.
+     * 'first' (string): The user's first name.
+     * 'last' (string): The user's last name.
+     * 'id' (string): The user's ID.
      * @return void
      * Create a new user and save it to the database, using info from the OpenAlex API.
      */
-    public static function createUserFromId($professor): void {
+    public static function createProfessorUser(array $professor): void {
+        $id = $professor['id'];
         // Check what type of id is used to fetch the author's info from OpenAlex api.
-        $id_type = Ids::getIdType($professor['id']);
+        $id_type = Ids::getIdType($id);
 
         $author = match ($id_type) {
-            Ids::ORC_ID, Ids::OPEN_ALEX => APIController::authorRequest($professor['id']),
+            Ids::ORC_ID, Ids::OPEN_ALEX => APIController::authorRequest($id),
             // Using a filter request since OpenAlex can only find Authors by scopus using filters.
-            Ids::SCOPUS => APIController::authorFilterRequest($professor['id'], false, true)
+            Ids::SCOPUS => APIController::authorFilterRequest($id, false, true)
         };
 
         if(!$author)
             return;
+
         if((is_array($author) && sizeof($author) === 0))
             return;
 
@@ -110,11 +117,11 @@ class User extends Authenticatable {
         $ids = [Ids::SCOPUS_ID => $scopus_id, Ids::ORC_ID_ID => $orc_id, Ids::OPEN_ALEX_ID => $open_alex_id];
 
         // If a user with the same openAlex id exists. return;
-        if(User::openAlex($open_alex_id)->exists())
+        if(self::openAlex($open_alex_id)->exists())
             return;
 
         // Else create a new user.
-        User::createNewUser($professor,$ids);
+        self::newProfessorUser($professor,$ids);
 
         Author::createAuthor($author,$ids, true);
     }
@@ -126,7 +133,7 @@ class User extends Authenticatable {
      * @return User
      * The newly created user.
      */
-    public static function createNewUser($professor, array $ids): User {
+    private static function newProfessorUser($professor, array $ids): User {
         $newUser = new User;
         try {
             $newUser->first_name = $professor['first'];
