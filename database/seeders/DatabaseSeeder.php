@@ -3,16 +3,15 @@
 namespace Database\Seeders;
 
 use Exception;
-use App\Utility\SystemManager;
+use App\Utility\ULog;
 use Illuminate\Database\Seeder;
 use App\Jobs\UpdateDatabaseJob;
 use App\Jobs\InitializeDatabaseJob;
-use function App\Providers\_log;
 
 class DatabaseSeeder extends Seeder {
 
     public function run(): void {
-//        self::InitializeDatabase();
+        self::InitializeDatabase();
         self::UpdateDatabase();
     }
 
@@ -20,7 +19,7 @@ class DatabaseSeeder extends Seeder {
         try {
             InitializeDatabaseJob::dispatchSync();
         } catch (Exception $exception) {
-            _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
+            ULog::error($exception->getMessage(), ULog::META);
         }
     }
 
@@ -28,7 +27,7 @@ class DatabaseSeeder extends Seeder {
         try {
             UpdateDatabaseJob::dispatchSync();
         } catch (Exception $exception) {
-            _log($exception->getMessage(), SystemManager::ERROR_LOG,SystemManager::LOG_META);
+            ULog::error($exception->getMessage(), ULog::META);
         }
     }
 }

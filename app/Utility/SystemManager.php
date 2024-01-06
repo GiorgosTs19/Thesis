@@ -3,7 +3,6 @@
 namespace App\Utility;
 
 use Illuminate\Support\Facades\Artisan;
-use function App\Providers\_log;
 
 class SystemManager {
 
@@ -18,7 +17,7 @@ class SystemManager {
      */
     public static function enableMaintenanceMode(): void {
         // Enable maintenance mode
-        _log('Turning On Maintenance mode');
+        ULog::log('Turning On Maintenance mode');
         Artisan::call('down');
     }
 
@@ -28,7 +27,7 @@ class SystemManager {
      */
     public static function disableMaintenanceMode(): void {
         // Disable maintenance mode
-        _log('Turning Off Maintenance mode');
+        ULog::log('Turning Off Maintenance mode');
         Artisan::call('up');
     }
 }

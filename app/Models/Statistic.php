@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use App\Utility\SystemManager;
 use Exception;
+use App\Utility\ULog;
 use Illuminate\Support\Arr;
-use function App\Providers\_log;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\{Model, Relations\BelongsTo, Factories\HasFactory};
 
 /**
  * @property mixed year
@@ -62,8 +59,8 @@ class Statistic extends Model {
             $newYearlyCitations->cited_count = $statistic->cited_by_count;
             $newYearlyCitations->asset_type = $asset_type;
             $newYearlyCitations->save();
-        } catch (Exception $error) {
-            _log($error->getMessage(), SystemManager::ERROR_LOG, [__FUNCTION__, __FILE__, __LINE__]);
+        } catch (Exception $exception) {
+            ULog::error($exception->getMessage(), ULog::META);
         }
     }
 
@@ -106,17 +103,17 @@ class Statistic extends Model {
 
                     if ($works_count_differ) {
                         $this->works_count = $requestStatistic->works_count;
-                        _log("Works count has been updated for Author $asset->open_alex_id");
+                        ULog::log("Works count has been updated for Author $asset->open_alex_id");
                     }
 
                     if ($citation_count_differ) {
                         $this->cited_count = $requestStatistic->cited_by_count;
-                        _log("Citation count has been updated for Author $asset->open_alex_id ");
+                        ULog::log("Citation count has been updated for Author $asset->open_alex_id ");
                     }
 
                     $this->save();
                 } catch (Exception $exception) {
-                    _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
+                    ULog::error($exception->getMessage(), ULog::META);
                 }
                 break;
             }
@@ -130,9 +127,9 @@ class Statistic extends Model {
                 try {
                     $this->cited_count = $requestStatistic->cited_by_count;
                     $this->save();
-                    _log("Citation count has been updated for Work $asset->open_alex_id ");
+                    ULog::log("Citation count has been updated for Work $asset->open_alex_id ");
                 } catch (Exception $exception) {
-                    _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
+                    ULog::error($exception->getMessage(), ULog::META);
                 }
                 break;
             }

@@ -2,12 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Utility\ULog;
 use Exception;
 use Illuminate\Bus\Queueable;
 use App\Models\{Author, Work};
 use App\Utility\SystemManager;
 use Illuminate\Support\Facades\DB;
-use function App\Providers\_log;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\{InteractsWithQueue, SerializesModels};
 use Illuminate\Contracts\Queue\{ShouldBeUnique, ShouldQueue};
@@ -28,7 +28,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
             SystemManager::enableMaintenanceMode();
 
             $started_time = date("H:i:s");
-            _log("Database Update started at $started_time");
+            ULog::log("Database Update started at $started_time");
 
             DB::transaction(function () {
                 $this->updateAuthors();
@@ -36,10 +36,10 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
             });
 
             $ended_time = date("H:i:s");
-            _log("Database Update ended at $ended_time");
+            ULog::log("Database Update ended at $ended_time");
 
         } catch (Exception $err) {
-            _log("Something went wrong while updating the database,".$err->getMessage(),SystemManager::ERROR_LOG);
+            ULog::log("Something went wrong while updating the database,".$err->getMessage(),ULog::META);
         }
         finally {
             SystemManager::disableMaintenanceMode();
@@ -52,7 +52,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
      */
     private function updateAuthors() : void {
         DB::transaction(function () {
-            _log('Starting Authors update');
+            ULog::log('Starting Authors update');
             // An array of the ids of the authors to be updated.
             $authors = Author::user()->get(Author::$UPDATE_FIELDS);
 
@@ -61,7 +61,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
 
             foreach ($authors as $author) {
                 $author->updateSelf();
-                _log('Author updates : '.++$completed."/$length completed");
+                ULog::log('Author updates : '.++$completed."/$length completed");
             }
         });
     }
@@ -71,7 +71,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
      * @return void
      */
     private function updateWorks() : void  {
-        _log('Starting Works update');
+        ULog::log('Starting Works update');
         DB::transaction(function () {
             // An array of the ids of the authors to be updated.
             $works = Work::all(Work::$UPDATE_FIELDS);
@@ -79,7 +79,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
             $completed = 0;
             foreach ($works as $work) {
                 $work->updateSelf();
-                _log('Work updates : '.++$completed."/$length completed");
+                ULog::log('Work updates : '.++$completed."/$length completed");
             }
         });
     }

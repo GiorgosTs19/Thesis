@@ -4,10 +4,8 @@ namespace App\Models;
 
 use Exception;
 use App\Utility\Ids;
-use function App\Providers\_log;
+use App\Utility\ULog;
 use Illuminate\Support\Facades\Auth;
-use function App\Providers\logMemory;
-use App\Utility\SystemManager;
 use App\Http\Controllers\APIController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -78,9 +76,9 @@ class Work extends Model {
 
             // Associate all authors from the array with the work being processed
             $newWork->parseAuthors($work->authorships);
-            logMemory();
-        } catch (Exception $error) {
-            _log($error->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
+            ULog::memory();
+        } catch (Exception $exception) {
+            ULog::error($exception->getMessage(), ULog::META);
         }
     }
 
@@ -163,7 +161,7 @@ class Work extends Model {
 
             $this->save();
         } catch (Exception $exception) {
-            _log($exception->getMessage(), SystemManager::ERROR_LOG, [__FUNCTION__, __FILE__, __LINE__]);
+            ULog::error($exception->getMessage(), ULog::META);
         }
         // Retrieve the current year
         $year_to_update =  date('Y');
@@ -180,7 +178,7 @@ class Work extends Model {
             // It seems like for some works there has not been any documented citations for the current year, or for years now,
             // so checking if the record we need exists in the first place
             if(!$requestStatistic) {
-                _log("No statistics were found for $this->open_alex_id for the year $year_to_update", 'info');
+                ULog::log("No statistics were found for $this->open_alex_id for the year $year_to_update", ULog::META);
                 return;
             }
             // If there is, and for some reason it has not been parsed on a previous update, create the new statistic for the current year.

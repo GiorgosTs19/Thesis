@@ -4,10 +4,10 @@ namespace App\Jobs;
 
 use Exception;
 use App\Models\User;
+use App\Utility\ULog;
 use App\Models\Author;
 use Illuminate\Bus\Queueable;
 use App\Utility\SystemManager;
-use function App\Providers\_log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -66,7 +66,7 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
     public function handle(): void {
         try {
             $started_time = date("H:i:s");
-            _log("Database Initialization started at $started_time");
+            ULog::log("Database Initialization started at $started_time");
 
             SystemManager::enableMaintenanceMode();
 
@@ -81,11 +81,11 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
             });
 
         } catch (Exception $err) {
-            _log("Something went wrong while updating the database,".$err->getMessage(),SystemManager::ERROR_LOG);
+            ULog::error("Something went wrong while updating the database,".$err->getMessage(),ULog::META);
         }
         finally {
             $ended_time = date("H:i:s");
-            _log("Database Initialization ended at $ended_time");
+            ULog::log("Database Initialization ended at $ended_time");
 
             SystemManager::disableMaintenanceMode();
         }

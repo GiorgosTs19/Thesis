@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use App\Utility\SystemManager;
 use Exception;
 use App\Utility\Ids;
+use App\Utility\ULog;
 use Laravel\Sanctum\HasApiTokens;
 use JetBrains\PhpStorm\ArrayShape;
-use function App\Providers\_log;
 use App\Http\Controllers\APIController;
 use Illuminate\Notifications\Notifiable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -137,9 +136,9 @@ class User extends Authenticatable {
             $newUser->scopus_id = $ids[Ids::SCOPUS_ID];
             $newUser->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
             $newUser->save();
-            _log("User $newUser->last_name $newUser->first_name has been created");
-        } catch (Exception $error ) {
-            _log($error->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
+            ULog::log("User $newUser->last_name $newUser->first_name has been created");
+        } catch (Exception $exception ) {
+            ULog::error($exception->getMessage(), ULog::META);
         }
         return $newUser;
     }

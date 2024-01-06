@@ -3,17 +3,14 @@
 namespace App\Models;
 
 use Exception;
-use App\Utility\Ids;
-use App\Utility\SystemManager;
-use function App\Providers\_log;
+use App\Utility\{Ids, ULog, SystemManager};
 use JetBrains\PhpStorm\ArrayShape;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\{Facades\Auth, Facades\Config};
 use App\Http\Controllers\APIController;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\{Eloquent\Model,
+    Eloquent\Relations\MorphMany,
+    Eloquent\Factories\HasFactory,
+    Eloquent\Relations\BelongsToMany};
 
 /**
  * @method static updateOrCreate(array $array, array $array1)
@@ -139,7 +136,7 @@ class Author extends Model {
 
             Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
         } catch (Exception $error) {
-            _log($error->getMessage(), SystemManager::ERROR_LOG,SystemManager::LOG_META);
+            ULog::error($error->getMessage(), SystemManager::ERROR_LOG,SystemManager::LOG_META);
         }
         return $newAuthor;
     }
@@ -205,7 +202,7 @@ class Author extends Model {
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
         $have_been_parsed_count = $prev_count + $works_count;
-        _log($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
+        ULog::log($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
 
         // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
         // then keep calling the function while incrementing the page parameter passed to the request,
@@ -229,7 +226,7 @@ class Author extends Model {
                 $newAuthorWork->work_id = $work->id;
                 $newAuthorWork->save();
             } catch (Exception $error) {
-                _log($error->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
+                ULog::error($error->getMessage(), ULog::META);
             }
         }
     }
@@ -258,7 +255,7 @@ class Author extends Model {
         $requestAuthor = APIController::authorUpdateRequest($this->open_alex_id);
 
         if($requestAuthor->works_count !== $this->works_count) {
-            _log("New works found for $this->display_name");
+            ULog::log("New works found for $this->display_name");
             $this->parseWorks(0, 1, true);
         }
 
@@ -272,7 +269,7 @@ class Author extends Model {
 
             $this->save();
         } catch (Exception $exception) {
-            _log($exception->getMessage(), SystemManager::ERROR_LOG, SystemManager::LOG_META);
+            ULog::error($exception->getMessage(), ULog::META);
         }
 
         $year_to_update =  date('Y');
