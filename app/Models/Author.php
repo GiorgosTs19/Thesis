@@ -16,6 +16,7 @@ use Illuminate\Database\{Eloquent\Model,
  * @method static updateOrCreate(array $array, array $array1)
  * @method static where(string $string, $orc_id)
  * @method static user()
+ * @method static find($id)
  *
  * @property int id
  * @property string orc_id
@@ -33,11 +34,6 @@ use Illuminate\Database\{Eloquent\Model,
 class Author extends Model {
     use HasFactory;
 
-    /**
-     * @var array|bool|mixed|string|null
-     */
-    private static mixed $AUTHOR_WORKS_BASE_URL;
-
     public static array $UPDATE_FIELDS = [
         'id',
         'open_alex_id',
@@ -45,7 +41,10 @@ class Author extends Model {
         'cited_by_count',
         'works_count'
     ];
-
+    /**
+     * @var array|bool|mixed|string|null
+     */
+    private static mixed $AUTHOR_WORKS_BASE_URL;
     protected $fillable = [
         'display_name',
         'orc_id',
@@ -83,8 +82,6 @@ class Author extends Model {
 
     /**
      * @param $open_alex_id
-     * The OpenAlex id to search an author with
-     * @param $orc_id
      * The OpenAlex id to search an author with
      * @return array
      * An array that contains a boolean as its first element, indicating if an author with a matching id was found,
@@ -136,7 +133,7 @@ class Author extends Model {
 
             Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
         } catch (Exception $error) {
-            ULog::error($error->getMessage(), SystemManager::ERROR_LOG,SystemManager::LOG_META);
+            ULog::error($error->getMessage(),SystemManager::LOG_META);
         }
         return $newAuthor;
     }
@@ -171,45 +168,15 @@ class Author extends Model {
         return $query->where('is_user',$is_user);
     }
 
-
     /**
-     * @param int $prev_count
-     * Keeps the amount of works already parsed ( used only if the function is called recursively, to keep track of parsed works ).
-     * @param int $page
-     * The page number used in the query ( used only if the function is called recursively, to fetch the next page of works )
-     * @param bool $checkNew
-     * A boolean indicating if the function should check for new works on the OpenAlex database.
-     * If set to true, the function will only request works published in the current year,
-     * Defaults to false.
-     * @return void
-     *  Retrieves all the works ( or a specified number of them ) from the OpenAlex API and parses them,
-     *  stores them in the database, parses all the authors associated with each one and creates a new author entry for any of them that doesn't already exist.
-     *  It will also create an association for each work and for each of the authors that exist and are associated with them.
+     * Scope
+     * A local scope that can help filter out authors based on their OpenAlex id.
+     * @param $query - The query that the scope should be chained to ( injected automatically )'
+     * @param $open_alex_id - The OpenAlex id of to search for.
+     * @return mixed
      */
-    public function parseWorks(int $prev_count = 0, int $page = 1, bool $checkNew = false): void {
-        [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page, false,
-        $checkNew ? ['publication_year'=>date('Y')] : []);
-        $total_work_count = $meta->count;
-
-        foreach ($works->generator() as $work) {
-            // Check if a work with this title already exists in the database, if so proceed to the next one
-            if(Work::openAlex($work->id)->exists())
-                continue;
-
-            // If not, create a new Work and save it to the database
-            Work::createNewWork($work);
-        }
-        // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
-        // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
-        $have_been_parsed_count = $prev_count + $works_count;
-        ULog::log($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
-
-        // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
-        // then keep calling the function while incrementing the page parameter passed to the request,
-        // until all the author's works have been parsed and stored.
-        if($have_been_parsed_count < $total_work_count) {
-            $this->parseWorks($have_been_parsed_count, ++$page, $checkNew);
-        }
+    public function scopeOpenAlex($query, string $open_alex_id): mixed{
+        return $query->where('open_alex_id',$open_alex_id);
     }
 
     /**
@@ -286,6 +253,46 @@ class Author extends Model {
         }
 
         $databaseStatistic->updateStatistic($this, $requestAuthor->counts_by_year);
+    }
+
+    /**
+     * @param int $prev_count
+     * Keeps the amount of works already parsed ( used only if the function is called recursively, to keep track of parsed works ).
+     * @param int $page
+     * The page number used in the query ( used only if the function is called recursively, to fetch the next page of works )
+     * @param bool $checkNew
+     * A boolean indicating if the function should check for new works on the OpenAlex database.
+     * If set to true, the function will only request works published in the current year,
+     * Defaults to false.
+     * @return void
+     *  Retrieves all the works ( or a specified number of them ) from the OpenAlex API and parses them,
+     *  stores them in the database, parses all the authors associated with each one and creates a new author entry for any of them that doesn't already exist.
+     *  It will also create an association for each work and for each of the authors that exist and are associated with them.
+     */
+    public function parseWorks(int $prev_count = 0, int $page = 1, bool $checkNew = false): void {
+        [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page, false,
+        $checkNew ? ['publication_year'=>date('Y')] : []);
+        $total_work_count = $meta->count;
+
+        foreach ($works->generator() as $work) {
+            // Check if a work with this title already exists in the database, if so proceed to the next one
+            if(Work::openAlex($work->id)->exists())
+                continue;
+
+            // If not, create a new Work and save it to the database
+            Work::createNewWork($work);
+        }
+        // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
+        // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
+        $have_been_parsed_count = $prev_count + $works_count;
+        ULog::log($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
+
+        // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
+        // then keep calling the function while incrementing the page parameter passed to the request,
+        // until all the author's works have been parsed and stored.
+        if($have_been_parsed_count < $total_work_count) {
+            $this->parseWorks($have_been_parsed_count, ++$page, $checkNew);
+        }
     }
 
     /**

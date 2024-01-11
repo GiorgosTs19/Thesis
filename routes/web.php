@@ -16,7 +16,7 @@ use App\Http\Controllers\AuthorController;
 */
 
 Route::get('/',[Controller::class, 'showLogin']);
-Route::get('/Author',[AuthorController::class, 'getAuthor']);
+Route::get('/Author/{id}',[AuthorController::class, 'showAuthorPage']);
 Route::get('/Article/{?oaurl}', [Controller::class, 'getArticle']);
 
 Route::prefix('author')->group(function () {

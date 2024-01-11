@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Work extends Model {
     use HasFactory;
 
-    const AUTHOR_WORKS_TABLE = 'author_works';
+    const AUTHOR_WORKS_TABLE = 'author_work';
 
     public static array $UPDATE_FIELDS = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
 

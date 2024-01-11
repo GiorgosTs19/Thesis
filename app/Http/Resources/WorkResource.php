@@ -34,7 +34,8 @@ class WorkResource extends JsonResource {
             'is_oa' => $this->is_oa,
             'open_alex_url' => $this->open_alex_url,
             'updated_at' => $this->updated_at,
-            'cites_url' => $this->cites_url
+            'cites_url' => $this->cites_url,
+            'authors'=>AuthorResource::collection($this->whenLoaded('authors'))
         ];
     }
 }
