@@ -1,30 +1,53 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import './styles.css'; // Import the corresponding CSS file
+import React, { useEffect, useRef } from 'react';
+import Chart from 'chart.js/auto';
+import {array, arrayOf, number, oneOfType, string} from "prop-types";
 
-SimpleStatisticsChart.propTypes = {
+const SimpleBarChart = ({labels, title, dataSet}) => {
+    const chartRef = useRef(null);
 
+    useEffect(() => {
+        // Your data
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: title,
+                data: dataSet, // Replace with your actual data
+                backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+                borderColor: ['rgba(75, 192, 192, 1)'],
+                borderWidth: 1
+            }]
+        };
+
+        // Chart configuration
+        const config = {
+            type: 'bar',
+            data,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        };
+
+        // Create a new instance of Chart.js
+        const myChart = new Chart(chartRef.current, config);
+
+        // Cleanup function to destroy the chart when the component unmounts
+        return () => {
+            myChart.destroy();
+        };
+    }, [labels, title, dataSet]);
+
+    return <canvas ref={chartRef}></canvas>;
+};
+
+SimpleBarChart.propTypes = {
+    labels:arrayOf(oneOfType([string,number])).isRequired,
+    title:string.isRequired,
+    dataSet:array.isRequired,
 }
-function SimpleStatisticsChart({ statistics, title, xAxisName, yAxisName }) {
-    return (
-        <>
-            {title && <h3 className="text-center italic mb-7">{title}</h3>}
-            <div className={'flex flex-col'}>
-                <div className={'flex flex-row mx-auto'}>
-                    {yAxisName && <h4 className="rotate-90 h-fit m-auto">{yAxisName}</h4>}
-                    <div className="chart-container">
-                        {statistics.map((stat, index) => (
-                            <div className="bar" key={index} title={stat.cited_count}>
-                                <div className="bar-cited" style={{height: `${stat.cited_count / 4}px`}}/>
-                                <div className="bar-label text-sm">{stat.year}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                {xAxisName && <h4 className="my-2 text-center">{xAxisName}</h4>}
-            </div>
-        </>
-    );
-}
-
-export default SimpleStatisticsChart;
+export default SimpleBarChart;

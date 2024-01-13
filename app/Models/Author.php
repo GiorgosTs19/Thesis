@@ -58,6 +58,10 @@ class Author extends Model {
         'works_url'
     ];
 
+    protected $casts = [
+        'updated_at'=>'datetime:Y-m-d'
+    ];
+
     protected $hidden = ['created_at', 'last_updated_date', 'created_date'];
 
     public function __construct(array $attributes = []) {
@@ -301,6 +305,6 @@ class Author extends Model {
      * All the cited_counts by year associated with an author.
      */
     public function statistics(): MorphMany {
-        return $this->morphMany(Statistic::class, 'asset');
+        return $this->morphMany(Statistic::class, 'asset')->orderBy('year');
     }
 }

@@ -1,0 +1,19 @@
+export function ChevronLeftSVG({className,width=24,height=24,onClick=()=>{},rotate='45def'}) {
+    return (
+        <svg
+            width={width}
+            height={height}
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{cursor:"pointer",rotate:rotate}}
+            className={className}
+            onClick={onClick}
+        >
+            <path
+                d="M16.2426 6.34317L14.8284 4.92896L7.75739 12L14.8285 19.0711L16.2427 17.6569L10.5858 12L16.2426 6.34317Z"
+                fill="currentColor"
+            />
+        </svg>
+    )
+}
