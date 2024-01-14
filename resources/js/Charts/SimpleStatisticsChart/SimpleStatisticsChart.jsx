@@ -65,5 +65,6 @@ SimpleBarChart.propTypes = {
     labels:arrayOf(oneOfType([string,number])).isRequired,
     title:string.isRequired,
     dataSet:array.isRequired,
+    description:string
 }
 export default SimpleBarChart;

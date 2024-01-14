@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Author;
+use App\Models\Statistic;
 use App\Utility\Ids;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -49,12 +50,12 @@ class AuthorResource extends JsonResource {
 
                 // If the year is not found, add an object with default values
                 if (!$found) {
-                    $statistics[] = [
+                    $statistics[] =  new Statistic([
                         'asset_type' => Author::class,
                         'cited_count' => 0,
                         'works_count' => 0,
                         'year' => $year,
-                    ];
+                    ]);
                 }
             }
 

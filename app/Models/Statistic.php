@@ -20,7 +20,9 @@ class Statistic extends Model {
     use HasFactory;
     protected $fillable = [
         'year',
-        'count'
+        'works_count',
+        'cited_count',
+        'asset_type'
         ];
 
     /**

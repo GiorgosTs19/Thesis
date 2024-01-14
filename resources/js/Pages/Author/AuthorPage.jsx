@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import {object} from 'prop-types';
 import BaseLayout from "@/Layouts/BaseLayout.jsx";
-import {InfoSVG} from "@/SVGS/InfoSVG.jsx";
 import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisticsChart.jsx";
 import Switch from "@/Components/Switch/Switch.jsx";
 import {Author} from "@/Models/Author/Author.js";
@@ -9,7 +8,6 @@ import WorksList from "@/Pages/Author/WorksList/WorksList.jsx";
 import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
 
  const AuthorPage = ({author, wosrks}) => {
-    console.log(wosrks)
     const authorObject = useMemo(()=>Author.parseResponseAuthor(author),[author]);
 
     const {
@@ -24,7 +22,7 @@ import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
     } = authorObject;
 
      const PROFILE_STATUS = {
-         INCOMPLETE: `${name} is not a registered user, thus the list of their works and some information might be incomplete and not always up to date.`,
+         INCOMPLETE: `${name} is not a registered user, thus their list of works and information might be incomplete and not always up to date.`,
          REGISTERED: `${name} is a registered user, their info and works are regularly updated`,
      }
 
@@ -46,11 +44,13 @@ import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
              dataSet:authorStatistics.map((statistic)=>statistic.citedCount),
              title:'Citations',
              labels:yearsArray,
+             description: 'Citation trends per year.',
          },
          WORKS : {
-             dataSet:authorStatistics.map((statistic)=>statistic.worksCount),
-             title:'Works',
-             labels:yearsArray,
+            dataSet:authorStatistics.map((statistic)=>statistic.worksCount),
+            title:'Works',
+            labels:yearsArray,
+            description: 'Distribution of works authored per year.',
          }
     }
 
@@ -66,11 +66,14 @@ import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
                         <Switch checkedLabel={CHART_DATA.WORKS.title} uncheckedLabel={CHART_DATA.CITATIONS.title}
                                 checked={activeChart.title !== CHART_DATA.CITATIONS.title} className={'mx-auto my-4'}
                                 onChange={(checked)=> setActiveChart(checked ?  CHART_DATA.CITATIONS : CHART_DATA.WORKS)}/>
-
-                        <div className="px-4 mb-4 max-w-full">
-                            <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet} labels={activeChart.labels} />
+                        <div className={'px-4 flex flex-col'}>
+                            <div className={'text-gray-500 opacity-75 italic mx-auto mb-4'}>
+                                {activeChart.description}
+                            </div>
+                            <div className="px-4 mb-4 max-w-full">
+                                <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet} labels={activeChart.labels} />
+                            </div>
                         </div>
-
                         <div className="mt-4">
                             <div className="rounded-lg bg-gray-100 px-6 py-4">
                                 <h2 className="text-lg font-semibold mb-2">{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>

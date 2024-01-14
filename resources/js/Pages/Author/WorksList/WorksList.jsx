@@ -1,15 +1,18 @@
-import React, {useMemo, useState} from 'react';
-import {array, arrayOf, bool, instanceOf, node, number, oneOf, oneOfType, string} from "prop-types";
+import React, {useState} from 'react';
+import {arrayOf, instanceOf, node, oneOfType} from "prop-types";
 import {Work} from "@/Models/Work/Work.js";
-import DropDownMenu from "@/Components/DropDownMenu/DropDownMenu.jsx";
+import useWorkSort from "@/Hooks/useWorksSort/useWorkSort.jsx";
+import {capitalizeFirstLetter} from "@/Utility/Strings/Utils.js";
 
 const MAX_VISIBLE_AUTHORS = 4;
 
-const WorkItem = ({work, highlighted}) => {
+const WorkItem = ({work}) => {
     const {
+        doi,
         title,
         authors,
-        isOa,
+        type,
+        isOA,
         publishedAt,
         referencedWorksCount,
         language
@@ -26,10 +29,13 @@ const WorkItem = ({work, highlighted}) => {
 
     const remainingAuthors = authors.length - MAX_VISIBLE_AUTHORS ;
 
-    return <li className="mb-4 flex-grow list-decimal basis-1/3 px-4 ">
+    return <li className="mb-4 flex-grow list-decimal ">
         <div className={'flex flex-wrap border-l-2 border-l-blue-700'}>
             <div className="text-gray-600  pl-3 text-sm">
-                {isOa ? 'Open Access Available' : 'Open Access Unavailable'}
+                {capitalizeFirstLetter(type)}
+            </div>
+            <div className="text-gray-600  pl-3 text-sm">
+                {isOA ? 'Open Access Available' : 'Open Access Unavailable'}
             </div>
             <div className="text-gray-600 pl-3 text-sm">
                 Published : {publishedAt}
@@ -42,10 +48,10 @@ const WorkItem = ({work, highlighted}) => {
             </div>
         </div>
 
-        <div className="text-black pl-3 text-lg
-            font-bold truncate whitespace-pre-wrap">
+        <a className="text-black pl-3 text-lg
+            font-bold truncate whitespace-pre-wrap hover:underline" href={doi}>
             {title}
-        </div>
+        </a>
         <div className="pl-3 text-blue-500 ">
             {authorElements}
             {remainingAuthors > 0 && !showAllAuthors ?  (<span className={'cursor-pointer underline text-amber-950 ml-2'} onClick={()=>setShowAllAuthors(true)}>{`+${remainingAuthors} more`}</span>) :
@@ -55,65 +61,15 @@ const WorkItem = ({work, highlighted}) => {
 }
 
 const WorksList = ({works, children}) => {
-    const SORTING_OPTIONS = [
-        {name:'Alphabetically ( A to Z )',value:0},
-        {name:'Alphabetically ( Z to A )', value:1},
-        {name:'Earliest Published', value:2},
-        {name:'Latest Published', value:3},
-        {name:'Lowest Citations', value:4},
-        {name:'Highest Citations', value:5},
-        {name:'Most Authors', value:6},
-    ]
-
-    const [sortingCriteria,setSortingCriteria] = useState(SORTING_OPTIONS[0].value);
-
-    const sortedWorks = useMemo(() => {
-        const titleSorting = (a, b) => {
-            const titleA = a.title.toUpperCase();
-            const titleB = b.title.toUpperCase();
-            return titleA.localeCompare(titleB);
-        };
-
-        const publicationDateSorting = (a, b) => {
-            const dateA = new Date(a.publishedAt);
-            const dateB = new Date(b.publishedAt);
-            return dateA - dateB;
-        };
-
-        const citedCountSorting = (a, b) => a.referencedWorksCount - b.referencedWorksCount;
-
-        const authorsCountSorting = (a, b) => a.authors.length - b.authors.length;
-
-        switch (sortingCriteria) {
-            case 0:
-                return [...works].sort(titleSorting);
-            case 1:
-                return [...works].sort((a, b) => -titleSorting(a, b));
-            case 2:
-                return [...works].sort(publicationDateSorting);
-            case 3:
-                return [...works].sort((a, b) => -publicationDateSorting(a, b));
-            case 4:
-                return [...works].sort(citedCountSorting);
-            case 5:
-                return [...works].sort((a, b) => -citedCountSorting(a, b));
-            case 6:
-                return [...works].sort((a, b) => -authorsCountSorting(a, b));
-            default:
-                return [...works];
-        }
-    }, [sortingCriteria, works]);
-
-
-    console.log(sortedWorks)
+    const [sortedWorks, sortingDropDown] = useWorkSort(works);
 
     return <div className="mt-4">
         <div className="rounded-lg bg-gray-200 p-6">
             <div className={'flex  mb-6'}>
                 {children}
-                <DropDownMenu options={SORTING_OPTIONS} onSelect={(value)=>setSortingCriteria(value)} className={'ms-auto'} label={'Sort by'}/>
+                {sortingDropDown}
             </div>
-            <ul className="list-disc pl-8 flex flex-wrap items-stretch">
+            <ul className="list-disc pl-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {sortedWorks.map((work) =>
                     work.title.length >0 && <WorkItem work={work} key={work.doi}/>
                 )}
@@ -123,12 +79,7 @@ const WorksList = ({works, children}) => {
 }
 
 WorkItem.propTypes = {
-    title: string,
-    authors: array,
-    is_oa: bool,
-    published_at: string,
-    referenced_works_count: number,
-    language: string
+    work:instanceOf(Work)
 }
 
 WorksList.propTypes = {

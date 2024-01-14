@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-const DropdownMenu = ({ options, onSelect, className, label}) => {
-    const [selectedOption, setSelectedOption] = useState(options[0]);
+const DropdownMenu = ({ options, onSelect, className, label, defaultOption = null }) => {
+    const [selectedOption, setSelectedOption] = useState(defaultOption);
     const [menuOpen, setMenuOpen] = useState(false);
 
     const handleOptionClick = (option) => {
@@ -49,16 +49,18 @@ const DropdownMenu = ({ options, onSelect, className, label}) => {
                         aria-orientation="vertical"
                         aria-labelledby="options-menu"
                     >
-                        {options.map((option) => (
-                            <button
-                                key={option.value}
-                                onClick={() => handleOptionClick(option)}
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                            >
-                                {option.name}
-                            </button>
-                        ))}
+                        {Object.entries(options).map(([key, option]) => {
+                            console.log(option)
+                                return <button
+                                    key={option.value}
+                                    onClick={() => handleOptionClick(option)}
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                    role="menuitem"
+                                >
+                                    {option.name}
+                                </button>
+
+                        })}
                     </div>
                 </div>
             )}
