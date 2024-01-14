@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
+
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property mixed publication_year
@@ -17,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property mixed open_alex_url
  * @property mixed updated_at
  * @property mixed cites_url
+ * @property mixed $id
  */
 class WorkResource extends JsonResource {
     /**
@@ -26,6 +28,7 @@ class WorkResource extends JsonResource {
      */
     public function toArray(Request $request): array {
         return [
+            'id'=>$this->id,
             'doi' => $this->doi,
             'title' => $this->title,
             'published_at' =>  Carbon::parse($this->publication_date)->format('d-m-Y'),
@@ -36,7 +39,7 @@ class WorkResource extends JsonResource {
             'open_alex_url' => $this->open_alex_url,
             'updated_at' => Carbon::parse($this->updated_at)->format('d-m-Y'),
             'cites_url' => $this->cites_url,
-            'authors'=>AuthorResource::collection($this->whenLoaded('authors'))
+            'authors'=>AuthorResource::collection($this->whenLoaded('authors')),
         ];
     }
 }

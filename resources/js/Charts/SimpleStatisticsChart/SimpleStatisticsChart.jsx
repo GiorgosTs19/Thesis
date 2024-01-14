@@ -2,6 +2,23 @@ import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import {array, arrayOf, number, oneOfType, string} from "prop-types";
 
+/**
+ * SimpleBarChart component displays a basic bar chart using Chart.js library.
+ *
+ * @component
+ * @param {Array} labels - The labels for the data points on the X-axis.
+ * @param {string} itle - The title of the bar chart.
+ * @param {Array} dataSet - The data set for the bar chart.
+ *
+ * @example
+ * // Example usage of SimpleBarChart component
+ * <SimpleBarChart
+ *   labels={['Label 1', 'Label 2', 'Label 3']}
+ *   title="My Bar Chart"
+ *   dataSet={[10, 20, 30]}
+ * />
+ */
+
 const SimpleBarChart = ({labels, title, dataSet}) => {
     const chartRef = useRef(null);
 
@@ -11,7 +28,7 @@ const SimpleBarChart = ({labels, title, dataSet}) => {
             labels: labels,
             datasets: [{
                 label: title,
-                data: dataSet, // Replace with your actual data
+                data: dataSet,
                 backgroundColor: ['rgba(75, 192, 192, 0.2)'],
                 borderColor: ['rgba(75, 192, 192, 1)'],
                 borderWidth: 1
@@ -28,21 +45,20 @@ const SimpleBarChart = ({labels, title, dataSet}) => {
                         beginAtZero: true
                     }
                 },
+                barThickness: 25,
                 responsive: true,
                 maintainAspectRatio: false,
             }
         };
 
-        // Create a new instance of Chart.js
         const myChart = new Chart(chartRef.current, config);
 
-        // Cleanup function to destroy the chart when the component unmounts
         return () => {
             myChart.destroy();
         };
     }, [labels, title, dataSet]);
 
-    return <canvas ref={chartRef}></canvas>;
+    return <canvas ref={chartRef} className={'max-w-full'}></canvas>;
 };
 
 SimpleBarChart.propTypes = {

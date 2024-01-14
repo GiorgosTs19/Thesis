@@ -195,7 +195,7 @@ class Work extends Model {
      * All the cited_counts by year associated with a work.
      */
     public function statistics(): MorphMany {
-        return $this->morphMany(Statistic::class, 'asset');
+        return $this->morphMany(Statistic::class, 'asset')->orderBy('year');
     }
 
     public function scopeOpenAlex($query, $id, $type = 'url') {

@@ -15,9 +15,9 @@ class AuthorController extends Controller {
         if(!$author)
             abort(404);
 
-        $works = $author->works()->paginate(10);
+        $works = $author->works()->with('authors')->paginate(10);
 
-        return Inertia::render('Author/Author',['author'=>new AuthorResource($author),'wosrks' => WorkResource::collection($works)]);
+        return Inertia::render('Author/AuthorPage',['author'=>new AuthorResource($author),'wosrks' => WorkResource::collection($works)]);
     }
 }
 

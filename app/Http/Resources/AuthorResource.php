@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Author;
 use App\Utility\Ids;
-use App\Utility\ULog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property mixed is_user
  * @property mixed updated_at
  * @property mixed cited_by_count
+ * @property mixed $id
  */
 
 class AuthorResource extends JsonResource {
@@ -29,8 +30,10 @@ class AuthorResource extends JsonResource {
 
     public function toArray(Request $request): array {
         $statistics = $this->whenLoaded('statistics');
-        // Convert the collection to an array
-        if($statistics && !$statistics instanceof MissingValue) {
+
+        $statisticsAreValid = !$statistics instanceof MissingValue && sizeof($statistics) > 0;
+
+        if($statistics && $statisticsAreValid) {
             $years = $statistics->pluck('year')->toArray();
             $allYears = range(min($years), max($years));
 
@@ -47,9 +50,9 @@ class AuthorResource extends JsonResource {
                 // If the year is not found, add an object with default values
                 if (!$found) {
                     $statistics[] = [
-                        'asset_type' => 'Author',
-                        'cited_count' => 0,  // You can set a default value for cited_count
-                        'works_count' => 0, // You can set a default value for works_count
+                        'asset_type' => Author::class,
+                        'cited_count' => 0,
+                        'works_count' => 0,
                         'year' => $year,
                     ];
                 }
@@ -61,6 +64,7 @@ class AuthorResource extends JsonResource {
 
 
         return [
+            'id'=>$this->id,
             'name' => $this->display_name,
             Ids::OPEN_ALEX_ID => $this->open_alex_id,
             Ids::ORC_ID_ID => $this->orc_id,
@@ -70,7 +74,7 @@ class AuthorResource extends JsonResource {
             'is_user' => !!$this->is_user,
             'updated_at' => Carbon::parse($this->updated_at)->format('d-m-Y'),
             'works'=>WorkResource::collection($this->whenLoaded('works')),
-            'statistics'=>StatisticResource::collection($statistics)
+            'statistics'=> $statisticsAreValid ? StatisticResource::collection($statistics) : []
         ];
     }
 }
