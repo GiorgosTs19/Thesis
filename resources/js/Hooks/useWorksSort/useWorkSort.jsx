@@ -5,8 +5,8 @@ import DropDownMenu from "@/Components/DropDownMenu/DropDownMenu.jsx";
 const SORTING_OPTIONS = {
     A_TO_Z:{name:'Alphabetically ( A to Z )',value:0},
     Z_TO_A:{name:'Alphabetically ( Z to A )', value:1},
-    EARLIEST_PUBLISHED:{name:'Earliest Published', value:2},
-    LATEST_PUBLISHED:{name:'Latest Published', value:3},
+    EARLIEST_PUBLISHED:{name:'Oldest', value:2},
+    LATEST_PUBLISHED:{name:'Newest', value:3},
     LOWEST_CITATIONS:{name:'Lowest Citations', value:4},
     HIGHEST_CITATIONS:{name:'Highest Citations', value:5},
     MOST_AUTHORS:{name:'Most Authors', value:6},

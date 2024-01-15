@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {func, number, oneOfType, shape, string} from "prop-types";
 
 const DropdownMenu = ({ options, onSelect, className, label, defaultOption = null }) => {
     const [selectedOption, setSelectedOption] = useState(defaultOption);
@@ -44,17 +45,17 @@ const DropdownMenu = ({ options, onSelect, className, label, defaultOption = nul
             {menuOpen && (
                 <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     <div
-                        className="py-1"
+                        className="py-1 flex flex-col"
                         role="menu"
                         aria-orientation="vertical"
                         aria-labelledby="options-menu"
                     >
                         {Object.entries(options).map(([key, option]) => {
-                            console.log(option)
                                 return <button
                                     key={option.value}
+                                    name={`MenuItem${key}`}
                                     onClick={() => handleOptionClick(option)}
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 mx-auto"
                                     role="menuitem"
                                 >
                                     {option.name}
@@ -68,4 +69,16 @@ const DropdownMenu = ({ options, onSelect, className, label, defaultOption = nul
     );
 };
 
+DropdownMenu.propTypes = {
+    options:shape({
+
+    }),
+    onSelect:func,
+    className:string,
+    label:string,
+    defaultOption:shape({
+        name:string.isRequired,
+        value:oneOfType([string,number]).isRequired
+    })
+}
 export default DropdownMenu;
