@@ -1,15 +1,17 @@
-import React, {useMemo, useState} from 'react';
-import {object, shape} from 'prop-types';
+import React, {useCallback, useMemo, useState} from 'react';
+import PropTypes, {arrayOf, bool, number, object, shape} from 'prop-types';
 import BaseLayout from "@/Layouts/BaseLayout.jsx";
 import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisticsChart.jsx";
 import Switch from "@/Components/Switch/Switch.jsx";
 import {Author} from "@/Models/Author/Author.js";
-import WorksList from "@/Pages/Author/WorksList/WorksList.jsx";
+import PaginatedList from "@/Components/PaginatedList/PaginatedList.jsx";
 import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
+import {WorkItem} from "@/Components/Assets/WorkItem/WorkItem.jsx";
+import {Work} from "@/Models/Work/Work.js";
 
- const AuthorPage = ({author, works}) => {
-    const authorObject = useMemo(()=>Author.parseResponseAuthor(author),[author]);
-     console.log(works)
+const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
+    console.log(currentSortOption)
+    const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
     const {
         name,
         isUser,
@@ -21,14 +23,14 @@ import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
         updatedAt
     } = authorObject;
 
-     const PROFILE_STATUS = {
-         INCOMPLETE: `${name} is not a registered user, thus their list of works and information might be incomplete and not always up to date.`,
-         REGISTERED: `${name} is a registered user, their info and works are regularly updated.`,
-     }
+    const PROFILE_STATUS = {
+        INCOMPLETE: `${name} is not a registered user, thus their list of works and information might be incomplete and not always up to date.`,
+        REGISTERED: `${name} is a registered user, their info and works are regularly updated.`,
+    }
 
     const properties = [
-        {name:'Citations', value:  citationCount},
-        {name:'Works', value:  worksCount},
+        {name: 'Citations', value: citationCount},
+        {name: 'Works', value: worksCount},
         {name: 'Open Alex', value: openAlexId ?? '-'},
         {name: 'Scopus', value: scopusId ?? '-'},
         {name: 'OrcId', value: orcId ?? '-'}
@@ -37,24 +39,28 @@ import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
     const authorStatistics = authorObject.statistics;
     // const authorWorks = authorObject.works;
 
-    const yearsArray = authorStatistics.map((statistic)=>statistic.year);
+    const yearsArray = authorStatistics.map((statistic) => statistic.year);
 
     const CHART_DATA = {
-         CITATIONS : {
-             dataSet:authorStatistics.map((statistic)=>statistic.citedCount),
-             title:'Citations',
-             labels:yearsArray,
-             description: 'Citation trends per year.',
-         },
-         WORKS : {
-            dataSet:authorStatistics.map((statistic)=>statistic.worksCount),
-            title:'Works',
-            labels:yearsArray,
+        CITATIONS: {
+            dataSet: authorStatistics.map((statistic) => statistic.citedCount),
+            title: 'Citations',
+            labels: yearsArray,
+            description: 'Citation trends per year.',
+        },
+        WORKS: {
+            dataSet: authorStatistics.map((statistic) => statistic.worksCount),
+            title: 'Works',
+            labels: yearsArray,
             description: 'Distribution of works authored per year.',
-         }
+        }
     }
 
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
+
+    const renderWorkItem = useCallback((work, index) => {
+        return work.title.length > 0 && <WorkItem work={work} key={work.doi} index={works.meta.from + index}/>
+    }, [works]);
 
     return (
         <>
@@ -81,29 +87,43 @@ import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
                                     className="mx-auto my-4"
                                     onChange={(checked) => setActiveChart(checked ? CHART_DATA.CITATIONS : CHART_DATA.WORKS)}
                                 />
-                                <div className="px-4 flex flex-col">
+                                <div className="flex flex-col">
                                     <div
                                         className="text-gray-500 opacity-75 italic mx-auto mb-4">{activeChart.description}</div>
-                                    <div className="px-4 mb-4 max-w-full">
+                                    <div className="md:px-4 mb-4 max-w-full">
                                         <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet}
                                                                labels={activeChart.labels}/>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <WorksList response={works} isUser={isUser}/>
+                        <PaginatedList response={works} renderFunc={renderWorkItem} parser={Work.parseResponseWork}
+                                       sortingOptions={sortingOptions} currentSortOption={currentSortOption}>
+                            <div className="text-lg font-semibold mb-4 text-yellow-800">
+                                Works
+                                <span
+                                    className={'mx-2 text-gray-600 opacity-50'}>{isUser ? '' : `(Only works co-authored with registered users appear in the list )`}</span>
+                            </div>
+                        </PaginatedList>
                     </div>
                 </div>
             </BaseLayout>
         </>
     )
- }
+}
+
+const SortingOptionPropTypes = PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    value: PropTypes.number.isRequired,
+    url: PropTypes.string.isRequired,
+    default: bool.isRequired
+});
 
 AuthorPage.propTypes = {
     author: object,
-    works:shape({
-
-    })
+    works: shape({}),
+    sortingOptions: arrayOf(SortingOptionPropTypes).isRequired,
+    currentSortOption: number.isRequired
 };
 
 export default AuthorPage;

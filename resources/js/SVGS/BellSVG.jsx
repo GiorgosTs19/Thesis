@@ -1,4 +1,6 @@
-export function BellSVG({className,width=24,height=24,onClick=()=>{},rotate='45def', cursor='pointer'}) {
+import {func, number, string} from "prop-types";
+
+export function BellSVG({className = '',width=24,height=24,onClick=()=>{},rotate='45def', cursor='pointer'}) {
     return (
         <svg
             width={width}
@@ -18,4 +20,13 @@ export function BellSVG({className,width=24,height=24,onClick=()=>{},rotate='45d
             />
         </svg>
     )
+}
+
+BellSVG.propTypes = {
+    className:string,
+    width:number,
+    height:number,
+    onClick:func,
+    rotate:string,
+    cursor:string
 }

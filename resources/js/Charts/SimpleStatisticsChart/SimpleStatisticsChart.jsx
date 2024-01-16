@@ -45,7 +45,7 @@ const SimpleBarChart = ({labels, title, dataSet}) => {
                         beginAtZero: true
                     }
                 },
-                barThickness: 25,
+                barThickness: 17,
                 responsive: true,
                 maintainAspectRatio: false,
             }

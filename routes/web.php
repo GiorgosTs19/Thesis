@@ -1,8 +1,8 @@
 <?php /** @noinspection ALL */
 
+use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,12 +15,12 @@ use App\Http\Controllers\AuthorController;
 |
 */
 
-Route::get('/',[Controller::class, 'showLogin']);
-Route::get('/Author/{id}',[AuthorController::class, 'showAuthorPage']);
+Route::get('/', [Controller::class, 'showLogin']);
+Route::get('/Author/{id}', [AuthorController::class, 'showAuthorPage'])->name('Author.Page');
 Route::get('/Article/{?oaurl}', [Controller::class, 'getArticle']);
 
 Route::prefix('author')->group(function () {
-    Route::get('/exists',[\App\Http\Controllers\SearchController::class,'checkAuthorExists'])->name('check_author_exists');
+    Route::get('/exists', [\App\Http\Controllers\SearchController::class, 'checkAuthorExists'])->name('check_author_exists');
 });
 
 Route::prefix('work')->group(function () {

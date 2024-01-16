@@ -1,15 +1,36 @@
-import React, { useState } from 'react';
-import {func, number, oneOfType, shape, string} from "prop-types";
+import React, {useState} from 'react';
+import {arrayOf, bool, func, number, oneOfType, shape, string} from "prop-types";
+import {Link} from "@inertiajs/inertia-react";
 
-const DropdownMenu = ({ options, onSelect, className, label, defaultOption = null }) => {
+const DropdownMenu = ({options, onSelect, className, label, defaultOption = null, renderLinks = false}) => {
     const [selectedOption, setSelectedOption] = useState(defaultOption);
     const [menuOpen, setMenuOpen] = useState(false);
-
     const handleOptionClick = (option) => {
         setSelectedOption(option);
         setMenuOpen(false);
         onSelect(option.value);
     };
+    const renderDropDownItem = (option, index) => {
+        return renderLinks ? <Link
+            key={option.value}
+            href={option.url}
+            name={`MenuItem${index}`}
+            onClick={() => handleOptionClick(option)}
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 mx-auto"
+            role="menuitem"
+            preserveState
+        >
+            {option.name}
+        </Link> : <button
+            key={option.value}
+            name={`MenuItem${index}`}
+            onClick={() => handleOptionClick(option)}
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 mx-auto"
+            role="menuitem"
+        >
+            {option.name}
+        </button>
+    }
 
     return (
         <div className={`relative inline-block text-left ${className}`}>
@@ -43,25 +64,15 @@ const DropdownMenu = ({ options, onSelect, className, label, defaultOption = nul
             </div>
 
             {menuOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                <div
+                    className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     <div
                         className="py-1 flex flex-col"
                         role="menu"
                         aria-orientation="vertical"
                         aria-labelledby="options-menu"
                     >
-                        {Object.entries(options).map(([key, option]) => {
-                                return <button
-                                    key={option.value}
-                                    name={`MenuItem${key}`}
-                                    onClick={() => handleOptionClick(option)}
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 mx-auto"
-                                    role="menuitem"
-                                >
-                                    {option.name}
-                                </button>
-
-                        })}
+                        {options.map((option, index) => renderDropDownItem(option, index))}
                     </div>
                 </div>
             )}
@@ -70,15 +81,19 @@ const DropdownMenu = ({ options, onSelect, className, label, defaultOption = nul
 };
 
 DropdownMenu.propTypes = {
-    options:shape({
-
-    }),
-    onSelect:func,
-    className:string,
-    label:string,
-    defaultOption:shape({
-        name:string.isRequired,
-        value:oneOfType([string,number]).isRequired
+    options: arrayOf(shape({
+        name: string.isRequired,
+        value: number.isRequired,
+        default: bool.isRequired,
+        url: string,
+    })),
+    renderLinks: bool,
+    onSelect: func,
+    className: string,
+    label: string,
+    defaultOption: shape({
+        name: string.isRequired,
+        value: oneOfType([string, number]).isRequired
     })
 }
 export default DropdownMenu;
