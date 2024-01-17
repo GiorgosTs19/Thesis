@@ -15,9 +15,9 @@ export class Statistic {
     constructor({assetType, citedCount = 0, worksCount = 0, year, assetId}) {
         this.assetType = assetType;
         this.assetId = assetId;
-        this.worksCount = worksCount;
+        if (assetType === 'Author') this.worksCount = worksCount;
+        this.citedCount = citedCount;
         this.year = year;
-        if(assetType === 'Author') this.citedCount = citedCount;
     }
 
     static parseResponseStatistic({assetType, assetId, year, worksCount, citedCount}) {

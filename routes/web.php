@@ -1,7 +1,6 @@
 <?php /** @noinspection ALL */
 
-use App\Http\Controllers\AuthorController;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\{AuthorController, Controller, WorkController};
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [Controller::class, 'showLogin']);
 Route::get('/Author/{id}', [AuthorController::class, 'showAuthorPage'])->name('Author.Page');
+Route::get('/Work/{id}', [WorkController::class, 'showWorkPage'])->name('Work.Page');
 Route::get('/Article/{?oaurl}', [Controller::class, 'getArticle']);
 
 Route::prefix('author')->group(function () {

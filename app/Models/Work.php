@@ -2,15 +2,12 @@
 
 namespace App\Models;
 
-use Exception;
+use App\Http\Controllers\APIController;
 use App\Utility\Ids;
 use App\Utility\ULog;
+use Exception;
+use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\BelongsToMany, Relations\MorphMany};
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\APIController;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property mixed $id
@@ -34,12 +31,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Work extends Model {
     use HasFactory;
 
+    public const SORTING_OPTIONS = [
+        ['name' => 'Alphabetically (A to Z)', 'value' => 0, 'default' => true],
+        ['name' => 'Alphabetically (Z to A)', 'value' => 1, 'default' => false],
+        ['name' => 'Oldest', 'value' => 2, 'default' => false],
+        ['name' => 'Newest', 'value' => 3, 'default' => false],
+        ['name' => 'Citations ( Ascending )', 'value' => 4, 'default' => false],
+        ['name' => 'Citations ( Descending )', 'value' => 5, 'default' => false],
+    ];
     const AUTHOR_WORKS_TABLE = 'author_work';
 
     public static array $UPDATE_FIELDS = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
 
     protected $fillable = ['doi', 'title', 'publication_date', 'publication_year', 'referenced_works_count', 'language', 'type',
-    'is_oa','open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date'];
+        'is_oa', 'open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date'];
 
     protected $hidden = ['last_updated_date', 'created_date', 'created_at'];
 
@@ -51,7 +56,7 @@ class Work extends Model {
      * @return void
      * The newly created work.
      */
-    public static function createNewWork ($work): void {
+    public static function createNewWork($work): void {
         $work_open_access = $work->open_access;
         $work_url = $work->ids->doi ?? $work_open_access->oa_url;
         $newWork = new Work;
@@ -72,7 +77,7 @@ class Work extends Model {
             $newWork->save();
 
             // Generate the counts_by_year statics for the work
-            Statistic::generateStatistics($newWork->id,$work->counts_by_year,self::class);
+            Statistic::generateStatistics($newWork->id, $work->counts_by_year, self::class);
 
             // Associate all authors from the array with the work being processed
             $newWork->parseAuthors($work->authorships);
@@ -100,7 +105,7 @@ class Work extends Model {
             // Check if an author exists by their Open Alex id or their OrcId
             ['exists' => $db_author_exists, 'author' => $newAuthor] = Author::authorExists($ids[Ids::OPEN_ALEX_ID]);
 
-            if(!$author_is_user && !$db_author_exists)
+            if (!$author_is_user && !$db_author_exists)
                 $newAuthor = Author::createAuthor($authorObject->author, $ids);
 
             $newAuthor->associateAuthorToWork($this);
@@ -114,7 +119,7 @@ class Work extends Model {
      * A boolean indicating if a work with the given doi exists in the database.
      */
     public static function workExistsByDoi($doi): bool {
-        return !!Work::where('doi',$doi)->exists();
+        return !!Work::where('doi', $doi)->exists();
     }
 
     /**
@@ -132,8 +137,8 @@ class Work extends Model {
      * @return mixed
      */
     public function scopeDoi($query, $doi): mixed {
-        if($doi !== '')
-            return $query->orWhere('doi',$doi);
+        if ($doi !== '')
+            return $query->orWhere('doi', $doi);
         return $query;
     }
 
@@ -146,11 +151,11 @@ class Work extends Model {
      * - counts_by_year ( only for the current year )
      * @return void
      */
-    public function updateSelf() : void {
+    public function updateSelf(): void {
         $requestWork = APIController::workUpdateRequest($this->open_alex_id);
 
         $shouldUpdate = $requestWork->updated_date !== $this->last_updated_date;
-        if(!$shouldUpdate)
+        if (!$shouldUpdate)
             return;
         try {
             $this->referenced_works_count = $requestWork->referenced_works_count;
@@ -164,20 +169,20 @@ class Work extends Model {
             ULog::error($exception->getMessage(), ULog::META);
         }
         // Retrieve the current year
-        $year_to_update =  date('Y');
+        $year_to_update = date('Y');
 
         // Check local db for the work's statistics for the current year
         $databaseStatistic = $this->statistics()
-            ->where('year',$year_to_update)
+            ->where('year', $year_to_update)
             ->first();
 
         // If there's no local record for this year's statistics for the current work,
         // make the api call to ensure it doesn't exist on OpenAlex as well.
         if (!$databaseStatistic) {
-            $requestStatistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class,$requestWork->counts_by_year);
+            $requestStatistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $requestWork->counts_by_year);
             // It seems like for some works there has not been any documented citations for the current year, or for years now,
             // so checking if the record we need exists in the first place
-            if(!$requestStatistic) {
+            if (!$requestStatistic) {
                 ULog::log("No statistics were found for $this->open_alex_id for the year $year_to_update", ULog::META);
                 return;
             }
@@ -199,9 +204,12 @@ class Work extends Model {
     }
 
     public function scopeOpenAlex($query, $id, $type = 'url') {
-        if($id !== '')
-            return match ($type) {'id'=>$query->orWhere('open_alex_id',$id), 'url'=>
-            $query->orWhere('open_alex_url',$id)};
+        if ($id !== '')
+            return match ($type) {
+                'id' => $query->orWhere('open_alex_id', $id),
+                'url' =>
+                $query->orWhere('open_alex_url', $id)
+            };
         return $query;
     }
 }

@@ -4,27 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\AuthorResource;
 use App\Http\Resources\WorkResource;
-use App\Models\Author;
+use App\Models\{Author, Work};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Inertia\{Inertia, Response};
 
-class AuthorController extends Controller
-{
-    private const SORTING_OPTIONS = [
-        ['name' => 'Alphabetically (A to Z)', 'value' => 0, 'default' => true],
-        ['name' => 'Alphabetically (Z to A)', 'value' => 1, 'default' => false],
-        ['name' => 'Oldest', 'value' => 2, 'default' => false],
-        ['name' => 'Newest', 'value' => 3, 'default' => false],
-        ['name' => 'Citations ( Ascending )', 'value' => 4, 'default' => false],
-        ['name' => 'Citations ( Descending )', 'value' => 5, 'default' => false],
-    ];
-
-    private function generateSortingOptions($authorId): array
-    {
+class AuthorController extends Controller {
+    private function generateSortingOptions($authorId): array {
         $sortingOptions = [];
 
-        foreach (self::SORTING_OPTIONS as $optionKey => $option) {
+        foreach (Work::SORTING_OPTIONS as $optionKey => $option) {
             // Generating URL for each sorting option
             $url = URL::route('Author.Page', ['id' => $authorId, 'sort' => $option['value']]);
 
@@ -40,8 +29,7 @@ class AuthorController extends Controller
         return $sortingOptions;
     }
 
-    private function applySorting($worksQuery, $sortingCriteria): void
-    {
+    private function applySorting($worksQuery, $sortingCriteria): void {
         switch ($sortingCriteria) {
             case 0:
                 $worksQuery->orderBy('title');
@@ -64,13 +52,8 @@ class AuthorController extends Controller
         }
     }
 
-    public function showAuthorPage(Request $request, $id): Response
-    {
-        $author = Author::with(['works.authors', 'statistics'])->openAlex($id)->first();
-
-        if (!$author) {
-            abort(404);
-        }
+    public function showAuthorPage(Request $request, $id): Response {
+        $author = Author::with(['works.authors', 'statistics'])->openAlex($id)->firstOrFail();
 
         // Retrieve works with authors
         $worksQuery = $author->works()->with('authors');
@@ -86,7 +69,7 @@ class AuthorController extends Controller
             $this->applySorting($worksQuery, $sortField);
         } else {
             // If no sorting is specified, use the default sorting option
-            $defaultSorting = collect(self::SORTING_OPTIONS)->firstWhere('default', true);
+            $defaultSorting = collect(Work::SORTING_OPTIONS)->firstWhere('default', true);
             $this->applySorting($worksQuery, $defaultSorting['value']);
             $current_sorting_method = $defaultSorting['value'];
         }
@@ -100,7 +83,7 @@ class AuthorController extends Controller
         // Append the current sort parameter to pagination links
         $works->appends(['sort' => $request->get('sort')]);
 
-        return Inertia::render('Author/AuthorPage', [
+        return Inertia::render('Routes/Author/AuthorPage', [
             'author' => new AuthorResource($author),
             'works' => WorkResource::collection($works),
             'sortingOptions' => $sortingOptions,

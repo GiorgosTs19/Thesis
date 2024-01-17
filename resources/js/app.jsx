@@ -1,14 +1,16 @@
 import './bootstrap';
-import { createRoot } from 'react-dom/client';
-import { createInertiaApp } from '@inertiajs/inertia-react';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import {createRoot} from 'react-dom/client';
+import {createInertiaApp} from '@inertiajs/inertia-react';
+import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import React from "react";
+import BaseLayout from "@/Layouts/BaseLayout.jsx";
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 const jsxFiles = import.meta.glob('./Pages/**/*.jsx');
 const tsxFiles = import.meta.glob('./Pages/**/*.tsx');
 
-const allFiles = { ...jsxFiles, ...tsxFiles };
+const allFiles = {...jsxFiles, ...tsxFiles};
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => {
@@ -20,14 +22,13 @@ createInertiaApp({
         } else if (allFiles[tsxPath]) {
             return resolvePageComponent(tsxPath, allFiles);
         } else {
-            // Handle the case where neither .jsx nor .tsx files are found
-            console.error(`File not found for ${name}`);
             return null;
         }
     },
     setup({el, App, props}) {
         const root = createRoot(el);
 
-        root.render(<App {...props}/>);
+        root.render(<BaseLayout title={''}><App {...props}/></BaseLayout>);
     },
-}).then(r =>{});
+}).then(r => {
+});

@@ -27,7 +27,7 @@ import DropDownMenu from "@/Components/DropDownMenu/DropDownMenu.jsx";
  * With Parser :
  * <PaginatedList response={response} renderFunc={()=>{}} parser={()=>{}}/>
  */
-const PaginatedList = ({response, children, renderFunc, parser, sortingOptions, currentSortOption}) => {
+const PaginatedList = ({response, children, renderFn, parser, sortingOptions, currentSortOption}) => {
     const items = parser ? response.data.map(item => parser(item)) : response.data;
 
     return <div className="">
@@ -44,7 +44,7 @@ const PaginatedList = ({response, children, renderFunc, parser, sortingOptions, 
             </div>
             <ul className="list-disc pl-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {items.map((item, index) =>
-                    renderFunc(item, index)
+                    renderFn(item, index)
                 )}
             </ul>
             <Pagination response={response} className={'mx-auto mt-2 text-sm'}/>
@@ -61,7 +61,7 @@ const SortingOptionPropTypes = PropTypes.shape({
 
 PaginatedList.propTypes = {
     children: oneOfType([arrayOf(node), node]),
-    renderFunc: func.isRequired,
+    renderFn: func.isRequired,
     parser: func,
     sortingOptions: arrayOf(SortingOptionPropTypes).isRequired,
     currentSortOption: number.isRequired,
