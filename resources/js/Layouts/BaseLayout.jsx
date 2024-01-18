@@ -11,7 +11,7 @@ function BaseLayout({title, children}) {
     return (
         <div className="min-h-full flex flex-col">
             <Navigation/>
-            <div className="mt-4 w-full p-4 shadow-md mx-auto flex flex-col flex-grow">
+            <div className="mt-2 w-full p-3 shadow-md mx-auto flex flex-col flex-grow">
                 {children}
             </div>
         </div>

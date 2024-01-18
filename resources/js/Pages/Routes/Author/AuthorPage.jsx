@@ -7,6 +7,9 @@ import PaginatedList from "@/Components/PaginatedList/PaginatedList.jsx";
 import PropTypes, {arrayOf, bool, number, object, shape} from 'prop-types';
 import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
 import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisticsChart.jsx";
+import {getTopCoAuthors} from "@/Utility/Arrays/Utils.js";
+import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
+import List from "@/Components/List/List.jsx";
 
 const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
@@ -18,7 +21,7 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
         openAlexId,
         scopusId,
         orcId,
-        updatedAt
+        updatedAt,
     } = authorObject;
 
     const PROFILE_STATUS = {
@@ -45,25 +48,39 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
             title: 'Citations',
             labels: yearsArray,
             description: 'Citation trends per year.',
+            disclaimer: 'The data presented in this chart may not capture the complete set of citations for' +
+                ' this author. The statistics gathered might not cover every year, potentially leading' +
+                'to gaps in the information.'
         },
         WORKS: {
             dataSet: authorStatistics.map((statistic) => statistic.worksCount),
             title: 'Works',
             labels: yearsArray,
             description: 'Distribution of works authored per year.',
+            disclaimer: 'The data presented in this chart may not capture the complete set of works for' +
+                ' this author. The statistics gathered might not cover every year, potentially leading' +
+                'to gaps in the information.'
         }
     }
+    const topCoAuthors = useMemo(() => getTopCoAuthors(authorObject.works, 3, authorObject), [authorObject.works],);
 
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
 
     const renderWorkItem = useCallback((work, index) => {
-        return work.title.length > 0 && <WorkItem work={work} key={work.doi} index={works.meta.from + index}/>
+        return work.title.length > 0 &&
+            <WorkItem work={work} key={work.doi} index={works.meta.from + index} authorToExclude={authorObject.id}/>
     }, [works]);
+
+    const renderAuthorItem = (item, index) => <AuthorItem key={index} author={item.value} index={index}
+                                                          extraProperties={[{
+                                                              name: 'Works Co-Authored',
+                                                              value: item.occurrences
+                                                          }]}/>
 
     return (
         <>
             <div className="bg-gray-100 flex items-center justify-self-end h-full ">
-                <div className="bg-white w-full p-6 flex flex-col h-full rounded-lg">
+                <div className="bg-white w-full px-6 py-3 flex flex-col h-full rounded-lg">
                     <div className="grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4">
                         <div className="2xl:col-span-2 flex flex-col">
                             <RowOfProperties properties={properties} title={authorObject.name}></RowOfProperties>
@@ -91,17 +108,30 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                                     <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet}
                                                            labels={activeChart.labels}/>
                                 </div>
+                                <div
+                                    className="text-gray-500 opacity-75 italic mx-auto mb-4">{activeChart.disclaimer}</div>
                             </div>
                         </div>
                     </div>
-                    <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork}
-                                   sortingOptions={sortingOptions} currentSortOption={currentSortOption}>
-                        <div className="text-lg font-semibold mb-4 text-yellow-800">
-                            Works
-                            <span
-                                className={'mx-2 text-gray-600 opacity-50'}>{isUser ? '' : `(Only works co-authored with registered users appear in the list )`}</span>
+                    <div className="grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4">
+                        <div className="2xl:col-span-4 flex flex-col">
+                            <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork}
+                                           sortingOptions={sortingOptions} currentSortOption={currentSortOption}>
+                                <div className="text-lg font-semibold mb-4 text-yellow-800">
+                                    Works
+                                    <span
+                                        className={'mx-2 text-gray-600 opacity-50'}>{isUser ? '' : `(Only works co-authored with registered users appear in the list )`}</span>
+                                </div>
+                            </PaginatedList>
                         </div>
-                    </PaginatedList>
+                        <div className="2xl:col-span-1 flex flex-col">
+                            <List data={topCoAuthors} renderFn={renderAuthorItem} vertical
+                                  wrapperClassName={'w-fit'} title={'Top Co-Authors'}
+                                  header={`Top authors who have collaborated with ${authorObject.name} on various works`}
+                                  footer={'( Based on the works list in this page )'}/>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </>

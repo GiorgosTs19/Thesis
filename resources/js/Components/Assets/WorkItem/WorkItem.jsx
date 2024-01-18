@@ -5,7 +5,7 @@ import {instanceOf, number} from "prop-types";
 import {Work} from "@/Models/Work/Work.js";
 
 const MAX_VISIBLE_AUTHORS = 4;
-export const WorkItem = ({work, index}) => {
+export const WorkItem = ({work, index, authorToExclude}) => {
     const {
         doi,
         title,
@@ -14,12 +14,18 @@ export const WorkItem = ({work, index}) => {
         isOA,
         publishedAt,
         referencedWorksCount,
-        language
+        language,
+        localUrl
     } = work;
 
     const [showAllAuthors, setShowAllAuthors] = useState(false);
+    const visibleAuthors = showAllAuthors ? authors : authors.slice(0, MAX_VISIBLE_AUTHORS);
 
-    const authorElements = (showAllAuthors ? authors : authors.slice(0, MAX_VISIBLE_AUTHORS)).map((author, index) => (
+    const filteredAuthors = authorToExclude
+        ? visibleAuthors.filter(author => author.id !== authorToExclude)
+        : visibleAuthors;
+
+    const authorElements = filteredAuthors.map((author, index) => (
         <React.Fragment key={index}>
             <a href={`http://127.0.0.1:8000/Author/${author.openAlexId}`}
                className={'hover:underline'}>{author.name} </a>
@@ -29,7 +35,7 @@ export const WorkItem = ({work, index}) => {
 
     const remainingAuthors = authors.length - MAX_VISIBLE_AUTHORS;
 
-    return <li className="mb-4 flex-grow list-none flex">
+    return <li className="flex-grow list-none flex">
         <div className="top-0 left-0 text-black text-sm flex flex-col gap-4 text-center">
             {index}
             <a href={doi} title={'Open to source'} className={'mr-1'}><ExternalSVG width={26} height={26}/></a>
@@ -53,7 +59,7 @@ export const WorkItem = ({work, index}) => {
                 </div>
             </div>
             <div className={'pl-3'}>
-                <a className="text-black text-lg
+                <a href={localUrl} className="text-black text-lg
                     font-bold truncate whitespace-pre-wrap hover:underline">
                     {title}
                 </a>
@@ -72,5 +78,6 @@ export const WorkItem = ({work, index}) => {
 
 WorkItem.propTypes = {
     work: instanceOf(Work),
-    index: number.isRequired
+    index: number.isRequired,
+    authorToExclude: number
 }

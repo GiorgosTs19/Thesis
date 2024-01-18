@@ -26,6 +26,7 @@ export class Work {
      * @param {string} language - The language in which the work is written.
      * @param openAlexId
      * @param statistics
+     * @param localUrl
      */
     constructor({
                     id,
@@ -41,7 +42,8 @@ export class Work {
                     openAlexUrl,
                     type,
                     openAlexId,
-                    statistics
+                    statistics,
+                    localUrl
                 }) {
         this.title = title;
         this.id = id;
@@ -58,6 +60,7 @@ export class Work {
         this.className = 'Work';
         this.openAlexId = openAlexId;
         this.statistics = statistics;
+        this.localUrl = localUrl;
     }
 
     static parseResponseWork({
@@ -75,7 +78,8 @@ export class Work {
                                  authors,
                                  type,
                                  open_alex_id,
-                                 statistics
+                                 statistics,
+                                 local_url
                              }) {
         return new Work({
             id,
@@ -93,7 +97,8 @@ export class Work {
             authors: authors.map(author => Author.parseResponseAuthor(author)),
             openAlexId: open_alex_id,
             statistics: statistics?.map(statistic => Statistic.parseResponseStatistic(
-                {assetType: className, citedCount: statistic.cited_count, assetId: id, year: statistic.year})) ?? []
+                {assetType: className, citedCount: statistic.cited_count, assetId: id, year: statistic.year})) ?? [],
+            localUrl: local_url
         });
     }
 

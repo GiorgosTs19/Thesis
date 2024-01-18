@@ -17,8 +17,22 @@ import {Statistic} from "@/Models/Statistic/Statistic.js";
  * @param {Date} updatedAt - The timestamp indicating when the author's profile was last updated.
  */
 const className = 'Author';
+
 export class Author {
-    constructor({name, isUser, citationCount, worksCount, openAlexId, scopusId, orcId, works, statistics, updatedAt, id}) {
+    constructor({
+                    name,
+                    isUser,
+                    citationCount,
+                    worksCount,
+                    openAlexId,
+                    scopusId,
+                    orcId,
+                    works,
+                    statistics,
+                    updatedAt,
+                    id,
+                    localUrl
+                }) {
         this.id = id;
         this.name = name;
         this.isUser = isUser;
@@ -31,24 +45,34 @@ export class Author {
         this.statistics = statistics;
         this.updatedAt = updatedAt;
         this.className = className;
+        this.localUrl = localUrl;
     }
 
-    static parseResponseAuthor({name, is_user, citation_count, works_count, open_alex_id,
-        scopus_id, orc_id, works= [], statistics, updated_at, id}) {
-            return new Author({
-                id,
-                name,
-                openAlexId:open_alex_id,
-                scopusId:scopus_id,
-                orcId:orc_id,
-                isUser:is_user,
-                citationCount:citation_count,
-                worksCount:works_count,
-                works:works.map(work=>Work.parseResponseWork(work)),
-                updatedAt:updated_at,
-                statistics:statistics.map(statistic=>Statistic.parseResponseStatistic(
-                    {assetType:className, citedCount:statistic.cited_count, worksCount:statistic.works_count, assetId:id, year:statistic.year}))
-            });
+    static parseResponseAuthor({
+                                   name, is_user, citation_count, works_count, open_alex_id,
+                                   scopus_id, orc_id, works = [], statistics, updated_at, id, local_url
+                               }) {
+        return new Author({
+            id,
+            name,
+            openAlexId: open_alex_id,
+            scopusId: scopus_id,
+            orcId: orc_id,
+            isUser: is_user,
+            citationCount: citation_count,
+            worksCount: works_count,
+            works: works.map(work => Work.parseResponseWork(work)),
+            updatedAt: updated_at,
+            statistics: statistics.map(statistic => Statistic.parseResponseStatistic(
+                {
+                    assetType: className,
+                    citedCount: statistic.cited_count,
+                    worksCount: statistic.works_count,
+                    assetId: id,
+                    year: statistic.year
+                })),
+            localUrl: local_url
+        });
     }
 
 }

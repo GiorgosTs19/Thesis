@@ -30,5 +30,5 @@ createInertiaApp({
 
         root.render(<BaseLayout title={''}><App {...props}/></BaseLayout>);
     },
-}).then(r => {
+}).then(() => {
 });

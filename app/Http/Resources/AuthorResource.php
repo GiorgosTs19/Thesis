@@ -21,7 +21,6 @@ use Illuminate\Support\Carbon;
  * @property mixed cited_by_count
  * @property mixed $id
  */
-
 class AuthorResource extends JsonResource {
     /**
      * Transform the resource into an array.
@@ -34,7 +33,7 @@ class AuthorResource extends JsonResource {
 
         $statisticsAreValid = !$statistics instanceof MissingValue && sizeof($statistics) > 0;
 
-        if($statistics && $statisticsAreValid) {
+        if ($statistics && $statisticsAreValid) {
             $years = $statistics->pluck('year')->toArray();
             $allYears = range(min($years), max($years));
 
@@ -50,7 +49,7 @@ class AuthorResource extends JsonResource {
 
                 // If the year is not found, add an object with default values
                 if (!$found) {
-                    $statistics[] =  new Statistic([
+                    $statistics[] = new Statistic([
                         'asset_type' => Author::class,
                         'cited_count' => 0,
                         'works_count' => 0,
@@ -65,7 +64,7 @@ class AuthorResource extends JsonResource {
 
 
         return [
-            'id'=>$this->id,
+            'id' => $this->id,
             'name' => $this->display_name,
             Ids::OPEN_ALEX_ID => $this->open_alex_id,
             Ids::ORC_ID_ID => $this->orc_id,
@@ -74,8 +73,9 @@ class AuthorResource extends JsonResource {
             'citation_count' => $this->cited_by_count,
             'is_user' => !!$this->is_user,
             'updated_at' => Carbon::parse($this->updated_at)->format('d-m-Y'),
-            'works'=>WorkResource::collection($this->whenLoaded('works')),
-            'statistics'=> $statisticsAreValid ? StatisticResource::collection($statistics) : []
+            'works' => WorkResource::collection($this->whenLoaded('works')),
+            'statistics' => $statisticsAreValid ? StatisticResource::collection($statistics) : [],
+            'local_url' => route('Author.Page', ['id' => $this->open_alex_id])
         ];
     }
 }
