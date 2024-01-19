@@ -2,6 +2,8 @@
 
 namespace App\Utility;
 
+use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class Requests {
@@ -13,7 +15,7 @@ class Requests {
 
     const REQUEST_ASSET = 'request';
 
-    public static function get($url): \GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\Response {
-        return Http::withOptions(['verify' => false])->get($url);
+    public static function get($url): PromiseInterface|Response {
+        return Http::get($url);
     }
 }

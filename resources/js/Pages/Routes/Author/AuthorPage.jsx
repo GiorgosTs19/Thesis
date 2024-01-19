@@ -50,7 +50,7 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
             description: 'Citation trends per year.',
             disclaimer: 'The data presented in this chart may not capture the complete set of citations for' +
                 ' this author. The statistics gathered might not cover every year, potentially leading' +
-                'to gaps in the information.'
+                ' to gaps in the information.'
         },
         WORKS: {
             dataSet: authorStatistics.map((statistic) => statistic.worksCount),
@@ -59,16 +59,16 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
             description: 'Distribution of works authored per year.',
             disclaimer: 'The data presented in this chart may not capture the complete set of works for' +
                 ' this author. The statistics gathered might not cover every year, potentially leading' +
-                'to gaps in the information.'
+                ' to gaps in the information.'
         }
     }
-    const topCoAuthors = useMemo(() => getTopCoAuthors(authorObject.works, 3, authorObject), [authorObject.works],);
+    const topCoAuthors = useMemo(() => getTopCoAuthors(authorObject.works, 5, authorObject), [authorObject.works],);
 
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
 
     const renderWorkItem = useCallback((work, index) => {
         return work.title.length > 0 &&
-            <WorkItem work={work} key={work.doi} index={works.meta.from + index} authorToExclude={authorObject.id}/>
+            <WorkItem work={work} key={work.doi} index={works.meta.from + index - 1} authorToExclude={authorObject.id}/>
     }, [works]);
 
     const renderAuthorItem = (item, index) => <AuthorItem key={index} author={item.value} index={index}
@@ -93,7 +93,7 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                             </div>
                         </div>
 
-                        <div className="2xl:col-span-3 flex flex-col">
+                        <div className="2xl:col-span-3 flex flex-col h-full">
                             <Switch
                                 checkedLabel={CHART_DATA.WORKS.title}
                                 uncheckedLabel={CHART_DATA.CITATIONS.title}
@@ -101,7 +101,7 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                                 className="mx-auto my-4"
                                 onChange={(checked) => setActiveChart(checked ? CHART_DATA.CITATIONS : CHART_DATA.WORKS)}
                             />
-                            <div className="flex flex-col">
+                            <div className="flex flex-col h-full">
                                 <div
                                     className="text-gray-500 opacity-75 italic mx-auto mb-4">{activeChart.description}</div>
                                 <div className="md:px-4 mb-4 max-w-full">
@@ -109,11 +109,17 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                                                            labels={activeChart.labels}/>
                                 </div>
                                 <div
-                                    className="text-gray-500 opacity-75 italic mx-auto mb-4">{activeChart.disclaimer}</div>
+                                    className="text-gray-500 opacity-75 italic m-auto text-center">{activeChart.disclaimer}</div>
                             </div>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4">
+                        <div className="2xl:col-span-1 flex flex-col">
+                            <List data={topCoAuthors} renderFn={renderAuthorItem} vertical
+                                  wrapperClassName={'xl:h-full'} title={'Top Co-Authors'}
+                                  header={`Top authors who have collaborated with ${authorObject.name} on various works`}
+                                  footer={'( Based on the works list in this page )'}/>
+                        </div>
                         <div className="2xl:col-span-4 flex flex-col">
                             <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork}
                                            sortingOptions={sortingOptions} currentSortOption={currentSortOption}>
@@ -123,12 +129,6 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                                         className={'mx-2 text-gray-600 opacity-50'}>{isUser ? '' : `(Only works co-authored with registered users appear in the list )`}</span>
                                 </div>
                             </PaginatedList>
-                        </div>
-                        <div className="2xl:col-span-1 flex flex-col">
-                            <List data={topCoAuthors} renderFn={renderAuthorItem} vertical
-                                  wrapperClassName={'w-fit'} title={'Top Co-Authors'}
-                                  header={`Top authors who have collaborated with ${authorObject.name} on various works`}
-                                  footer={'( Based on the works list in this page )'}/>
                         </div>
                     </div>
 

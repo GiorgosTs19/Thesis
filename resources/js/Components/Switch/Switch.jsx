@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {bool, func, string} from "prop-types";
 
-const Switch = ({ checkedLabel, uncheckedLabel, onChange, checked, className }) => {
+const Switch = ({checkedLabel, uncheckedLabel, onChange, checked = false, className}) => {
     const [isChecked, setIsChecked] = useState(checked);
 
     const toggleSwitch = () => {
@@ -30,5 +30,6 @@ Switch.propTypes = {
     uncheckedLabel: string.isRequired,
     onChange: func,
     checked: bool,
+    className: string
 }
 export default Switch;

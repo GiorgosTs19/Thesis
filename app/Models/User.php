@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Exception;
+use App\Http\Controllers\APIController;
 use App\Utility\Ids;
 use App\Utility\ULog;
-use Laravel\Sanctum\HasApiTokens;
-use JetBrains\PhpStorm\ArrayShape;
-use App\Http\Controllers\APIController;
-use Illuminate\Notifications\Notifiable;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use JetBrains\PhpStorm\ArrayShape;
+use Laravel\Sanctum\HasApiTokens;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 /**
  * @property mixed last_name
@@ -72,9 +74,9 @@ class User extends Authenticatable {
      * and the user ( it they exist, otherwise null ) as its second element.
      */
     #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorIsUser(string $open_alex_id): array {
-        $user_query = self::where(Ids::OPEN_ALEX_ID,$open_alex_id);
+        $user_query = self::where(Ids::OPEN_ALEX_ID, $open_alex_id);
         $user_exists = boolval($user_query->exists());
-        return ['exists'=>$user_exists, 'author'=>$user_query->first()];
+        return ['exists' => $user_exists, 'author' => $user_query->first()];
     }
 
     /**
@@ -99,13 +101,13 @@ class User extends Authenticatable {
             Ids::SCOPUS => APIController::authorFilterRequest($id, false, true)
         };
 
-        if(!$author)
+        if (!$author)
             return;
 
-        if((is_array($author) && sizeof($author) === 0))
+        if ((is_array($author) && sizeof($author) === 0))
             return;
 
-        if(is_array($author))
+        if (is_array($author))
             $author = $author[0];
 
         // Parse the ids of the author
@@ -117,13 +119,13 @@ class User extends Authenticatable {
         $ids = [Ids::SCOPUS_ID => $scopus_id, Ids::ORC_ID_ID => $orc_id, Ids::OPEN_ALEX_ID => $open_alex_id];
 
         // If a user with the same openAlex id exists. return;
-        if(self::openAlex($open_alex_id)->exists())
+        if (self::openAlex($open_alex_id)->exists())
             return;
 
         // Else create a new user.
-        self::newProfessorUser($professor,$ids);
+        self::newProfessorUser($professor, $ids);
 
-        Author::createAuthor($author,$ids, true);
+        Author::createAuthor($author, $ids, true);
     }
 
     /**
@@ -144,21 +146,25 @@ class User extends Authenticatable {
             $newUser->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
             $newUser->save();
             ULog::log("User $newUser->last_name $newUser->first_name has been created");
-        } catch (Exception $exception ) {
+        } catch (Exception $exception) {
             ULog::error($exception->getMessage(), ULog::META);
         }
         return $newUser;
     }
 
     public function scopeOrcId($query, $id) {
-        if($id !== '')
+        if ($id !== '')
             return $query->orWhere(Ids::ORC_ID_ID, $id);
         return $query;
     }
 
     public function scopeOpenAlex($query, $id) {
-        if($id !== '')
+        if ($id !== '')
             return $query->orWhere(Ids::OPEN_ALEX_ID, $id);
         return $query;
+    }
+
+    public function groups(): BelongsToMany {
+        return $this->belongsToMany(Group::class);
     }
 }
