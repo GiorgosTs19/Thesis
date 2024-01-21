@@ -7,7 +7,6 @@ import List from "@/Components/List/List.jsx";
 import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
 
 const WorkPage = ({work}) => {
-    console.log(work)
     const workObject = Work.parseResponseWork(work);
     const {title} = workObject;
     const {statistics, authors} = workObject

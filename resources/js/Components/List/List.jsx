@@ -40,8 +40,8 @@ const List = ({
                   header,
                   footer
               }) => {
-    const items = parser ? data.map(item => parser(item)) : data;
-
+    const items = parser ? data.map(parser) : data;
+    
     return <div className={`rounded-lg bg-gray-200 p-4 flex flex-col ${wrapperClassName}`}>
         <div className={`${header ? 'mb-2' : 'mb-6'} text-lg font-semibold text-yellow-800 w-fit`}>
             {title}

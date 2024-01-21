@@ -1,5 +1,10 @@
 import React from "react";
-export function InfoSVG({className='',width=24,height=24,onClick=()=>{},rotate='45def', cursor = ''}) {
+import {func, number, string} from "prop-types";
+
+export function InfoSVG({
+                            className = '', width = 24, height = 24, onClick = () => {
+    }, rotate = '45def', cursor = ''
+                        }) {
     return (
         <svg
             width={width}
@@ -7,7 +12,7 @@ export function InfoSVG({className='',width=24,height=24,onClick=()=>{},rotate='
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{cursor:cursor,rotate:rotate}}
+            style={{cursor: cursor, rotate: rotate}}
             className={className}
             onClick={onClick}
         >
@@ -27,4 +32,13 @@ export function InfoSVG({className='',width=24,height=24,onClick=()=>{},rotate='
             />
         </svg>
     )
+}
+
+InfoSVG.propTypes = {
+    className: string,
+    width: number,
+    height: number,
+    onClick: func,
+    rotate: string,
+    cursor: string
 }

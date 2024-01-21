@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Work;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class SearchController extends Controller {
@@ -16,18 +14,29 @@ class SearchController extends Controller {
      * @return Response
      */
 
-    public function checkAuthorExists(Request $request): Response {
-//        $input = $request->only(['asset_id','id_type', 'asset_type']);
-//        $asset_type = (int)$input['asset_type'] === 1 ? Author::class : Work::class;
-//        $prefix = $asset_type === Author::class ? 'A' : 'W';
-//        $id_type = $input['id_type'];
-//        $asset_id = $id_type === 'open_alex' ? $prefix.$input['asset_id'] : $input['asset_id'];
-//        if($asset_type === Author::class)
-//            $asset = APIController::authorRequest($asset_id, $id_type);
-//        else
-//            $asset = APIController::workRequest($asset_id);
-//        $asset_exists = !is_null($asset);
-//        return Inertia::render('Search/Search',['asset' => $asset_exists ? $asset : null,
-//            'exists' => $asset_exists, 'asset_type'=>'Author']);
+    public function search(Request $request): Response {
+        $query = $request->input('query');
+
+        // Search authors
+        $authorResults = Author::searchName($query)
+            ->searchOpenAlex($query)
+            ->searchScopus($query)
+            ->searchOrcId($query)
+            ->get();
+
+        // Search works
+        $workResults = Work::searchTitle($query)
+            ->searchDOI($query)
+            ->searchOpenAlex($query)
+            ->get();
+
+        // Combine and return the results
+        $results = [
+            'query' => $query,
+            'authors' => $authorResults,
+            'works' => $workResults,
+        ];
+
+        return redirect()->back()->with(['searchResults' => $results]);
     }
 }

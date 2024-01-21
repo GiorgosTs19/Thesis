@@ -1,6 +1,6 @@
 <?php /** @noinspection ALL */
 
-use App\Http\Controllers\{AuthorController, Controller, WorkController};
+use App\Http\Controllers\{AuthorController, HomeController, WorkController};
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,13 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [Controller::class, 'showLogin']);
-Route::get('/Author/{id}', [AuthorController::class, 'showAuthorPage'])->name('Author.Page');
-Route::get('/Work/{id}', [WorkController::class, 'showWorkPage'])->name('Work.Page');
-Route::get('/Article/{?oaurl}', [Controller::class, 'getArticle']);
+Route::get('/', [HomeController::class, 'showHomePage'])->name('Home.Page');
+Route::get('/author/{id}', [AuthorController::class, 'showAuthorPage'])->name('Author.Page');
+Route::get('/work/{id}', [WorkController::class, 'showWorkPage'])->name('Work.Page');
 
-Route::prefix('author')->group(function () {
-    Route::get('/exists', [\App\Http\Controllers\SearchController::class, 'checkAuthorExists'])->name('check_author_exists');
+Route::prefix('search')->group(function () {
+    Route::get('/', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
 });
 
 Route::prefix('work')->group(function () {

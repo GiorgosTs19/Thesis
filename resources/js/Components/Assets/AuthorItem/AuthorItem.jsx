@@ -1,6 +1,7 @@
 import React from "react";
 import {arrayOf, instanceOf, number, oneOfType, shape, string} from "prop-types";
 import {Author} from "@/Models/Author/Author.js";
+import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
 
 export const AuthorItem = ({author, index, extraProperties = []}) => {
     const {
@@ -21,10 +22,10 @@ export const AuthorItem = ({author, index, extraProperties = []}) => {
                     {isUser ? 'Registered User' : 'Guest User'}
                 </div>
                 <div className="text-gray-600 pl-3 text-sm">
-                    Citations : {citationCount}
+                    Citations : {numberToDotNotation(citationCount)}
                 </div>
                 <div className="text-gray-600 pl-3 text-sm">
-                    Works : {worksCount}
+                    Works : {numberToDotNotation(worksCount)}
                 </div>
                 {
                     extraProperties.map((property, index) =>
@@ -48,7 +49,7 @@ AuthorItem.propTypes = {
     author: instanceOf(Author),
     index: number.isRequired,
     extraProperties: arrayOf(shape({
-        name: string.isRequired,
-        value: oneOfType([number, string]).isRequired
+        name: string,
+        value: oneOfType([number, string])
     }))
 }

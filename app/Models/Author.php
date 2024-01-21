@@ -2,21 +2,23 @@
 
 namespace App\Models;
 
-use Exception;
-use App\Utility\{Ids, ULog, SystemManager};
-use JetBrains\PhpStorm\ArrayShape;
-use Illuminate\Support\{Facades\Auth, Facades\Config};
 use App\Http\Controllers\APIController;
-use Illuminate\Database\{Eloquent\Model,
-    Eloquent\Relations\MorphMany,
-    Eloquent\Factories\HasFactory,
-    Eloquent\Relations\BelongsToMany};
+use App\Utility\{Ids, SystemManager, ULog};
+use Exception;
+use Illuminate\Database\{Eloquent\Factories\HasFactory,
+    Eloquent\Model,
+    Eloquent\Relations\BelongsToMany,
+    Eloquent\Relations\MorphMany};
+use Illuminate\Support\{Facades\Auth, Facades\Config};
+use JetBrains\PhpStorm\ArrayShape;
 
 /**
  * @method static updateOrCreate(array $array, array $array1)
- * @method static where(string $string, $orc_id)
  * @method static user()
  * @method static find($id)
+ * @method static mostWorks(int $int)
+ * @method static name(mixed $query)
+ * @method static searchName(mixed $query)
  *
  * @property int id
  * @property string orc_id
@@ -30,7 +32,6 @@ use Illuminate\Database\{Eloquent\Model,
  * @property string open_alex_id
  * @property string last_updated_date
  */
-
 class Author extends Model {
     use HasFactory;
 
@@ -59,7 +60,7 @@ class Author extends Model {
     ];
 
     protected $casts = [
-        'updated_at'=>'datetime:Y-m-d'
+        'updated_at' => 'datetime:Y-m-d'
     ];
 
     protected $hidden = ['created_at', 'last_updated_date', 'created_date'];
@@ -80,8 +81,8 @@ class Author extends Model {
      * @return mixed
      * The author if they exist.
      */
-    public static function getAuthorDbIdByExternalId($external_id, string $external_id_name ='orc_id'): mixed {
-        return Author::where($external_id_name,$external_id)->first();
+    public static function getAuthorDbIdByExternalId($external_id, string $external_id_name = 'orc_id'): mixed {
+        return Author::where($external_id_name, $external_id)->first();
     }
 
     /**
@@ -92,9 +93,9 @@ class Author extends Model {
      *  and the author ( it they exist, otherwise null ) as its second element.
      */
     #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExists($open_alex_id): array {
-        $author_query =  Author::where(Ids::OPEN_ALEX_ID,$open_alex_id);
+        $author_query = Author::where(Ids::OPEN_ALEX_ID, $open_alex_id);
         $author_exists = $author_query->exists();
-        return ['exists'=>(boolean)$author_exists, 'author'=>$author_query->first()];
+        return ['exists' => (boolean)$author_exists, 'author' => $author_query->first()];
     }
 
     /**
@@ -110,7 +111,7 @@ class Author extends Model {
      */
     public static function createAuthor($author, array $ids = [], bool $is_user = false): ?Author {
         $newAuthor = new Author;
-        if(!$is_user) {
+        if (!$is_user) {
             $author = APIController::authorRequest($ids[Ids::OPEN_ALEX_ID]);
         }
         try {
@@ -119,25 +120,25 @@ class Author extends Model {
             $newAuthor = Author::updateOrCreate(
                 [Ids::OPEN_ALEX_ID => $ids[Ids::OPEN_ALEX_ID]],
                 [
-                    Ids::SCOPUS_ID => $ids[Ids::SCOPUS_ID] ??  null,
+                    Ids::SCOPUS_ID => $ids[Ids::SCOPUS_ID] ?? null,
                     Ids::ORC_ID_ID => $ids[Ids::ORC_ID_ID] ?? null,
-                    'cited_by_count' => property_exists($author,'cited_by_count') ? $author->cited_by_count : null,
+                    'cited_by_count' => property_exists($author, 'cited_by_count') ? $author->cited_by_count : null,
                     'display_name' => $author->display_name,
                     'is_user' => $is_user,
-                    'works_url'=>property_exists($author,'works_api_url') ? $author->works_api_url : self::$AUTHOR_WORKS_BASE_URL.$ids['open_alex_id'],
-                    'last_updated_date'=>property_exists($author,'updated_date') ? $author->updated_date : null,
-                    'created_date'=>property_exists($author,'created_date') ? $author->created_date : null,
+                    'works_url' => property_exists($author, 'works_api_url') ? $author->works_api_url : self::$AUTHOR_WORKS_BASE_URL . $ids['open_alex_id'],
+                    'last_updated_date' => property_exists($author, 'updated_date') ? $author->updated_date : null,
+                    'created_date' => property_exists($author, 'created_date') ? $author->created_date : null,
                     'works_count' => $author->works_count
                 ]
             );
 
-            if(!property_exists($author,'counts_by_year')) {
+            if (!property_exists($author, 'counts_by_year')) {
                 return $newAuthor;
             }
 
-            Statistic::generateStatistics($newAuthor->id,$author->counts_by_year, self::class);
+            Statistic::generateStatistics($newAuthor->id, $author->counts_by_year, self::class);
         } catch (Exception $error) {
-            ULog::error($error->getMessage(),SystemManager::LOG_META);
+            ULog::error($error->getMessage(), SystemManager::LOG_META);
         }
         return $newAuthor;
     }
@@ -168,8 +169,8 @@ class Author extends Model {
      * "1" for authors that are also users and "0" for those who are not.
      * @return mixed
      */
-    public function scopeUser($query, int $is_user = 1): mixed{
-        return $query->where('is_user',$is_user);
+    public function scopeUser($query, int $is_user = 1): mixed {
+        return $query->where('is_user', $is_user);
     }
 
     /**
@@ -179,8 +180,8 @@ class Author extends Model {
      * @param $open_alex_id - The OpenAlex id of to search for.
      * @return mixed
      */
-    public function scopeOpenAlex($query, string $open_alex_id): mixed{
-        return $query->where('open_alex_id',$open_alex_id);
+    public function scopeOpenAlex($query, string $open_alex_id): mixed {
+        return $query->where('open_alex_id', $open_alex_id);
     }
 
     /**
@@ -190,7 +191,7 @@ class Author extends Model {
      * Creates a row in the AuthorWorks table, associating the given work with an author.
      */
     public function associateAuthorToWork($work): void {
-        if(!$this->associationExists($work->id)) {
+        if (!$this->associationExists($work->id)) {
             try {
                 $newAuthorWork = new AuthorWork;
                 $newAuthorWork->author_id = $this->id;
@@ -209,7 +210,7 @@ class Author extends Model {
      * A boolean indicating if an association between the author and the given work already exists in the database.
      */
     public function associationExists($work_id): bool {
-        return AuthorWork::where('author_id',$this->id)->where('work_id',$work_id)->exists();
+        return AuthorWork::where('author_id', $this->id)->where('work_id', $work_id)->exists();
     }
 
     /**
@@ -225,12 +226,12 @@ class Author extends Model {
 
         $requestAuthor = APIController::authorUpdateRequest($this->open_alex_id);
 
-        if($requestAuthor->works_count !== $this->works_count) {
+        if ($requestAuthor->works_count !== $this->works_count) {
             ULog::log("New works found for $this->display_name");
             $this->parseWorks(0, 1, true);
         }
 
-        if($requestAuthor->updated_date === $this->last_updated_date)
+        if ($requestAuthor->updated_date === $this->last_updated_date)
             return;
 
         try {
@@ -243,14 +244,14 @@ class Author extends Model {
             ULog::error($exception->getMessage(), ULog::META);
         }
 
-        $year_to_update =  date('Y');
+        $year_to_update = date('Y');
         $databaseStatistic = $this->statistics()
-            ->where('year',$year_to_update)
+            ->where('year', $year_to_update)
             ->first();
 
         if (!$databaseStatistic) {
             $requestStatistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $requestAuthor->counts_by_year);
-            if(!$requestStatistic)
+            if (!$requestStatistic)
                 return;
             Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
             return;
@@ -275,12 +276,12 @@ class Author extends Model {
      */
     public function parseWorks(int $prev_count = 0, int $page = 1, bool $checkNew = false): void {
         [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page, false,
-        $checkNew ? ['publication_year'=>date('Y')] : []);
+            $checkNew ? ['publication_year' => date('Y')] : []);
         $total_work_count = $meta->count;
 
         foreach ($works->generator() as $work) {
             // Check if a work with this title already exists in the database, if so proceed to the next one
-            if(Work::openAlex($work->id)->exists())
+            if (Work::openAlex($work->id)->exists())
                 continue;
 
             // If not, create a new Work and save it to the database
@@ -289,12 +290,12 @@ class Author extends Model {
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
         $have_been_parsed_count = $prev_count + $works_count;
-        ULog::log($have_been_parsed_count.'/'.$total_work_count.' works parsed for '.$this->display_name);
+        ULog::log($have_been_parsed_count . '/' . $total_work_count . ' works parsed for ' . $this->display_name);
 
         // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
         // then keep calling the function while incrementing the page parameter passed to the request,
         // until all the author's works have been parsed and stored.
-        if($have_been_parsed_count < $total_work_count) {
+        if ($have_been_parsed_count < $total_work_count) {
             $this->parseWorks($have_been_parsed_count, ++$page, $checkNew);
         }
     }
@@ -306,5 +307,25 @@ class Author extends Model {
      */
     public function statistics(): MorphMany {
         return $this->morphMany(Statistic::class, 'asset')->orderBy('year');
+    }
+
+    public function scopeMostWorks($query, int $limit) {
+        return $query->orderBy('works_count', 'desc')->limit($limit);
+    }
+
+    public function scopeSearchName($query, $name) {
+        return $query->orWhere('display_name', 'LIKE', "%{$name}%");
+    }
+
+    public function scopeSearchScopus($query, $scopus_id) {
+        return $query->orWhere('scopus_id', $scopus_id);
+    }
+
+    public function scopeSearchOrcId($query, $orc_id) {
+        return $query->orWhere('orc_id', $orc_id);
+    }
+
+    public function scopeSearchOpenAlex($query, $open_alex_id) {
+        return $query->orWhere('open_alex_id', $open_alex_id);
     }
 }

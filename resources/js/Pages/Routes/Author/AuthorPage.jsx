@@ -10,6 +10,7 @@ import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisti
 import {getTopCoAuthors} from "@/Utility/Arrays/Utils.js";
 import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
 import List from "@/Components/List/List.jsx";
+import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
 
 const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
@@ -30,8 +31,8 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
     }
 
     const properties = [
-        {name: 'Citations', value: citationCount},
-        {name: 'Works', value: worksCount},
+        {name: 'Citations', value: numberToDotNotation(citationCount)},
+        {name: 'Works', value: numberToDotNotation(worksCount)},
         {name: 'Open Alex', value: openAlexId ?? '-'},
         {name: 'Scopus', value: scopusId ?? '-'},
         {name: 'OrcId', value: orcId ?? '-'}
@@ -76,7 +77,6 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                                                               name: 'Works Co-Authored',
                                                               value: item.occurrences
                                                           }]}/>
-
     return (
         <>
             <div className="bg-gray-100 flex items-center justify-self-end h-full ">

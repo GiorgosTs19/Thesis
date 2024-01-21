@@ -25,8 +25,9 @@ use Illuminate\Support\Facades\Auth;
  * @property string last_updated_date
  * @property int referenced_works_count
  *
- * @method static where(string $string, $doi)
  * @method static openAlex($id)
+ * @method static mostCitations(int $int)
+ * @method static searchTitle(mixed $query)
  */
 class Work extends Model {
     use HasFactory;
@@ -142,6 +143,14 @@ class Work extends Model {
         return $query;
     }
 
+    public function scopeMostCitations($query, int $limit) {
+        return $query->orderBy('referenced_works_count', 'desc')->limit($limit)->get();
+    }
+
+    public function scopeIsOpenAccess($query, int $is_oa = 1) {
+        return $query->where('is_oa', $is_oa);
+    }
+
     /**
      * Updates the work ( if any changes are detected on the OpenAlex's api response ).
      * It compares the update date on the response, to the local last_updated_date ( last updated on the OpenAlex's database since the last local update )
@@ -211,5 +220,19 @@ class Work extends Model {
                 $query->orWhere('open_alex_url', $id)
             };
         return $query;
+    }
+
+    public function scopeSearchTitle($query, $title) {
+        return $query->orWhere('title', 'LIKE', "%{$title}%");
+    }
+
+    public function scopeSearchDOI($query, $doi) {
+        // Add "https://doi.org/" if not already present
+        $doiToSearch = str_starts_with($doi, 'https://doi.org/') ? $doi : 'https://doi.org/' . $doi;
+        return $query->orWhere('doi', $doiToSearch);
+    }
+
+    public function scopeSearchOpenAlex($query, $open_alex_id) {
+        return $query->orWhere('open_alex_id', $open_alex_id);
     }
 }

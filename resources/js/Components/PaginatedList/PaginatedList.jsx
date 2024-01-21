@@ -30,25 +30,23 @@ import DropDownMenu from "@/Components/DropDownMenu/DropDownMenu.jsx";
 const PaginatedList = ({response, children, renderFn, parser, sortingOptions, currentSortOption}) => {
     const items = parser ? response.data.map(item => parser(item)) : response.data;
 
-    return <div className="">
-        <div className="rounded-lg bg-gray-200 p-4 flex flex-col">
-            <div className={'grid grid-cols-1 sm:grid-cols-2 mb-6 md:mb-4'}>
-                <div className={'col-span-1'}>
-                    {children}
-                </div>
-                <div className={'col-span-1 flex mx-auto md:ml-auto md:mr-0'}>
-                    <DropDownMenu options={sortingOptions} renderLinks
-                                  className={'ms-auto'} label={'Sort by'}
-                                  defaultOption={sortingOptions.find(option => option.value === currentSortOption)}/>
-                </div>
+    return <div className="rounded-lg bg-gray-200 p-4 flex flex-col h-full">
+        <div className={'grid grid-cols-1 sm:grid-cols-2 mb-6 md:mb-4'}>
+            <div className={'col-span-1'}>
+                {children}
             </div>
-            <ul className="list-disc pl-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {items.map((item, index) =>
-                    renderFn(item, index)
-                )}
-            </ul>
-            <Pagination response={response} className={'mx-auto mt-2 text-sm'}/>
+            <div className={'col-span-1 flex mx-auto md:ml-auto md:mr-0'}>
+                <DropDownMenu options={sortingOptions} renderLinks
+                              className={'ms-auto'} label={'Sort by'}
+                              defaultOption={sortingOptions.find(option => option.value === currentSortOption)}/>
+            </div>
         </div>
+        <ul className="list-disc pl-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {items.map((item, index) =>
+                renderFn(item, index)
+            )}
+        </ul>
+        <Pagination response={response} className={'mx-auto mt-2 text-sm'}/>
     </div>
 }
 
