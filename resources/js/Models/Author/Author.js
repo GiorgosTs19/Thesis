@@ -61,16 +61,16 @@ export class Author {
             isUser: is_user,
             citationCount: citation_count,
             worksCount: works_count,
-            works: works.map(work => Work.parseResponseWork(work)),
+            works: works ? works.map(work => Work.parseResponseWork(work)) : [],
             updatedAt: updated_at,
-            statistics: statistics.map(statistic => Statistic.parseResponseStatistic(
+            statistics: statistics ? statistics.map(statistic => Statistic.parseResponseStatistic(
                 {
                     assetType: className,
                     citedCount: statistic.cited_count,
                     worksCount: statistic.works_count,
                     assetId: id,
                     year: statistic.year
-                })),
+                })) : [],
             localUrl: local_url
         });
     }

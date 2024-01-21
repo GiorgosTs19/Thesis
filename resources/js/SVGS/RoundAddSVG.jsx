@@ -1,4 +1,10 @@
-export function RoundAddSVG({className,width=24,height=24,onClick=()=>{},rotate='45deg'}) {
+import React from "react";
+import {func, number, string} from "prop-types";
+
+export function RoundAddSVG({
+                                className, width = 24, height = 24, onClick = () => {
+    }, rotate = '45deg'
+                            }) {
     return (
         <svg
             width={width}
@@ -6,7 +12,7 @@ export function RoundAddSVG({className,width=24,height=24,onClick=()=>{},rotate=
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{cursor:"pointer",rotate:rotate}}
+            style={{cursor: "pointer", rotate: rotate}}
             className={className}
             onClick={onClick}
         >
@@ -25,4 +31,13 @@ export function RoundAddSVG({className,width=24,height=24,onClick=()=>{},rotate=
             />
         </svg>
     )
+}
+
+RoundAddSVG.propTypes = {
+    className: string,
+    width: number,
+    height: number,
+    onClick: func,
+    rotate: string,
+    cursor: string
 }

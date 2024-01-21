@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AuthorResource;
+use App\Http\Resources\WorkResource;
 use App\Models\Author;
 use App\Models\Work;
 use Illuminate\Http\Request;
@@ -21,20 +23,20 @@ class SearchController extends Controller {
         $authorResults = Author::searchName($query)
             ->searchOpenAlex($query)
             ->searchScopus($query)
-            ->searchOrcId($query)
+            ->searchOrcId($query)->limit(5)
             ->get();
 
         // Search works
         $workResults = Work::searchTitle($query)
             ->searchDOI($query)
-            ->searchOpenAlex($query)
+            ->searchOpenAlex($query)->limit(5)
             ->get();
 
         // Combine and return the results
         $results = [
             'query' => $query,
-            'authors' => $authorResults,
-            'works' => $workResults,
+            'authors' => AuthorResource::collection($authorResults),
+            'works' => WorkResource::collection($workResults),
         ];
 
         return redirect()->back()->with(['searchResults' => $results]);

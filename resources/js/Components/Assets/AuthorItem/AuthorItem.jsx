@@ -11,7 +11,7 @@ export const AuthorItem = ({author, index, extraProperties = []}) => {
         isUser,
         localUrl
     } = author;
-
+    
     return <li className="mb-4 flex-grow list-none flex">
         <div className="top-0 left-0 text-black text-sm text-center mr-2">
             {index + 1}

@@ -94,7 +94,7 @@ export class Work {
             openAlexUrl: open_alex_url,
             updatedAt: updated_at,
             citesUrl: cites_url,
-            authors: authors.map(author => Author.parseResponseAuthor(author)),
+            authors: authors ? authors.map(author => Author.parseResponseAuthor(author)) : [],
             openAlexId: open_alex_id,
             statistics: statistics?.map(statistic => Statistic.parseResponseStatistic(
                 {assetType: className, citedCount: statistic.cited_count, assetId: id, year: statistic.year})) ?? [],

@@ -1,4 +1,10 @@
-export function ChevronRightSVG({className,width=24,height=24,onClick=()=>{},rotate='45def'}) {
+import React from "react";
+import {func, number, string} from "prop-types";
+
+export function ChevronRightSVG({
+                                    className, width = 24, height = 24, onClick = () => {
+    }, rotate = ''
+                                }) {
     return (
         <svg
             width={width}
@@ -6,7 +12,7 @@ export function ChevronRightSVG({className,width=24,height=24,onClick=()=>{},rot
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{cursor:"pointer",rotate:rotate}}
+            style={{cursor: "pointer", rotate: rotate}}
             className={className}
             onClick={onClick}
         >
@@ -16,4 +22,13 @@ export function ChevronRightSVG({className,width=24,height=24,onClick=()=>{},rot
             />
         </svg>
     )
+}
+
+ChevronRightSVG.propTypes = {
+    className: string,
+    width: number,
+    height: number,
+    onClick: func,
+    rotate: string,
+    cursor: string
 }

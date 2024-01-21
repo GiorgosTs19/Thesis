@@ -1,10 +1,10 @@
-import {arrayOf, func, node, number, oneOfType, string} from 'prop-types';
+import {arrayOf, bool, func, node, number, oneOfType, string} from 'prop-types';
 import React from 'react'
 
-const defaultClassName = 'block rounded-md w-full border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 ' +
-    'placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6';
+const defaultClassName = 'block rounded-md w-full border-0 py-2 px-4 text-gray-900 ' +
+    'placeholder:text-gray-400 sm:text-sm sm:leading-6';
 
-function ExtendedInput({
+const ExtendedInput = ({
                            name,
                            leadingElement = 'children',
                            value,
@@ -14,20 +14,22 @@ function ExtendedInput({
                            containerClassName = '',
                            inputClassName = '',
                            leadingElementClassName = '',
-                           children
-                       }) {
+                           children,
+                           type = 'text',
+                           autoFocus = false
+                       }) => {
     return (
         <div className={containerClassName}>
             {label && <label htmlFor={name}
                              className={`block text-sm font-medium leading-6 text-gray-900 ${leadingElementClassName}`}>{label}</label>}
-            <div className="relative mt-2 rounded-md shadow-sm">
+            <div className="relative mt-2 rounded-md shadow-sm justify-between flex">
                 {leadingElement &&
-                    <div className="absolute inset-y-0 left-0 flex items-center ">
+                    <div className="flex items-center pl-3 w-fit">
                         {leadingElement === 'children' ? children : leadingElement}
                     </div>}
-                <input type="text" name={name} id={name} className={`${defaultClassName} ${inputClassName}`}
+                <input type={type} name={name} id={name} className={`${defaultClassName} ${inputClassName}`}
                        placeholder={placeholder}
-                       value={value} onChange={onChange}/>
+                       value={value} onChange={onChange} autoFocus={autoFocus}/>
             </div>
         </div>
     );
@@ -35,8 +37,10 @@ function ExtendedInput({
 
 ExtendedInput.propTypes = {
     name: string.isRequired,
+    type: string,
     label: string,
     placeholder: string,
+    autoFocus: bool,
     leadingElement: oneOfType([node, string]),
     value: oneOfType([string, number]).isRequired,
     onChange: func.isRequired,
