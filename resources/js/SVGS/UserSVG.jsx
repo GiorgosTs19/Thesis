@@ -1,4 +1,7 @@
-export function UserSVG({className,width=24,height=24}) {
+import React from "react";
+import {func, number, string} from "prop-types";
+
+export function UserSVG({className, width = 24, height = 24}) {
     return (
         <svg
             width={width}
@@ -20,4 +23,13 @@ export function UserSVG({className,width=24,height=24}) {
             />
         </svg>
     )
+}
+
+UserSVG.propTypes = {
+    className: string,
+    width: number,
+    height: number,
+    onClick: func,
+    rotate: string,
+    cursor: string
 }

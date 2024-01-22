@@ -16,20 +16,22 @@ const ExtendedInput = ({
                            leadingElementClassName = '',
                            children,
                            type = 'text',
-                           autoFocus = false
+                           autoFocus = false,
+                           onClick
                        }) => {
     return (
         <div className={containerClassName}>
             {label && <label htmlFor={name}
                              className={`block text-sm font-medium leading-6 text-gray-900 ${leadingElementClassName}`}>{label}</label>}
-            <div className="relative mt-2 rounded-md shadow-sm justify-between flex">
+            <div className="relative rounded-md shadow-sm justify-between flex">
                 {leadingElement &&
                     <div className="flex items-center pl-3 w-fit">
                         {leadingElement === 'children' ? children : leadingElement}
                     </div>}
                 <input type={type} name={name} id={name} className={`${defaultClassName} ${inputClassName}`}
                        placeholder={placeholder}
-                       value={value} onChange={onChange} autoFocus={autoFocus}/>
+                       value={value} readOnly={value === undefined} onChange={onChange} autoFocus={autoFocus}
+                       onClick={onClick}/>
             </div>
         </div>
     );
@@ -42,8 +44,9 @@ ExtendedInput.propTypes = {
     placeholder: string,
     autoFocus: bool,
     leadingElement: oneOfType([node, string]),
-    value: oneOfType([string, number]).isRequired,
-    onChange: func.isRequired,
+    value: oneOfType([string, number]),
+    onChange: func,
+    onClick: func,
     containerClassName: string,
     inputClassName: string,
     leadingElementClassName: string,

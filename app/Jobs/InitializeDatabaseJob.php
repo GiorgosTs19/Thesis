@@ -2,30 +2,30 @@
 
 namespace App\Jobs;
 
-use Exception;
-use App\Models\User;
-use App\Utility\ULog;
 use App\Models\Author;
-use Illuminate\Bus\Queueable;
+use App\Models\User;
 use App\Utility\SystemManager;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Utility\ULog;
+use Exception;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
-class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
+class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected array $PROFESSORS = [
-        ['email' => 'adamidis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Adamidis', 'id' => '0000-0003-4020-1328', 'found'=>false],
-        ['email' => 'amanatiadis@ihu.gr', 'first'=>'Dimitrios', 'last'=>'Amanatiadis', 'id' => 'A5048293553', 'found'=>true],
+        ['email' => 'adamidis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Adamidis', 'id' => '0000-0003-4020-1328', 'found' => false],
+        ['email' => 'amanatiadis@ihu.gr', 'first' => 'Dimitrios', 'last' => 'Amanatiadis', 'id' => 'A5048293553', 'found' => true],
         ['email' => 'zafiris', 'first' => 'Zafiris', 'last' => 'Ampatzis', 'id' => 'A5068848285', 'found' => true],
-        ['email' => 'antoniou@ihu.gr', 'first' => 'Efstathios', 'last' => 'Antoniou', 'id' => 'A5082819385', 'found'=>true],
+        ['email' => 'antoniou@ihu.gr', 'first' => 'Efstathios', 'last' => 'Antoniou', 'id' => 'A5082819385', 'found' => true],
         ['email' => 'asdre', 'first' => 'Katerina', 'last' => 'Asdre', 'id' => 'A5042673538', 'found' => true],
-        ['email' => 'bamnios@ihu.gr', 'first' => 'Georgios', 'last' => 'Bamnios', 'id' => 'A5083200723', 'found'=> true],
-        ['email' => 'pchatzimisios@ihu.gr', 'first' => 'Periklis', 'last' => 'Chatzimisios', 'id' => '0000-0003-2366-1365','found' => true],
+        ['email' => 'bamnios@ihu.gr', 'first' => 'Georgios', 'last' => 'Bamnios', 'id' => 'A5083200723', 'found' => true],
+        ['email' => 'pchatzimisios@ihu.gr', 'first' => 'Periklis', 'last' => 'Chatzimisios', 'id' => '0000-0003-2366-1365', 'found' => true],
         ['email' => 'ignatios', 'first' => 'Ignatios', 'last' => 'Deligiannis', 'id' => 'A5070715009', 'found' => true],
         ['email' => 'dad', 'first' => 'Dimitrios', 'last' => 'Dervos', 'id' => 'A5032970498', 'found' => true],
         ['email' => 'k.diamantaras@ihu.edu.gr', 'first' => 'Konstantinos', 'last' => 'Diamantaras', 'id' => '7003525351', 'found' => true],
@@ -55,10 +55,12 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
         ['email' => 'cbratsas@iee.ihu.gr', 'first' => 'Charalampos', 'last' => 'Bratsas', 'id' => 'A5021462636', 'found' => true],
         ['email' => 'mspapa@ihu.gr', 'first' => 'Maria', 'last' => 'Papadopoulou', 'id' => '0000-0002-9651-2144', 'found' => true],
     ];
+
     /**
      * Create a new job instance.
      */
-    public function __construct() {}
+    public function __construct() {
+    }
 
     /**
      * Execute the job.
@@ -71,7 +73,7 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
             SystemManager::enableMaintenanceMode();
 
             DB::transaction(function () {
-                foreach ($this->PROFESSORS as $professor) User::createProfessorUser($professor['id']);
+                foreach ($this->PROFESSORS as $professor) User::createProfessorUser($professor);
 
                 // Retrieve all the authors that are also users.
                 $User_Authors = Author::user()->get();
@@ -81,9 +83,8 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique{
             });
 
         } catch (Exception $err) {
-            ULog::error("Something went wrong while updating the database,".$err->getMessage(),ULog::META);
-        }
-        finally {
+            ULog::error("Something went wrong while updating the database," . $err->getMessage(), ULog::META);
+        } finally {
             $ended_time = date("H:i:s");
             ULog::log("Database Initialization ended at $ended_time");
             SystemManager::disableMaintenanceMode();

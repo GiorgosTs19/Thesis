@@ -6,8 +6,9 @@ import {useForm} from "@inertiajs/inertia-react";
 import SearchResultsList from "@/Components/Search/SearchResults/SearchResultsList.jsx";
 import {Author} from "@/Models/Author/Author.js";
 import {Work} from "@/Models/Work/Work.js";
+import {bool} from "prop-types";
 
-const Search = () => {
+const Search = ({isHomeScreen}) => {
     const [openModal, setOpenModal] = useState(false);
 
     const {data, setData, get, processing, errors} = useForm({
@@ -53,10 +54,18 @@ const Search = () => {
 
     return (
         <>
-            <input type={'search'}
-                   className={'p-2 m-auto border border-gray-600 rounded-xl w-full lg:w-7/12 text-center'}
-                   placeholder={'Explore the catalog of renowned authors and their works'}
-                   onClick={() => setOpenModal(true)}/>
+            {isHomeScreen ? <input type={'search'}
+                                   className={'p-2 m-auto border border-gray-300 rounded-xl w-full lg:w-4/12 text-center focus:outline-none focus-visible:outline-none'}
+                                   placeholder={'Explore the catalog of renowned authors and their works'}
+                                   onClick={() => setOpenModal(true)} autoFocus/> :
+                <ExtendedInput name={'Search'} onClick={() => setOpenModal(true)}
+                               placeholder={'Search'}
+                               inputClassName={'p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none'}
+                               containerClassName={'bg-white rounded-lg'} type={'search'} autoFocus
+                               leadingElement={'children'}>
+                    <SearchSVG/>
+                </ExtendedInput>
+            }
             <Modal show={openModal} onClose={() => {
                 setOpenModal(false)
             }} dismissible position={'top-center'}>
@@ -107,6 +116,10 @@ const Search = () => {
             </Modal>
         </>
     )
+}
+
+Search.propTypes = {
+    isHomeScreen: bool
 }
 
 export default Search;
