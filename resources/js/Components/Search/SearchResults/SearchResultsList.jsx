@@ -2,6 +2,7 @@ import React from 'react';
 import {array, bool, func, string} from "prop-types";
 import {AuthorSearchResult} from "@/Components/Search/SearchResults/AuthorSearchResult.jsx";
 import {WorkSearchResult} from "@/Components/Search/SearchResults/WorkSearchResult.jsx";
+import clsx from "clsx";
 
 /**
  * PaginatedList Component.
@@ -32,6 +33,15 @@ import {WorkSearchResult} from "@/Components/Search/SearchResults/WorkSearchResu
  * With Parser :
  * <List data={data} renderFunc={()=>{}} parser={()=>{}}/>
  */
+
+const styles = {
+    outerDiv: 'rounded-lg bg-transparent p-4 flex flex-col',
+    list: 'list-disc pl-2 gap-6',
+    vertical: 'md:grid-cols-2 lg:grid-cols-3',
+    horizontal: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+    header: 'text-gray-500 text-sm mb-3',
+    footer: 'text-gray-500 text-sm mt-2'
+}
 const List = ({
                   data,
                   title,
@@ -55,19 +65,19 @@ const List = ({
         }
     };
 
-    return <div className={`rounded-lg bg-transparent p-4 flex flex-col ${wrapperClassName}`}>
+    return <div className={clsx(styles.outerDiv, wrapperClassName)}>
         <div className={`${header ? 'mb-2' : 'mb-6'} text-lg font-semibold text-yellow-800 w-fit`}>
             {title}
         </div>
-        {header && <div className={'text-gray-500 text-sm mb-3'}>
+        {header && <div className={styles.header}>
             {header}
         </div>}
-        <ul className={`list-disc pl-2 gap-8 ${listClassName} ${vertical ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 '}`}>
+        <ul className={clsx(listClassName, vertical ? styles.vertical : styles.horizontal, styles.list)}>
             {items.map(item =>
                 renderFn(item, query)
             )}
         </ul>
-        {footer && <div className={'text-gray-500 text-sm mt-2'}>
+        {footer && <div className={styles.footer}>
             {footer}
         </div>}
     </div>

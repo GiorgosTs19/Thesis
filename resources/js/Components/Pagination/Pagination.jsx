@@ -76,28 +76,4 @@ Pagination.propTypes = {
     }),
     className: string
 }
-{/*<li key={'first'} className={"page-item w-auto " + (currentPage === 1 ? ' disabled' : '')}>*/
-}
-{/*    <Link className={'page-link '} href={Meta.links[0].url} preserveState={true}>*/
-}
-{/*         &laquo;*/
-}
-{/*        /!*Prev*!/*/
-}
-{/*    </Link>*/
-}
-{/*</li>*/
-}
 
-{/*<li key={'next'} className={"page-item " + (currentPage === Meta.last_page ? ' disabled' : '')}>*/
-}
-{/*    <Link className={'page-link'} href={ Meta.links[Meta.links.length-1].url} preserveState={true}>*/
-}
-{/*       /!*Next*!/*/
-}
-{/*        &raquo;*/
-}
-{/*    </Link>*/
-}
-{/*</li>*/
-}

@@ -4,6 +4,13 @@ import {Author} from "@/Models/Author/Author.js";
 import {highlightMatchingCharacters} from "@/Components/Search/Utils/Utils.jsx";
 import {ChevronRightSVG} from "@/SVGS/ChevronRightSVG.jsx";
 
+const styles = {
+    li: 'flex-grow list-none flex justify-between hover:bg-gray-100 p-2 rounded-lg cursor-pointer',
+    a: 'flex flex-col',
+    properties: 'flex flex-wrap border-l-2 border-l-blue-700',
+    property: 'text-gray-600 pl-3 text-xs lg:text-sm',
+    name: 'pl-3 text-black font-bold truncate whitespace-pre-wrap hover:underline text-sm lg:text-lg'
+}
 export const AuthorSearchResult = ({author, query}) => {
     const {
         name,
@@ -16,19 +23,20 @@ export const AuthorSearchResult = ({author, query}) => {
         {name: 'OrcId', value: author.orcId ?? '-'}
     ];
 
-    return <li className="mb-4 flex-grow list-none flex justify-between hover:bg-gray-100 p-2 rounded-lg">
-        <a className={'flex flex-col'} href={localUrl}>
-            <div className={'flex flex-wrap border-l-2 border-l-blue-700'}>
+    return <li
+        className={styles.li}>
+        <a className={styles.a} href={localUrl}>
+            <div className={styles.properties}>
                 {
                     extraProperties.map((property, index) =>
-                        <div key={index} className="text-gray-600 pl-3 text-sm">
+                        <div key={index} className={styles.property}>
                             {property.name} : {highlightMatchingCharacters(property.value, query)}
                         </div>
                     )
                 }
             </div>
-            <div className={'pl-3 text-black text-lg font-bold truncate whitespace-pre-wrap hover:underline'}>
-
+            <div
+                className={styles.name}>
                 {highlightMatchingCharacters(name, query)}
             </div>
         </a>

@@ -10,9 +10,10 @@ export const WorkSearchResult = ({work, query}) => {
         localUrl
     } = work;
 
-    return <li className="mb-4 flex-grow list-none flex justify-between hover:bg-gray-100 p-2 rounded-lg">
+    return <li className="flex-grow list-none flex justify-between hover:bg-gray-100 p-2 rounded-lg">
         <a className={'flex flex-col'} href={localUrl}>
-            <div className={'pl-3 text-black text-lg font-bold truncate whitespace-pre-wrap hover:underline'}>
+            <div
+                className={'pl-3 text-black font-bold truncate whitespace-pre-wrap hover:underline cursor-pointer text-sm lg:text-lg'}>
                 {highlightMatchingCharacters(title, query)}
             </div>
         </a>
