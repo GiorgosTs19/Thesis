@@ -11,32 +11,32 @@ export const AuthorItem = ({author, index, extraProperties = []}) => {
         isUser,
         localUrl
     } = author;
-    
+
     return <li className="mb-4 flex-grow list-none flex">
         <div className="top-0 left-0 text-black text-sm text-center mr-2">
             {index + 1}
         </div>
         <div className={'flex flex-col'}>
             <div className={'flex flex-wrap border-l-2 border-l-blue-700'}>
-                <div className="text-gray-600 pl-3 text-sm">
+                <div className="text-gray-600 pl-3 text-xs lg:text-sm">
                     {isUser ? 'Registered User' : 'Guest User'}
                 </div>
-                <div className="text-gray-600 pl-3 text-sm">
+                <div className="text-gray-600 pl-3 text-xs lg:text-sm">
                     Citations : {numberToDotNotation(citationCount)}
                 </div>
-                <div className="text-gray-600 pl-3 text-sm">
+                <div className="text-gray-600 pl-3 text-xs lg:text-sm">
                     Works : {numberToDotNotation(worksCount)}
                 </div>
                 {
                     extraProperties.map((property, index) =>
-                        <div key={index} className="text-gray-600 pl-3 text-sm">
+                        <div key={index} className="text-gray-600 pl-3 text-xs lg:text-sm">
                             {property.name} : {property.value}
                         </div>
                     )
                 }
             </div>
             <div className={'pl-3'}>
-                <a href={localUrl} className="text-black text-lg
+                <a href={localUrl} className="text-black text-sm
                     font-bold truncate whitespace-pre-wrap hover:underline">
                     {name}
                 </a>

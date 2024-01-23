@@ -2,6 +2,9 @@ import React from "react";
 import {array} from "prop-types";
 import Search from "@/Components/Search/Search.jsx";
 import HomeBanner from "@/Pages/Routes/Home/HomeBanner/HomeBanner.jsx";
+import List from "@/Components/List/List.jsx";
+import {renderAuthorItem} from "@/Models/Author/Utils.jsx";
+import {Author} from "@/Models/Author/Author.js";
 
 const styles = {
     header: 'text-xl md:text-2xl xl:text-3xl text-gray-500 mb-4 italic focus:ring-0',
@@ -26,18 +29,16 @@ const HomePage = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
     )
 }
 
-{/*<List data={mostWorksAuthors} renderFn={renderAuthorItem}*/
-}
-{/*      title={'Top Authors by Prolificacy'} parser={Author.parseResponseAuthor}*/
-}
-{/*      wrapperClassName={'w-fit mx-auto'}/>*/
-}
-{/*<List data={mostWorksUsers} renderFn={renderAuthorItem}*/
-}
-{/*      title={'Top Users by Prolificacy'} parser={Author.parseResponseAuthor}*/
-}
-{/*      wrapperClassName={'w-fit mx-auto'}/>*/
-}
+// <List data={mostWorksAuthors} renderFn={renderAuthorItem}
+//
+//       title={'Top Authors by Prolificacy'} parser={Author.parseResponseAuthor}
+//
+//       wrapperClassName={'w-fit mx-auto'}/>
+//
+// <List data={mostWorksUsers} renderFn={renderAuthorItem}
+//       title={'Top Users by Prolificacy'} parser={Author.parseResponseAuthor}
+//
+//       wrapperClassName={'w-fit mx-auto'}/>
 // <List data={mostCitationsWorks} renderFn={renderWorkItem}
 //       title={'Most Cited Works: A Citation Powerhouse'} parser={Work.parseResponseWork}
 //       wrapperClassName={'mx-auto'}/>

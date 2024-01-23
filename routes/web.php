@@ -1,6 +1,6 @@
 <?php /** @noinspection ALL */
 
-use App\Http\Controllers\{AuthorController, HomeController, WorkController};
+use App\Http\Controllers\{AuthorController, HomeController, WorkController, SearchController};
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,7 +19,7 @@ Route::get('/author/{id}', [AuthorController::class, 'showAuthorPage'])->name('A
 Route::get('/work/{id}', [WorkController::class, 'showWorkPage'])->name('Work.Page');
 
 Route::prefix('search')->group(function () {
-    Route::get('/', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
+    Route::get('/', [SearchController::class, 'search'])->name('search');
 });
 
 Route::prefix('work')->group(function () {

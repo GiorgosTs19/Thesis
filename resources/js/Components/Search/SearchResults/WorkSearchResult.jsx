@@ -13,7 +13,7 @@ export const WorkSearchResult = ({work, query}) => {
     return <li className="flex-grow list-none flex justify-between hover:bg-gray-100 p-2 rounded-lg">
         <a className={'flex flex-col'} href={localUrl}>
             <div
-                className={'pl-3 text-black font-bold truncate whitespace-pre-wrap hover:underline cursor-pointer text-sm lg:text-lg'}>
+                className={'pl-3 text-black font-bold truncate whitespace-pre-wrap hover:underline cursor-pointer text-sm lg:text-lg border-l-2 border-l-blue-700'}>
                 {highlightMatchingCharacters(title, query)}
             </div>
         </a>

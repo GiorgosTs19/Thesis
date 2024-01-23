@@ -6,6 +6,16 @@ import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisti
 import List from "@/Components/List/List.jsx";
 import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
 
+const styles = {
+    container:'bg-gray-100 flex items-center justify-self-end h-full mx-auto',
+    innerContainer:'bg-white w-full p-6 flex flex-col h-full rounded-lg',
+    propertiesContainer:'flex flex-col',
+    chartContainer:'flex flex-col bg-gray-100 rounded-lg p-4',
+    chartDescription:'text-gray-500 opacity-75 italic mx-auto mb-4',
+    chart:'md:px-4 mb-4 max-w-full',
+    chartDisclaimer:'text-gray-500 text-sm text-center opacity-75 italic mx-auto my-2',
+    authorList:'w-full'
+}
 const WorkPage = ({work}) => {
     const workObject = Work.parseResponseWork(work);
     const {title} = workObject;
@@ -17,6 +27,9 @@ const WorkPage = ({work}) => {
         title: 'References',
         labels: yearsArray,
         description: 'References trends per year.',
+        disclaimer:'The data presented in this chart may not capture the complete set of references for' +
+            ' this work. The statistics gathered might not cover every year, potentially leading' +
+            ' to gaps in the information.'
     }
 
     const renderAuthorItem = (item, index) => {
@@ -24,10 +37,10 @@ const WorkPage = ({work}) => {
     }
 
     return <>
-        <div className="bg-gray-100 flex items-center justify-self-end h-full mx-auto">
-            <div className="bg-white w-full p-6 flex flex-col h-full rounded-lg">
+        <div className={styles.container}>
+            <div className={styles.innerContainer}>
                 <div className="gap-4 mb-4">
-                    <div className="flex flex-col">
+                    <div className={styles.propertiesContainer}>
                         <RowOfProperties properties={workObject.getProperties()}
                                          title={title}></RowOfProperties>
                         {/*<div className="rounded-lg bg-gray-100 px-6 py-4">*/}
@@ -39,21 +52,17 @@ const WorkPage = ({work}) => {
                         {/*</div>*/}
                     </div>
 
-                    <div className="flex flex-col bg-gray-100 rounded-lg p-4">
+                    <div className={styles.chartContainer}>
                         {REFERENCES_CHART.dataSet.length ?
                             <>
-                                <div
-                                    className="text-gray-500 opacity-75 italic mx-auto mb-4">{REFERENCES_CHART.description}</div>
-                                <div className="md:px-4 mb-4 max-w-full">
+                                <div className={styles.chartDescription}>{REFERENCES_CHART.description}</div>
+                                <div className={styles.chart}>
                                     <SimpleStatisticsChart title={REFERENCES_CHART.title}
                                                            dataSet={REFERENCES_CHART.dataSet}
                                                            labels={REFERENCES_CHART.labels}/>
                                 </div>
-                                <div
-                                    className="text-gray-500 text-sm text-center opacity-75 italic mx-auto my-2">
-                                    The data presented in this chart may not capture the complete set of references for
-                                    this work. The statistics gathered might not cover every year, potentially leading
-                                    to gaps in the information.
+                                <div className={styles.chartDisclaimer}>
+                                    {REFERENCES_CHART.disclaimer}
                                 </div>
                             </>
                             :
@@ -62,7 +71,7 @@ const WorkPage = ({work}) => {
                     </div>
                 </div>
                 <List data={authors} renderFn={renderAuthorItem}
-                      wrapperClassName={`${authors.length < 5 ? 'w-fit' : ''}`} title={'Authors'}/>
+                      wrapperClassName={styles.authorList} title={'Authors'}/>
             </div>
         </div>
     </>

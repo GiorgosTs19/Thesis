@@ -37,7 +37,7 @@ const PaginatedList = ({response, children, renderFn, parser, sortingOptions, cu
             </div>
             <div className={'col-span-1 flex mx-auto md:ml-auto md:mr-0'}>
                 <DropDownMenu options={sortingOptions} renderLinks
-                              className={'ms-auto'} label={'Sort by'}
+                              className={'ms-auto'}
                               defaultOption={sortingOptions.find(option => option.value === currentSortOption)}/>
             </div>
         </div>

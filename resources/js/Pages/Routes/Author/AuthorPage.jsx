@@ -85,10 +85,10 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                         <div className="2xl:col-span-2 flex flex-col">
                             <RowOfProperties properties={properties} title={authorObject.name}></RowOfProperties>
                             <div className="rounded-lg bg-gray-100 px-6 py-4">
-                                <h2 className="text-lg font-semibold mb-2">{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
+                                <h2 className="font-semibold mb-2 text-sm lg:text-lg">{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
                                 <div
-                                    className="text-gray-700 italic">{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
-                                <div className="mt-2 text-gray-500 opacity-80 text-sm">Last
+                                    className="text-gray-700 italic text-xs lg:text-sm">{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
+                                <div className="mt-2 text-gray-500 opacity-80 text-xs lg:text-sm">Last
                                     updated: {updatedAt}</div>
                             </div>
                         </div>

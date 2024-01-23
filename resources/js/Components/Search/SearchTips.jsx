@@ -1,6 +1,10 @@
 import React from "react";
 import {ChevronRightSVG} from "@/SVGS/ChevronRightSVG.jsx";
 import {arrayOf, func, string} from "prop-types";
+import {DoiSVG} from "@/SVGS/DoiSVG.jsx";
+import {OpenAlexSVG} from "@/SVGS/OpenAlexSVG.jsx";
+import {OrcidSVG} from "@/SVGS/OrcidSVG.jsx.jsx";
+import {ScopusSVG} from "@/SVGS/ScopusSVG.jsx";
 
 const styles = {
     wrapper: 'flex flex-col',
@@ -42,16 +46,13 @@ const SearchTips = ({setData, recentQueries}) => {
                         Author Name
                     </li>
                     <li className={'my-auto'} title={'Scopus Id'}>
-                        <img src={'resources/Images/scopus.svg'} height={24} width={24}
-                             alt={'Scopus Id'}/>
+                        <ScopusSVG/>
                     </li>
                     <li className={'my-auto'} title={'Orcid Id'}>
-                        <img src={'resources/Images/orcid.svg'} height={24} width={24}
-                             alt={'Orcid Id'}/>
+                        <OrcidSVG/>
                     </li>
                     <li className={'my-auto'} title={'Open Alex Id'}>
-                        <img src={'resources/Images/openalex.svg'} height={24} width={24}
-                             alt={'Open Alex Id'}/>
+                        <OpenAlexSVG/>
                     </li>
                 </ul>
                 <h4 className={styles.tipsSubHeader}>Search for works
@@ -61,12 +62,10 @@ const SearchTips = ({setData, recentQueries}) => {
                         Work Title
                     </li>
                     <li className={'my-auto'} title={'DOI'}>
-                        <img src={'resources/Images/doi.svg'} height={24} width={24}
-                             alt={'DOI'}/>
+                        <DoiSVG/>
                     </li>
                     <li className={'my-auto'} title={'Open Alex Id'}>
-                        <img src={'resources/Images/openalex.svg'} height={24} width={24}
-                             alt={'Open Alex Id'}/>
+                        <OpenAlexSVG/>
                     </li>
                 </ul>
             </div>

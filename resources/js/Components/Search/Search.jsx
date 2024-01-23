@@ -30,7 +30,7 @@ const Search = ({isHomeScreen}) => {
     const [searchAuthorsResult, setSearchAuthorsResult] = useState([]);
 
     useEffect(() => {
-        if (debouncedSearchQuery.trim() === '' || recentQueries.find(query => query === debouncedSearchQuery))
+        if (debouncedSearchQuery.trim() === '' || recentQueries.find(query => query.toLowerCase() === debouncedSearchQuery.toLowerCase()))
             return;
         const updatedQueries = [debouncedSearchQuery, ...recentQueries.slice(0, 2)];
         saveRecentQueries(updatedQueries);

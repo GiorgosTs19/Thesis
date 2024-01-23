@@ -35,10 +35,9 @@ const DropdownMenu = ({options, onSelect, className, label, defaultOption = null
 
     return (
         <div className={`relative inline-block text-left ${className}`}>
-            <div className={'mb-2 text-lg'}>
+            {label && <div className={'mb-2 text-lg'}>
                 {label}
-            </div>
-
+            </div>}
             <div>
                 <button
                     type="button"

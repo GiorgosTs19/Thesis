@@ -5,8 +5,8 @@ const styles = {
     title: 'text-3xl mb-2 p-1 text-center',
     propertiesWrapper: 'flex flex-wrap gap-8 p-6',
     propertyWrapper: 'mb-4 w-fit flex-grow',
-    propertyValue: 'text-black border-l-2 border-l-blue-600 pl-3 text-lg font-bold',
-    propertyName: 'text-gray-600 border-l-2 border-l-blue-600 pl-3'
+    propertyValue: 'text-black border-l-2 border-l-blue-600 pl-3 text-lg font-bold text-sm',
+    propertyName: 'text-gray-600 border-l-2 border-l-blue-600 pl-3 text-xs'
 }
 const RowOfProperties = ({properties, title}) => {
     return <div className="">

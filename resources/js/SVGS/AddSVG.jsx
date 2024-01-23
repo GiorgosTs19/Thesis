@@ -1,3 +1,6 @@
+import {func, number, string} from "prop-types";
+import {BellSVG} from "@/SVGS/BellSVG.jsx";
+
 export function AddSVG({className,width=24,height=24,onClick=()=>{},rotate='45def'}) {
     return (
         <svg
@@ -22,4 +25,13 @@ export function AddSVG({className,width=24,height=24,onClick=()=>{},rotate='45de
             />
         </svg>
     )
+}
+
+AddSVG.propTypes = {
+    className:string,
+    width:number,
+    height:number,
+    onClick:func,
+    rotate:string,
+    cursor:string
 }
