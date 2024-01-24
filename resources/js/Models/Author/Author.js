@@ -1,5 +1,6 @@
 import {Work} from "@/Models/Work/Work.js";
 import {Statistic} from "@/Models/Statistic/Statistic.js";
+import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
 
 /**
  * Create a new Author.
@@ -75,4 +76,13 @@ export class Author {
         });
     }
 
+    getProperties() {
+        return [
+            {name: 'Citations', value: numberToDotNotation(this.citationCount)},
+            {name: 'Works', value: numberToDotNotation(this.worksCount)},
+            {name: 'Open Alex', value: this.openAlexId ?? '-'},
+            {name: 'Scopus', value: this.scopusId ?? '-'},
+            {name: 'OrcId', value: this.orcId ?? '-'}
+        ];
+    }
 }

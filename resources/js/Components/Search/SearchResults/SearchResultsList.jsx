@@ -40,7 +40,8 @@ const styles = {
     vertical: 'md:grid-cols-2 lg:grid-cols-3',
     horizontal: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
     header: 'text-gray-500 text-sm mb-3',
-    footer: 'text-gray-500 text-sm mt-2'
+    footer: 'text-gray-500 text-sm mt-2',
+    title: 'text-lg font-semibold text-yellow-800 w-fit'
 }
 const List = ({
                   data,
@@ -66,7 +67,7 @@ const List = ({
     };
 
     return <div className={clsx(styles.outerDiv, wrapperClassName)}>
-        <div className={`${header ? 'mb-2' : 'mb-6'} text-lg font-semibold text-yellow-800 w-fit`}>
+        <div className={clsx(header ? 'mb-2' : 'mb-6', styles.title)}>
             {title}
         </div>
         {header && <div className={styles.header}>

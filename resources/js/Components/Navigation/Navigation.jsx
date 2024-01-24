@@ -26,15 +26,22 @@ export function Navigation() {
         {name: 'Sign out', href: '#'},
     ];
 
+    const logo = <div className="flex-shrink-0">
+        <a className={'text-white mr-4 sm:text-xl md:text-2xl'} href={route('Home.Page')}>
+            MyPubsV2
+        </a>
+    </div>
+
     return (
         <Disclosure as="nav" className="bg-gray-800">
             {({open}) => (
                 <>
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 items-center justify-between">
                             <div className="flex items-center">
                                 <div className="hidden md:block">
                                     <div className="ml-10 flex items-baseline space-x-4">
+                                        {logo}
                                         {navigation.map((item) => (
                                             <a
                                                 key={item.name}
@@ -53,23 +60,15 @@ export function Navigation() {
                                     </div>
                                 </div>
                                 <div className={'md:hidden'}>
-                                    <div className="flex items-center px-5">
-                                        <div className="flex-shrink-0">
-                                            <img className="h-10 w-10 rounded-full" src={user.imageUrl} alt=""/>
-                                        </div>
-                                        <div className="ml-3">
-                                            <div
-                                                className="text-base font-medium leading-none text-white">{user.name}</div>
-                                            <div
-                                                className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
-                                        </div>
+                                    <div className="flex items-center px-2">
+                                        {logo}
                                         <button
                                             type="button"
                                             className="relative ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                                         >
                                             <span className="absolute -inset-1.5"/>
                                             <span className="sr-only">View notifications</span>
-                                            <BellIcon className="h-6 w-6 ml-5" aria-hidden="true"/>
+                                            <BellIcon className="h-6 w-6" aria-hidden="true"/>
                                         </button>
                                     </div>
                                 </div>
@@ -161,8 +160,14 @@ export function Navigation() {
                             ))}
                             <Search/>
                         </div>
-                        <div className="border-t border-gray-700 pb-3 pt-4">
-                            <div className="mt-3 space-y-1 px-2">
+                        <div className="border-t border-gray-700 pb-3 pt-2">
+                            <div className="mt-2 space-y-1 px-2">
+                                <div className="ml-3">
+                                    <div
+                                        className="text-base font-medium leading-none text-white">{user.name}</div>
+                                    <div
+                                        className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
+                                </div>
                                 {userNavigation.map((item) => (
                                     <Disclosure.Button
                                         key={item.name}

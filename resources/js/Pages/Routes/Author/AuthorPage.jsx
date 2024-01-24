@@ -10,18 +10,30 @@ import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisti
 import {getTopCoAuthors} from "@/Utility/Arrays/Utils.js";
 import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
 import List from "@/Components/List/List.jsx";
-import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
 
+const styles = {
+    infoContainer: 'grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4',
+    info: '2xl:col-span-2 flex flex-col',
+    statusWrapper: 'rounded-lg bg-gray-100 px-6 py-4',
+    statusHeader: 'font-semibold mb-2 text-sm lg:text-lg',
+    status: 'text-gray-700 italic text-xs lg:text-sm',
+    lastUpdated: 'mt-2 text-gray-500 opacity-80 text-xs lg:text-sm',
+    chartsContainer: '2xl:col-span-3 flex flex-col h-full',
+    chartContainer: 'flex flex-col h-full',
+    chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4',
+    chart: 'md:px-4 mb-4 max-w-full',
+    chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
+    listsContainer: 'grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4',
+    authorsListContainer: '2xl:col-span-1 flex flex-col',
+    worksListContainer: '2xl:col-span-4 flex flex-col',
+    listTitle: 'md:text-lg font-semibold mb-4 text-yellow-800',
+    listText: 'mx-2 text-xs sm:text-sm text-gray-600 opacity-50'
+}
 const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
     const {
         name,
         isUser,
-        citationCount,
-        worksCount,
-        openAlexId,
-        scopusId,
-        orcId,
         updatedAt,
     } = authorObject;
 
@@ -29,14 +41,6 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
         INCOMPLETE: `${name} is not a registered user, thus their list of works and information might be incomplete and not always up to date.`,
         REGISTERED: `${name} is a registered user, their info and works are regularly updated.`,
     }
-
-    const properties = [
-        {name: 'Citations', value: numberToDotNotation(citationCount)},
-        {name: 'Works', value: numberToDotNotation(worksCount)},
-        {name: 'Open Alex', value: openAlexId ?? '-'},
-        {name: 'Scopus', value: scopusId ?? '-'},
-        {name: 'OrcId', value: orcId ?? '-'}
-    ];
 
     const authorStatistics = authorObject.statistics;
     // const authorWorks = authorObject.works;
@@ -79,59 +83,55 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                                                           }]}/>
     return (
         <>
-            <div className="bg-gray-100 flex items-center justify-self-end h-full ">
-                <div className="bg-white w-full px-6 py-3 flex flex-col h-full rounded-lg">
-                    <div className="grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4">
-                        <div className="2xl:col-span-2 flex flex-col">
-                            <RowOfProperties properties={properties} title={authorObject.name}></RowOfProperties>
-                            <div className="rounded-lg bg-gray-100 px-6 py-4">
-                                <h2 className="font-semibold mb-2 text-sm lg:text-lg">{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
-                                <div
-                                    className="text-gray-700 italic text-xs lg:text-sm">{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
-                                <div className="mt-2 text-gray-500 opacity-80 text-xs lg:text-sm">Last
-                                    updated: {updatedAt}</div>
-                            </div>
-                        </div>
-
-                        <div className="2xl:col-span-3 flex flex-col h-full">
-                            <Switch
-                                checkedLabel={CHART_DATA.WORKS.title}
-                                uncheckedLabel={CHART_DATA.CITATIONS.title}
-                                checked={activeChart.title !== CHART_DATA.CITATIONS.title}
-                                className="mx-auto my-4"
-                                onChange={(checked) => setActiveChart(checked ? CHART_DATA.CITATIONS : CHART_DATA.WORKS)}
-                            />
-                            <div className="flex flex-col h-full">
-                                <div
-                                    className="text-gray-500 opacity-75 italic mx-auto mb-4">{activeChart.description}</div>
-                                <div className="md:px-4 mb-4 max-w-full">
-                                    <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet}
-                                                           labels={activeChart.labels}/>
-                                </div>
-                                <div
-                                    className="text-gray-500 opacity-75 italic m-auto text-center">{activeChart.disclaimer}</div>
-                            </div>
-                        </div>
+            <div className={styles.infoContainer}>
+                <div className={styles.info}>
+                    <RowOfProperties properties={authorObject.getProperties()}
+                                     title={authorObject.name}></RowOfProperties>
+                    <div className={styles.statusWrapper}>
+                        <h2 className={styles.statusHeader}>{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
+                        <div
+                            className={styles.status}>{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
+                        <div className={styles.lastUpdated}>Last
+                            updated: {updatedAt}</div>
                     </div>
-                    <div className="grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4">
-                        <div className="2xl:col-span-1 flex flex-col">
-                            <List data={topCoAuthors} renderFn={renderAuthorItem} vertical
-                                  wrapperClassName={'xl:h-full'} title={'Top Co-Authors'}
-                                  header={`Top authors who have collaborated with ${authorObject.name} on various works`}
-                                  footer={'( Based on the works list in this page )'}/>
-                        </div>
-                        <div className="2xl:col-span-4 flex flex-col">
-                            <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork}
-                                           sortingOptions={sortingOptions} currentSortOption={currentSortOption}>
-                                <div className="text-lg font-semibold mb-4 text-yellow-800">
-                                    Works
-                                    <span
-                                        className={'mx-2 text-gray-600 opacity-50'}>{isUser ? '' : `(Only works co-authored with registered users appear in the list )`}</span>
-                                </div>
-                            </PaginatedList>
-                        </div>
-                    </div>
+                </div>
 
+                <div className={styles.chartsContainer}>
+                    <Switch
+                        checkedLabel={CHART_DATA.WORKS.title}
+                        uncheckedLabel={CHART_DATA.CITATIONS.title}
+                        checked={activeChart.title !== CHART_DATA.CITATIONS.title}
+                        className="mx-auto my-4"
+                        onChange={(checked) => setActiveChart(checked ? CHART_DATA.CITATIONS : CHART_DATA.WORKS)}
+                    />
+                    <div className={styles.chartContainer}>
+                        <div
+                            className={styles.chartDescription}>{activeChart.description}</div>
+                        <div className={styles.chart}>
+                            <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet}
+                                                   labels={activeChart.labels}/>
+                        </div>
+                        <div
+                            className={styles.chartDisclaimer}>{activeChart.disclaimer}</div>
+                    </div>
+                </div>
+            </div>
+            <div className={styles.listsContainer}>
+                <div className={styles.authorsListContainer}>
+                    <List data={topCoAuthors} renderFn={renderAuthorItem} vertical
+                          wrapperClassName={'xl:h-full'} title={'Top Co-Authors'}
+                          header={`Top authors who have collaborated with ${authorObject.name} on various works`}
+                          footer={'( Based on the works list in this page )'}/>
+                </div>
+                <div className={styles.worksListContainer}>
+                    <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork}
+                                   sortingOptions={sortingOptions} currentSortOption={currentSortOption}>
+                        <div className={styles.listTitle}>
+                            Works
+                            <span
+                                className={styles.listText}>{isUser ? '' : `(Only works co-authored with registered users appear in the list )`}</span>
+                        </div>
+                    </PaginatedList>
                 </div>
             </div>
         </>

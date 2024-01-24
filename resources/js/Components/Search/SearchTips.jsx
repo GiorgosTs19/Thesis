@@ -24,7 +24,7 @@ const SearchTips = ({setData, recentQueries}) => {
                 <div className={styles.recentWrapper}>
                     <h4 className={styles.recentHeader}>Recently Searched</h4>
                     <ul className={'gap-2'}>
-                        {recentQueries.map((query, index) => <li key={index} onClick={() => setData({query})}
+                        {recentQueries.map((query, index) => <li key={index} onClick={() => setData(query)}
                                                                  className={styles.recentQuery}>
                             <div>
                                 {query}

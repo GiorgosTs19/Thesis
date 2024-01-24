@@ -43,7 +43,7 @@ const List = ({
     const items = parser ? data.map(parser) : data;
 
     return <div className={`rounded-lg bg-gray-200 p-4 flex flex-col ${wrapperClassName}`}>
-        <div className={`${header ? 'mb-2' : 'mb-6'} text-lg font-semibold text-yellow-800 w-fit`}>
+        <div className={`${header ? 'mb-2' : 'mb-6'} md:text-lg font-semibold text-yellow-800 w-fit`}>
             {title}
         </div>
         {header && <div className={'text-gray-500 text-sm mb-3'}>

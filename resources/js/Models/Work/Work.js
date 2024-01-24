@@ -107,9 +107,8 @@ export class Work {
             {name: 'Type', value: capitalizeFirstLetter(this.type)},
             {name: 'References', value: this.referencedWorksCount},
             {name: 'Published', value: this.publishedAt},
-            {name: 'OpenAlex', value: this.openAlexId},
+            {name: 'Open Alex', value: this.openAlexId},
             {name: 'Open Access', value: this.isOA ? 'Available' : 'Unavailable'},
         ];
     }
-
 }

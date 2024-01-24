@@ -13,7 +13,11 @@ function BaseLayout({title, children}) {
         <div className="min-h-full flex flex-col">
             <Navigation/>
             <div className="mt-2 w-full p-3 shadow-md mx-auto flex flex-col flex-grow h-full">
-                {children}
+                <div className="bg-gray-100 flex items-center justify-self-end h-full">
+                    <div className="bg-white w-full px-6 py-3 flex flex-col h-full rounded-lg">
+                        {children}
+                    </div>
+                </div>
             </div>
             <FooterNavigation/>
         </div>
