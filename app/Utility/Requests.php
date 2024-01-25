@@ -16,6 +16,8 @@ class Requests {
     const REQUEST_ASSET = 'request';
 
     public static function get($url): PromiseInterface|Response {
-        return Http::get($url);
+        if (env('APP_ENV') === 'production')
+            return Http::get($url);
+        return Http::withoutVerifying()->get($url);
     }
 }
