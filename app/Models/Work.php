@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static openAlex($id)
  * @method static mostCitations(int $int)
  * @method static searchTitle(mixed $query)
+ * @method static countByType()
  */
 class Work extends Model {
     use HasFactory;
@@ -235,4 +236,29 @@ class Work extends Model {
     public function scopeSearchOpenAlex($query, $open_alex_id) {
         return $query->orWhere('open_alex_id', $open_alex_id);
     }
+
+    public function scopeCountByType($query) {
+        return $query->selectRaw('type, COUNT(*) as count')
+            ->groupBy('type');
+    }
+
+    public static function getDynamicTypesList(int $threshold = 3) {
+        $works_by_type = Work::countByType()->get();
+
+        $totalWorks = $works_by_type->sum('count');
+
+        // Filter types based on the threshold percentage
+        $filteredTypes = $works_by_type->filter(function ($type) use ($totalWorks, $threshold) {
+            return ($type->count / $totalWorks) * 100 >= $threshold;
+        });
+
+        // Sum the count of types that do not pass the threshold
+        $otherCount = $works_by_type->whereNotIn('type', $filteredTypes->pluck('type')->toArray())->sum('count');
+
+        // Create a new collection with the filtered types and 'Other'
+        $filteredTypes->push(['type' => 'Other', 'count' => $otherCount]);
+
+        return $filteredTypes;
+    }
+
 }

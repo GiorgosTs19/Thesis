@@ -2,28 +2,25 @@ import React from "react";
 import {array} from "prop-types";
 import Search from "@/Components/Search/Search.jsx";
 import HomeBanner from "@/Pages/Routes/Home/HomeBanner/HomeBanner.jsx";
-import List from "@/Components/List/List.jsx";
-import {renderAuthorItem} from "@/Models/Author/Utils.jsx";
-import {Author} from "@/Models/Author/Author.js";
 
 const styles = {
-    header: 'text-xl md:text-2xl xl:text-3xl text-gray-500 mb-4 italic focus:ring-0',
-    container: 'bg-white flex items-center h-full rounded-lg',
-    innerContainer: 'bg-white w-full px-6 py-3 flex flex-col h-full rounded-lg',
-    wrapper: 'md:p-4 flex flex-col text-center mb-5'
+    header: 'text-4xl xl:text-6xl text-gray-500 mb-6',
+    container: 'flex items-center h-full rounded-lg',
+    innerContainer: 'w-full px-6 py-3 flex flex-col h-full rounded-lg',
+    wrapper: 'md:p-4 flex flex-col text-center mb-5',
 }
-const HomePage = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
+const HomePage = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks, worksByType}) => {
 
     return (
         <div className={styles.container}>
             <div className={styles.innerContainer}>
                 <div className={styles.wrapper}>
                     <div className={styles.header}>
-                        Discover notable authors and their literary works
+                        MyPubsV2
                     </div>
                     <Search isHomeScreen/>
                 </div>
-                <HomeBanner/>
+                <HomeBanner worksByType={worksByType}/>
             </div>
         </div>
     )

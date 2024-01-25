@@ -8,7 +8,7 @@ const styles = {
     title: 'text-3xl mb-2 p-1 text-center',
     propertiesWrapper: 'flex flex-wrap gap-8 p-6 mb-4',
     propertyWrapper: 'mb-4 w-fit flex-grow flex',
-    propertyValue: 'text-black border-l-2 border-l-blue-600 pl-3 text-lg font-bold text-sm',
+    propertyValue: 'text-black border-l-2 border-l-blue-600 pl-3 font-bold text-sm',
     propertyName: 'text-gray-600 border-l-2 border-l-blue-600 pl-3 text-xs'
 }
 const RowOfProperties = ({properties, title}) => {

@@ -14,7 +14,7 @@ function BaseLayout({title, children}) {
             <Navigation/>
             <div className="mt-2 w-full p-3 shadow-md mx-auto flex flex-col flex-grow h-full">
                 <div className="bg-gray-100 flex items-center justify-self-end h-full">
-                    <div className="bg-white w-full px-6 py-3 flex flex-col h-full rounded-lg">
+                    <div className="w-full px-6 py-3 flex flex-col h-full rounded-lg">
                         {children}
                     </div>
                 </div>
