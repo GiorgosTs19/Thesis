@@ -1,5 +1,5 @@
 import React from "react";
-import {array} from "prop-types";
+import {array, arrayOf, number, shape, string} from "prop-types";
 import Search from "@/Components/Search/Search.jsx";
 import HomeBanner from "@/Pages/Routes/Home/HomeBanner/HomeBanner.jsx";
 
@@ -44,5 +44,9 @@ HomePage.propTypes = {
     mostWorksAuthors: array,
     mostWorksUsers: array,
     mostCitationsWorks: array,
+    worksByType: arrayOf(shape({
+        type: string.isRequired,
+        count: number.isRequired
+    }))
 }
 export default HomePage;

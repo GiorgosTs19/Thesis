@@ -12,5 +12,14 @@ module.exports = {
     rules: {
         // Add specific rules as needed
     },
+    env: {
+        browser: true,
+        node: true,
+        // Add other environments as needed
+    },
+    globals: {
+        // Add global variables here
+        fetch: 'readonly',
+    },
     ignorePatterns: ['node_modules/', 'build/', 'dist/', 'vendor/', 'config/', '/resources/js/bootstrap.js'], // Add directories you want to ignore
 };
