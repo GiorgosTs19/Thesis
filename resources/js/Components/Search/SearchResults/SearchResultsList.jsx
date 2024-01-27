@@ -3,6 +3,7 @@ import {array, bool, func, string} from "prop-types";
 import {AuthorSearchResult} from "@/Components/Search/SearchResults/AuthorSearchResult.jsx";
 import {WorkSearchResult} from "@/Components/Search/SearchResults/WorkSearchResult.jsx";
 import clsx from "clsx";
+import {UserSearchResult} from "@/Components/Search/SearchResults/UserSearchResult.jsx";
 
 /**
  * PaginatedList Component.
@@ -63,6 +64,8 @@ const List = ({
                 return <AuthorSearchResult author={item} query={query} key={item.id}/>
             case 'Work' :
                 return <WorkSearchResult work={item} query={query} key={item.id}/>
+            case 'User' :
+                return <UserSearchResult query={query} user={item} key={item.id}/>
         }
     };
 

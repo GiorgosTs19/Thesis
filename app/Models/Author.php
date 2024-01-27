@@ -314,18 +314,18 @@ class Author extends Model {
     }
 
     public function scopeSearchName($query, $name) {
-        return $query->orWhere('display_name', 'LIKE', "%{$name}%");
+        return $query->orWhere('display_name', $name)->orWhere('display_name', 'LIKE', "%{$name}%");
     }
 
     public function scopeSearchScopus($query, $scopus_id) {
-        return $query->orWhere('scopus_id', $scopus_id)->orWhere('scopus_id', 'LIKE', "%{$scopus_id}%");
+        return $query->orWhere(Ids::SCOPUS_ID, $scopus_id)->orWhere('scopus_id', 'LIKE', "%{$scopus_id}%");
     }
 
     public function scopeSearchOrcId($query, $orc_id) {
-        return $query->orWhere('orc_id', $orc_id)->orWhere('orc_id', 'LIKE', "%{$orc_id}%");
+        return $query->orWhere(Ids::ORC_ID_ID, $orc_id)->orWhere(Ids::ORC_ID_ID, 'LIKE', "%{$orc_id}%");
     }
 
     public function scopeSearchOpenAlex($query, $open_alex_id) {
-        return $query->orWhere('open_alex_id', $open_alex_id)->orWhere('open_alex_id', 'LIKE', "%{$open_alex_id}%");
+        return $query->orWhere(Ids::OPEN_ALEX_ID, $open_alex_id)->orWhere(Ids::OPEN_ALEX_ID, 'LIKE', "%{$open_alex_id}%");
     }
 }

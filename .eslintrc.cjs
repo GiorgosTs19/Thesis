@@ -20,6 +20,7 @@ module.exports = {
     globals: {
         // Add global variables here
         fetch: 'readonly',
+        route: 'readonly'
     },
     ignorePatterns: ['node_modules/', 'build/', 'dist/', 'vendor/', 'config/', '/resources/js/bootstrap.js'], // Add directories you want to ignore
 };

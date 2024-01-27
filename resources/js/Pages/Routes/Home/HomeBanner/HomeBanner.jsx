@@ -7,6 +7,7 @@ import {OrcidSVG} from "@/SVGS/OrcidSVG.jsx.jsx";
 import {OpenAlexSVG} from "@/SVGS/OpenAlexSVG.jsx";
 import {ScopusSVG} from "@/SVGS/ScopusSVG.jsx";
 import {CheckGearSVG} from "@/SVGS/CheckGearSVG.jsx";
+import clsx from "clsx";
 
 const styles = {
     wrapperDiv: 'col-span-3 lg:col-span-1 flex flex-col text-center py-6 px-2 bg-white rounded-xl',
@@ -15,7 +16,7 @@ const styles = {
     outerGrid: 'grid grid-cols-3 gap-6 lg:gap-8 mb-8',
     propertiesWrapper: 'flex flex-wrap gap-10 m-auto py-7 text-center flex px-4 rounded-3xl',
     propertyWrapper: 'flex-grow flex text-center mx-auto',
-    propertyValue: 'text-black text-3xl xl:text-5xl font-bold mx-auto',
+    propertyValue: 'text-black text-2xl lg:text-3xl xxl:text-5xl font-bold mx-auto',
     propertyName: 'text-gray-600 text-sm lg:text-lg mx-auto',
     header: 'text-xl md:text-2xl xl:text-3xl text-gray-500 mb-4 italic focus:ring-0',
     button: 'p-4 rounded-xl border border-gray-200 bg-gray-200 hover:bg-gray-100 mt-5 w-fit mx-auto'
@@ -23,7 +24,7 @@ const styles = {
 const HomeBanner = ({worksByType}) => {
     return <>
         <div className={styles.outerGrid}>
-            <div className={styles.wrapperDiv}>
+            <div className={clsx(styles.wrapperDiv)}>
                 <AuthorSVG width={64} height={64} className={styles.image}/>
                 <div className={styles.text}>
                     Explore a vast collection of renowned authors. Uncover insights,
@@ -33,7 +34,7 @@ const HomeBanner = ({worksByType}) => {
                     Explore Authors
                 </button>
             </div>
-            <div className={styles.wrapperDiv}>
+            <div className={clsx(styles.wrapperDiv, 'order-first lg:order-none')}>
                 <div className={styles.header}>
                     Discover notable authors and their literary works
                 </div>
@@ -54,7 +55,7 @@ const HomeBanner = ({worksByType}) => {
                     }
                 </div>
             </div>
-            <div className={styles.wrapperDiv}>
+            <div className={clsx(styles.wrapperDiv, 'order-3 lg:order-3')}>
                 <WorksSVG width={64} height={64} className={styles.image}/>
                 <div className={styles.text}>
                     Search through an extensive catalog of papers, discover details about each piece,

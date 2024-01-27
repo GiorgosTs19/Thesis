@@ -22,10 +22,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property mixed scopus_id
  * @property mixed email
  * @property mixed orc_id
- *
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)
  * @method static openAlex(string|null $open_alex_id)
+ * @method static searchOpenAlex(mixed $query)
  */
 class User extends Authenticatable {
     use HasApiTokens, HasFactory, Notifiable;
@@ -158,9 +158,51 @@ class User extends Authenticatable {
         return $query;
     }
 
+    public function scopeScopus($query, $id) {
+        if ($id !== '')
+            return $query->orWhere(Ids::SCOPUS_ID, $id);
+        return $query;
+    }
+
+    public function scopeName($query, $name) {
+        if ($name !== '')
+            return $query->orWhere('first_name', $name)->orWhere('last_name', $name);
+        return $query;
+    }
+
     public function scopeOpenAlex($query, $id) {
         if ($id !== '')
             return $query->orWhere(Ids::OPEN_ALEX_ID, $id);
+        return $query;
+    }
+
+    public function scopeSearchOrcId($query, $orc_id) {
+        if ($orc_id !== '')
+            return $query->where(Ids::ORC_ID_ID, $orc_id)->orWhere(Ids::ORC_ID_ID, 'LIKE', "%{$orc_id}%");
+        return $query;
+    }
+
+    public function scopeSearchScopus($query, $scopus_id) {
+        if ($scopus_id !== '')
+            return $query->where(Ids::SCOPUS_ID, $scopus_id)->orWhere(Ids::SCOPUS_ID, 'LIKE', "%{$scopus_id}%");
+        return $query;
+    }
+
+    public function scopeSearchName($query, $name) {
+        if ($name !== '')
+            return $query->orWhere('first_name', $name)->orWhere('first_name', 'LIKE', "%{$name}%")->orWhere('last_name', $name)->orWhere('last_name', 'LIKE', "%{$name}%");
+        return $query;
+    }
+
+    public function scopeSearchEmail($query, $email) {
+        if ($email !== '')
+            return $query->orWhere('email', $email)->orWhere('email', 'LIKE', "%{$email}%");
+        return $query;
+    }
+
+    public function scopeSearchOpenAlex($query, $open_alex_id) {
+        if ($open_alex_id !== '')
+            return $query->where(Ids::OPEN_ALEX_ID, $open_alex_id)->orWhere(Ids::OPEN_ALEX_ID, 'LIKE', "%{$open_alex_id}%");
         return $query;
     }
 

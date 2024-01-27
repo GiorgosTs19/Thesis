@@ -9,21 +9,28 @@ import {bool} from "prop-types";
 import SearchTips from "@/Components/Search/SearchTips.jsx";
 import useSaveRecentSearchQueries from "@/Hooks/useSaveRecentSearchQueries/useSaveRecentSearchQueries.js";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
+import {User} from "@/Models/User/User.js";
 
 const styles = {
-    plainInput: 'p-2 m-auto border border-gray-300 rounded-xl w-full lg:w-4/12 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm',
+    extendedHomeInputContainer: 'bg-white rounded-lg w-full lg:w-4/12 m-auto ',
+    plainInput: 'p-2 border border-gray-300 rounded-xl text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm',
     extendedInput: 'p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none',
     noResults: 'text-sm font-semibold my-2 text-gray-500 text-center',
-    content: 'space-y-6 flex flex-col'
+    content: 'space-y-6 flex flex-col',
+    belowMinChars: 'mx-auto text-sm text-red-400 opacity-75 mt-2'
 }
-const Search = ({isHomeScreen}) => {
+const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
     const [openModal, setOpenModal] = useState(false);
 
-    const [query, setQuery, searchWorksResult, searchAuthorsResult, noResultsFound] = useSearch();
+    const [query, setQuery, {works, authors, users}, noResultsFound] = useSearch({
+        onlyWorks,
+        onlyAuthors,
+        onlyUsers
+    });
+
     const recentQueries = useSaveRecentSearchQueries(query);
 
-
-    const queryIsEmpty = query.length === 0;
+    const queryIsEmpty = query.length >= 0 && query.length <= 2;
     const handleQueryChange = (e) => {
         const query = e.target.value;
         setQuery(query);
@@ -34,10 +41,14 @@ const Search = ({isHomeScreen}) => {
         setQuery('')
     }
 
-    const inputToReturn = isHomeScreen ? <input type={'search'}
-                                                className={styles.plainInput}
-                                                placeholder={'Explore the catalog of authors and their works'}
-                                                onClick={() => setOpenModal(true)} autoFocus/> :
+    const inputToReturn = isHomeScreen ?
+        <ExtendedInput name={'Search'} onClick={() => setOpenModal(true)} onChange={() => setOpenModal(true)}
+                       placeholder={'Explore the catalog of authors and their works'}
+                       inputClassName={styles.plainInput}
+                       containerClassName={styles.extendedHomeInputContainer} type={'search'} autoFocus
+                       leadingElement={'children'}>
+            <SearchSVG/>
+        </ExtendedInput> :
         <ExtendedInput name={'Search'} onClick={() => setOpenModal(true)}
                        placeholder={'Search'}
                        inputClassName={styles.extendedInput}
@@ -46,10 +57,10 @@ const Search = ({isHomeScreen}) => {
             <SearchSVG/>
         </ExtendedInput>
 
+    const belowMinimumChars = query.length > 0 && query.length <= 2;
+
     const content = queryIsEmpty ? <SearchTips setData={setQuery} recentQueries={recentQueries}/> :
-        noResultsFound && <h4 className={styles.noResults}>No results meet the
-            specified
-            criteria</h4>
+        noResultsFound && <h4 className={styles.noResults}>No results meet the specified criteria</h4>
 
     return (
         <>
@@ -63,20 +74,30 @@ const Search = ({isHomeScreen}) => {
                                leadingElement={'children'}>
                     <SearchSVG/>
                 </ExtendedInput>
-                <Modal.Body className={'p-3'}>
+                <Modal.Body className={'p-3 bg-white'}>
                     <div className={styles.content}>
+                        {
+                            belowMinimumChars &&
+                            <h4 className={styles.belowMinChars}>Type at least {3 - query.length} more
+                                characters</h4>
+                        }
                         {
                             content
                         }
                         {
-                            searchAuthorsResult.length > 0 && !queryIsEmpty &&
-                            <SearchResultsList data={searchAuthorsResult} parser={Author.parseResponseAuthor}
+                            authors.length > 0 && !queryIsEmpty &&
+                            <SearchResultsList data={authors} parser={Author.parseResponseAuthor}
                                                query={query} title={'Authors'}/>
                         }
                         {
-                            searchWorksResult.length > 0 && !queryIsEmpty &&
-                            <SearchResultsList data={searchWorksResult} parser={Work.parseResponseWork}
+                            works.length > 0 && !queryIsEmpty &&
+                            <SearchResultsList data={works} parser={Work.parseResponseWork}
                                                query={query} title={'Works'}/>
+                        }
+                        {
+                            users.length > 0 && !queryIsEmpty &&
+                            <SearchResultsList data={users} parser={User.parseResponseAuthor}
+                                               query={query} title={'Users'}/>
                         }
                     </div>
                 </Modal.Body>
@@ -86,7 +107,10 @@ const Search = ({isHomeScreen}) => {
 }
 
 Search.propTypes = {
-    isHomeScreen: bool
+    isHomeScreen: bool,
+    onlyWorks: bool,
+    onlyAuthors: bool,
+    onlyUsers: bool
 }
 
 export default Search;
