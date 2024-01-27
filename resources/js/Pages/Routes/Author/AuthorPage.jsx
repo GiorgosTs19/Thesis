@@ -72,8 +72,7 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
 
     const renderWorkItem = useCallback((work, index) => {
-        return work.title.length > 0 &&
-            <WorkItem work={work} key={work.doi} index={works.meta.from + index - 1} authorToExclude={authorObject.id}/>
+        return <WorkItem work={work} key={work.doi} index={works.meta.from + index} authorToExclude={authorObject.id}/>
     }, [works]);
 
     const renderAuthorItem = (item, index) => <AuthorItem key={index} author={item.value} index={index}

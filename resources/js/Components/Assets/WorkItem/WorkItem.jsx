@@ -6,15 +6,15 @@ import {Work} from "@/Models/Work/Work.js";
 
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
-    authorElement:'hover:underline text-xs lg:text-sm',
-    li:'flex-grow list-none flex',
-    index:'top-0 left-0 text-black text-sm flex flex-col gap-4 text-center',
-    infoContainer:'flex flex-col',
-    innerInfoContainer:'flex flex-wrap border-l-2 border-l-blue-700',
-    infoProperty:'text-gray-600  pl-3 text-xs lg:text-sm',
-    title:'text-black text-sm font-bold truncate whitespace-pre-wrap hover:underline',
-    authorsList:'pl-3 text-blue-500',
-    showMoreLessAuthors:'cursor-pointer underline text-amber-950 ml-2 text-xs lg:text-sm'
+    authorElement: 'hover:underline text-xs lg:text-sm',
+    li: 'flex-grow list-none flex',
+    index: 'top-0 left-0 text-black text-sm flex flex-col gap-4 text-center',
+    infoContainer: 'flex flex-col',
+    innerInfoContainer: 'flex flex-wrap border-l-2 border-l-blue-700',
+    infoProperty: 'text-gray-600  pl-3 text-xs lg:text-sm',
+    title: 'text-black text-sm font-bold truncate whitespace-pre-wrap hover:underline',
+    authorsList: 'pl-3 text-blue-500',
+    showMoreLessAuthors: 'cursor-pointer underline text-amber-950 ml-2 text-xs lg:text-sm'
 }
 export const WorkItem = ({work, index, authorToExclude}) => {
     const {
@@ -40,7 +40,7 @@ export const WorkItem = ({work, index, authorToExclude}) => {
         <React.Fragment key={index}>
             <a href={`http://127.0.0.1:8000/Author/${author.openAlexId}`}
                className={styles.authorElement}>{author.name} </a>
-            {index < authors.length && ', '}
+            {index < filteredAuthors.length - 1 && ', '}
         </React.Fragment>
     ));
 
@@ -71,7 +71,7 @@ export const WorkItem = ({work, index, authorToExclude}) => {
             </div>
             <div className={'pl-3'}>
                 <a href={localUrl} className={styles.title}>
-                    {title}
+                    {title ?? 'Title Unavailable'}
                 </a>
             </div>
             <div className={styles.authorsList}>

@@ -70,41 +70,43 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
         <>
             {inputToReturn}
             <Modal show={openModal} onClose={handleSearchModalClose} dismissible position={'top-center'}>
-                <ExtendedInput onChange={handleQueryChange} name={'Search'}
-                               value={query}
-                               placeholder={'Search for authors and their works'}
-                               inputClassName={styles.extendedInput}
-                               containerClassName={'top-0 bg-white rounded-t-xl'} type={'search'} autoFocus
-                               leadingElement={'children'}>
-                    <SearchSVG className={'bg-transparent'}/>
-                </ExtendedInput>
-                <Modal.Body className={'p-3 bg-white rounded-b-2xl'}>
-                    <div className={styles.content} ref={modalRef}>
-                        {
-                            belowMinimumChars &&
-                            <h4 className={styles.belowMinChars}>Type at least {3 - query.length} more
-                                characters</h4>
-                        }
-                        {
-                            content
-                        }
-                        {
-                            authors.length > 0 && !queryIsEmpty &&
-                            <SearchResultsList data={authors} parser={Author.parseResponseAuthor}
-                                               query={query} title={'Authors'}/>
-                        }
-                        {
-                            works.length > 0 && !queryIsEmpty &&
-                            <SearchResultsList data={works} parser={Work.parseResponseWork}
-                                               query={query} title={'Works'}/>
-                        }
-                        {
-                            users.length > 0 && !queryIsEmpty &&
-                            <SearchResultsList data={users} parser={User.parseResponseAuthor}
-                                               query={query} title={'Users'}/>
-                        }
-                    </div>
-                </Modal.Body>
+                <div ref={modalRef}>
+                    <ExtendedInput onChange={handleQueryChange} name={'Search'}
+                                   value={query}
+                                   placeholder={'Search for authors and their works'}
+                                   inputClassName={styles.extendedInput}
+                                   containerClassName={'top-0 bg-white rounded-t-xl'} type={'search'} autoFocus
+                                   leadingElement={'children'}>
+                        <SearchSVG className={'bg-transparent'}/>
+                    </ExtendedInput>
+                    <Modal.Body className={'p-3 bg-white rounded-b-2xl'}>
+                        <div className={styles.content}>
+                            {
+                                belowMinimumChars &&
+                                <h4 className={styles.belowMinChars}>Type at least {3 - query.length} more
+                                    characters</h4>
+                            }
+                            {
+                                content
+                            }
+                            {
+                                authors.length > 0 && !queryIsEmpty &&
+                                <SearchResultsList data={authors} parser={Author.parseResponseAuthor}
+                                                   query={query} title={'Authors'}/>
+                            }
+                            {
+                                works.length > 0 && !queryIsEmpty &&
+                                <SearchResultsList data={works} parser={Work.parseResponseWork}
+                                                   query={query} title={'Works'}/>
+                            }
+                            {
+                                users.length > 0 && !queryIsEmpty &&
+                                <SearchResultsList data={users} parser={User.parseResponseAuthor}
+                                                   query={query} title={'Users'}/>
+                            }
+                        </div>
+                    </Modal.Body>
+                </div>
             </Modal>
         </>
     )
