@@ -24,6 +24,8 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
     const [openModal, setOpenModal] = useState(false);
     const modalRef = useClickAway((e) => {
         if (e instanceof TouchEvent) {
+            // * Prevent closing the modal if the user is just trying to navigate back
+            // * or close the keyboard on mobile phones without buttons.
             if (e.type === 'touchend')
                 setOpenModal(false);
             return;
