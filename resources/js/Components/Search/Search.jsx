@@ -70,11 +70,11 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
                                value={query}
                                placeholder={'Search for authors and their works'}
                                inputClassName={styles.extendedInput}
-                               containerClassName={'top-0 bg-transparent'} type={'search'} autoFocus
+                               containerClassName={'top-0 bg-white'} type={'search'} autoFocus
                                leadingElement={'children'}>
                     <SearchSVG className={'bg-transparent'}/>
                 </ExtendedInput>
-                <Modal.Body className={'p-3 bg-white'}>
+                <Modal.Body className={'p-3 bg-white rounded-3xl'}>
                     <div className={styles.content}>
                         {
                             belowMinimumChars &&
