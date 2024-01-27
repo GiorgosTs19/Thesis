@@ -23,9 +23,9 @@ const ExtendedInput = ({
         <div className={containerClassName}>
             {label && <label htmlFor={name}
                              className={`block text-sm font-medium leading-6 text-gray-900 ${leadingElementClassName}`}>{label}</label>}
-            <div className="relative rounded-md shadow-sm justify-between flex">
+            <div className="relative rounded-md shadow-sm justify-between flex bg-transparent">
                 {leadingElement &&
-                    <div className="flex items-center pl-3 w-fit">
+                    <div className="flex items-center pl-3 w-fit bg-transparent">
                         {leadingElement === 'children' ? children : leadingElement}
                     </div>}
                 <input type={type} name={name} id={name} className={`${defaultClassName} ${inputClassName}`}

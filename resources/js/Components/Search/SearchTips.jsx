@@ -15,7 +15,7 @@ const styles = {
     tipsHeader: 'text-lg font-semibold text-yellow-800 text-auto',
     tipsSubHeader: 'text-sm font-semibold my-2 text-gray-500 mx-2',
     list: 'flex gap-4 mx-auto',
-    subTip: 'text-sm font-semibold my-2 text-gray-500 mx-auto mt-4'
+    subTip: 'text-sm font-semibold my-2 text-gray-500 mx-auto mt-4 text-center'
 }
 const SearchTips = ({setData, recentQueries}) => {
     return (
