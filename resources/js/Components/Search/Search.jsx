@@ -72,7 +72,7 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
                                inputClassName={styles.extendedInput}
                                containerClassName={'top-0'} type={'search'} autoFocus
                                leadingElement={'children'}>
-                    <SearchSVG/>
+                    <SearchSVG className={'bg-transparent'}/>
                 </ExtendedInput>
                 <Modal.Body className={'p-3 bg-white'}>
                     <div className={styles.content}>
