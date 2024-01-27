@@ -22,7 +22,12 @@ const styles = {
 }
 const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
     const [openModal, setOpenModal] = useState(false);
-    const modalRef = useClickAway(() => {
+    const modalRef = useClickAway((e) => {
+        if (e instanceof TouchEvent) {
+            if (e.type === 'touchend')
+                setOpenModal(false);
+            return;
+        }
         setOpenModal(false);
     });
 
