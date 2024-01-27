@@ -9,11 +9,12 @@ import {bool} from "prop-types";
 import SearchTips from "@/Components/Search/SearchTips.jsx";
 import useSaveRecentSearchQueries from "@/Hooks/useSaveRecentSearchQueries/useSaveRecentSearchQueries.js";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
+import {useClickAway} from "@uidotdev/usehooks";
 import {User} from "@/Models/User/User.js";
 
 const styles = {
     extendedHomeInputContainer: 'bg-white rounded-lg w-full lg:w-4/12 m-auto ',
-    plainInput: 'p-2 border border-gray-300 rounded-xl text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm',
+    plainInput: 'p-2 border border-gray-300 rounded-3 rounded-l-3 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm',
     extendedInput: 'p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none',
     noResults: 'text-sm font-semibold my-2 text-gray-500 text-center',
     content: 'space-y-6 flex flex-col',
@@ -21,6 +22,9 @@ const styles = {
 }
 const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
     const [openModal, setOpenModal] = useState(false);
+    const modalRef = useClickAway(() => {
+        setOpenModal(false);
+    });
 
     const [query, setQuery, {works, authors, users}, noResultsFound] = useSearch({
         onlyWorks,
@@ -75,7 +79,7 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
                     <SearchSVG className={'bg-transparent'}/>
                 </ExtendedInput>
                 <Modal.Body className={'p-3 bg-white rounded-b-2xl'}>
-                    <div className={styles.content}>
+                    <div className={styles.content} ref={modalRef}>
                         {
                             belowMinimumChars &&
                             <h4 className={styles.belowMinChars}>Type at least {3 - query.length} more
