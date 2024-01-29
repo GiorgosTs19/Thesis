@@ -80,6 +80,7 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                                                               name: 'Works Co-Authored',
                                                               value: item.occurrences
                                                           }]}/>
+
     return (
         <>
             <div className={styles.infoContainer}>

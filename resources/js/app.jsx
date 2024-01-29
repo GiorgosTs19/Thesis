@@ -4,6 +4,7 @@ import {createInertiaApp} from '@inertiajs/inertia-react';
 import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import React from "react";
 import BaseLayout from "@/Layouts/BaseLayout.jsx";
+import {API} from "@/API/API.js";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -32,3 +33,5 @@ createInertiaApp({
     },
 }).then(() => {
 });
+
+const api = new API();

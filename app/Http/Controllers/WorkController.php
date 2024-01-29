@@ -55,39 +55,8 @@ class WorkController extends Controller {
     public function showWorkPage(Request $request, $id): Response {
         $work = Work::with(['authors', 'statistics'])->openAlex($id, 'id')->firstOrFail();
 
-        // Retrieve works with authors
-//        $worksQuery = $author->works()->with('authors');
-
-        $current_sorting_method = 0;
-        // Check if sorting is specified in the request
-//        if ($request->has('sort')) {
-//            // Implement your sorting logic here based on the 'sort' query parameter
-//            // You can use orderBy() or any other method that suits your needs
-//            // For example, assuming 'sort' parameter contains the field to sort by
-//            $sortField = $request->get('sort');
-//            $current_sorting_method = $sortField;
-//            $this->applySorting($worksQuery, $sortField);
-//        } else {
-//            // If no sorting is specified, use the default sorting option
-//            $defaultSorting = collect(Work::SORTING_OPTIONS)->firstWhere('default', true);
-//            $this->applySorting($worksQuery, $defaultSorting['value']);
-//            $current_sorting_method = $defaultSorting['value'];
-//        }
-//
-//        // Paginate the sorted works
-//        $works = $worksQuery->paginate(9);
-//
-//        // Generate URLs for each sorting option and include them in the sortingOptions object
-//        $sortingOptions = $this->generateSortingOptions($id);
-//
-//        // Append the current sort parameter to pagination links
-//        $works->appends(['sort' => $request->get('sort')]);
-
         return Inertia::render('Routes/Work/WorkPage', [
             'work' => new WorkResource($work),
-//            'works' => WorkResource::collection($works),
-//            'sortingOptions' => $sortingOptions,
-//            'currentSortOption' => (int)$current_sorting_method
         ]);
     }
 }

@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\{Factories\HasFactory,
     Relations\BelongsToMany,
     Relations\HasMany};
 
+/**
+ * @property int $id
+ * @method static find(int $id)
+ * @method static name(mixed $name)
+ */
 class Group extends Model {
     use HasFactory;
 
@@ -24,7 +29,28 @@ class Group extends Model {
         return $this->hasMany(Group::class, 'parent_id');
     }
 
-    public function users(): BelongsToMany {
-        return $this->belongsToMany(User::class);
+    public function members(): BelongsToMany {
+        return $this->belongsToMany(Author::class);
+    }
+
+    public function childrenRecursive(): HasMany {
+        return $this->children()->with('childrenRecursive', 'members');
+    }
+
+    //    public function membersRecursive(): BelongsToMany {
+    //        return $this->members()->with('membersRecursive');
+    //    }
+
+
+    public function scopeName($query, $name) {
+        return $query->where('name', $name);
+    }
+
+    public function addMember($author_id): bool {
+        $newMember = new AuthorGroup([
+            'author_id' => $author_id,
+            'group_id' => $this->id
+        ]);
+        return $newMember->save();
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property mixed $author_id
@@ -14,8 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class AuthorWork extends Model {
     use HasFactory;
 
-    protected $table = 'author_work';
-
+    protected $table = 'author_works';
     protected $fillable = [
         'Author_Id',
         'Work_Id',

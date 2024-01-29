@@ -9,10 +9,10 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('user_groups', function (Blueprint $table) {
+        Schema::create('author_group', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
-            $table->foreignId('group_id');
+            $table->foreignId('author_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('group_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
@@ -21,6 +21,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('user_groups');
+        Schema::dropIfExists('author_groups');
     }
 };

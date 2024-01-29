@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('author_work', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('author_id');
-            $table->foreignId('work_id');
+            $table->foreignId('author_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('work_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
@@ -21,6 +21,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('author_work');
+        Schema::dropIfExists('author_works');
     }
 };

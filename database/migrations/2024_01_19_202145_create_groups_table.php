@@ -12,7 +12,7 @@ return new class extends Migration {
         Schema::create('groups', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('parent_id')->references('id')->on('groups');
+            $table->foreignId('parent_id')->nullable()->constrained('groups')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
