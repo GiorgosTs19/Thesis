@@ -22,7 +22,7 @@ class Group extends Model {
     ];
 
     public function parent(): BelongsTo {
-        return $this->belongsTo(Group::class, 'parent_id');
+        return $this->belongsTo(Group::class, 'parent_id')->with(['members', 'parent']);
     }
 
     public function children(): HasMany {
@@ -34,7 +34,7 @@ class Group extends Model {
     }
 
     public function childrenRecursive(): HasMany {
-        return $this->children()->with('childrenRecursive', 'members');
+        return $this->children()->with('childrenRecursive', 'members')->with('parent');
     }
 
     //    public function membersRecursive(): BelongsToMany {

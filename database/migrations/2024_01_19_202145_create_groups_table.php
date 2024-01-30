@@ -12,6 +12,7 @@ return new class extends Migration {
         Schema::create('groups', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->tinyText('description');
             $table->foreignId('parent_id')->nullable()->constrained('groups')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

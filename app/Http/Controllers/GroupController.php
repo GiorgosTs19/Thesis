@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\GroupResource;
 use App\Models\Author;
 use App\Models\AuthorGroup;
 use App\Models\Group;
@@ -12,27 +13,10 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class GroupController extends Controller {
-
-    protected function flattenGroups($groups) {
-        $flattened = [];
-
-        foreach ($groups as $group) {
-            $flattened[] = $group;
-
-            if ($group->children->isNotEmpty()) {
-                $flattened = array_merge($flattened, $this->flattenGroups($group->children));
-            }
-        }
-
-        return $flattened;
-    }
-
     public function showGroupsPage(): Response {
-        $groups = Group::with(['childrenRecursive', 'members'])->whereNull('parent_id')->get();
-//        dump($groups);
-//        $groups = $this->flattenGroups($groups);
+        $groups = Group::with(['members', 'parent'])->orderBy('name')->get();
 
-        return Inertia::render('Routes/Groups/GroupsPage', ['groups' => $groups]);
+        return Inertia::render('Routes/Groups/GroupsPage', ['groups' => GroupResource::collection($groups)]);
     }
 
     /**

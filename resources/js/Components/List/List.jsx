@@ -15,6 +15,7 @@ import {array, bool, func, string} from "prop-types";
  * @param listClassName - Classes to apply to the list element.
  * @param header - An optional header to display above the list.
  * @param footer - An optional footer to display below the list.
+ * @param emptyListPlaceholder - An optional placeholder to show if the list of items to render is empty.
  * @returns The PaginatedList component.
  *
  * @example
@@ -38,7 +39,8 @@ const List = ({
                   wrapperClassName = '',
                   listClassName = '',
                   header,
-                  footer
+                  footer,
+                  emptyListPlaceholder = 'The list is empty'
               }) => {
     const items = parser ? data.map(parser) : data;
 
@@ -49,11 +51,12 @@ const List = ({
         {header && <div className={'text-gray-500 text-sm mb-3'}>
             {header}
         </div>}
-        <ul className={`list-disc pl-2 gap-8 ${listClassName} ${vertical ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 '}`}>
+        {items.length ? <ul
+            className={`list-disc pl-2 gap-8 ${listClassName} ${vertical ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 '}`}>
             {items.map((item, index) =>
                 renderFn(item, index)
             )}
-        </ul>
+        </ul> : <h4 className={'text-xl m-auto'}>{emptyListPlaceholder}</h4>}
         {footer && <div className={'text-gray-500 text-sm mt-2'}>
             {footer}
         </div>}
@@ -70,5 +73,6 @@ List.propTypes = {
     vertical: bool,
     wrapperClassName: string,
     listClassName: string,
+    emptyListPlaceholder: string,
 }
 export default List;

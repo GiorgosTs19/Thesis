@@ -18,6 +18,7 @@ export function Navigation() {
     const navigation = [
         {name: 'Authors', href: '#', current: false},
         {name: 'Works', href: '#', current: false},
+        {name: 'Groups', href: route('Groups.Page'), current: window.location.href === route('Groups.Page')},
     ];
 
     const userNavigation = [

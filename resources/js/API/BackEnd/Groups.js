@@ -23,9 +23,9 @@ export class Groups extends AbstractAPI {
         });
     }
 
-    async createGroup(name) {
-        if (!name) {
-            throw new Error('Name parameter is marked as required for createGroup()');
+    async createGroup(name, description) {
+        if (!name || !description) {
+            throw new Error('The name and description parameters are marked as required for createGroup()');
         }
 
         return this.post(route('Group.Create'), {

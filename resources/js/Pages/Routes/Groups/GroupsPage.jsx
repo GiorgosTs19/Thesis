@@ -1,6 +1,9 @@
-import React from "react";
-import {Sidebar} from "flowbite-react";
-import {arrayOf, object, oneOfType, string} from "prop-types";
+import React, {useState} from "react";
+import {Badge, Card, ListGroup} from "flowbite-react";
+import {arrayOf, bool, func, object, oneOfType} from "prop-types";
+import List from "@/Components/List/List.jsx";
+import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
+import {Author} from "@/Models/Author/Author.js";
 
 const styles = {
     grid: 'grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4',
@@ -21,52 +24,61 @@ const styles = {
     listText: 'mx-2 text-xs sm:text-sm text-gray-600 opacity-50'
 }
 
-const Group = ({group, className}) => (
-    <>
-        {group.children_recursive.length ? (
-            <Sidebar.Collapse key={group.id} label={group.name}>
-                {group.children_recursive.map((item) => (
-                    <Group key={item.id} group={item} className={'ml-5'}/>
-                ))}
-            </Sidebar.Collapse>
-        ) : (
-            <Sidebar.Item key={group.id}><span className={className}>{group.name}</span></Sidebar.Item>
-        )}
-    </>
-);
+const Group = ({group, onClick, isSelected}) => {
+    return (
+        <>
+            <ListGroup.Item key={group.id} active={isSelected}
+                            className={`w-full cursor-pointer text-lg`}
+                            onClick={onClick}>{group.name}</ListGroup.Item>
+        </>
+    );
+};
+
 Group.propTypes = {
     group: object,
-    className: string
+    onClick: func,
+    isSelected: bool
 }
 
 const GroupsPage = ({groups}) => {
-    console.log(groups)
-    return (<>
-        <div className={styles.grid}>
-            <div className={styles.gridCol}>
-                <Sidebar aria-label="Sidebar with multi-level dropdown example" className={'w-auto'}>
-                    <Sidebar.Items>
-                        <Sidebar.ItemGroup>
-                            {
-                                groups.map(group => group.children_recursive.length ? (
-                                    <Sidebar.Collapse key={group.id} label={group.name}>
-                                        {group.children_recursive.map((item) => (
-                                            <Group key={item.id} group={item} className={'ml-5'}/>
-                                        ))}
-                                    </Sidebar.Collapse>
-                                ) : (
-                                    <Sidebar.Item key={group.id}>{group.name}</Sidebar.Item>
-                                ))
-                            }
-                        </Sidebar.ItemGroup>
-                    </Sidebar.Items>
-                </Sidebar>
-            </div>
+    const [selectedGroup, setSelectedGroup] = useState(groups[0]);
 
-            <div className={styles.gridCol}>
-                2
+    const renderAuthorItem = (item, index) => {
+        return <AuthorItem author={item} index={index} key={index}/>
+    }
+
+    return (<>
+        <Card className={'h-full w-full'}>
+            <div className={'grid grid-cols-3 lg:grid-cols-6 gap-5'}>
+                <div className={'col-span-3 lg:col-span-2'}>
+                    <ListGroup aria-label="Groups List" className={'w-full lg:w-fit overflow-y-auto gap-3'}>
+                        {
+                            groups.map((group, index) => <Group key={group.id} group={group} depth={0}
+                                                                onClick={() => setSelectedGroup(group)}
+                                                                isSelected={selectedGroup.id === group.id}/>)
+                        }
+                    </ListGroup>
+                </div>
+                <div className={'col-span-3 lg:col-span-4 flex'}>
+                    <Card className={'m-auto w-full lg:w-9/12 xl:6/12 h-full'}>
+                        <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            {selectedGroup.name}
+                        </h5>
+                        <p className="font-normal text-gray-700 dark:text-gray-400">
+                            {selectedGroup.description}
+                        </p>
+                        {selectedGroup.parent &&
+                            <Badge className={'text-lg cursor-pointer w-fit px-3 py-1 rounded-lg'}
+                                   onClick={() => setSelectedGroup(selectedGroup.parent)}>Subgroup of
+                                : {selectedGroup.parent.name}</Badge>}
+                        <List data={selectedGroup.members} renderFn={renderAuthorItem}
+                              wrapperClassName={'w-full h-full'}
+                              title={`Group Members ${selectedGroup.members.length ? ` ( ${selectedGroup.members.length} )` : ''}`}
+                              parser={Author.parseResponseAuthor} emptyListPlaceholder={'This group has no members'}/>
+                    </Card>
+                </div>
             </div>
-        </div>
+        </Card>
     </>)
 };
 
