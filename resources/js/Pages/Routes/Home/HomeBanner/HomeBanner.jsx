@@ -3,12 +3,13 @@ import {WorksSVG} from "@/SVGS/WorksSVG.jsx";
 import {AuthorSVG} from "@/SVGS/AuthorSVG.jsx";
 import {arrayOf, number, shape, string} from "prop-types";
 import {capitalizeFirstLetter} from "@/Utility/Strings/Utils.js";
-import {OrcidSVG} from "@/SVGS/OrcidSVG.jsx.jsx";
-import {OpenAlexSVG} from "@/SVGS/OpenAlexSVG.jsx";
-import {ScopusSVG} from "@/SVGS/ScopusSVG.jsx";
-import {CheckGearSVG} from "@/SVGS/CheckGearSVG.jsx";
 import clsx from "clsx";
 import {Card} from "flowbite-react";
+import {ScopusSVG} from "@/SVGS/ScopusSVG.jsx";
+import {OpenAlexSVG} from "@/SVGS/OpenAlexSVG.jsx";
+import {OrcidSVG} from "@/SVGS/OrcidSVG.jsx.jsx";
+import './styles.css'
+import {RiNumber1, RiNumber2, RiNumber3} from "react-icons/ri";
 
 const styles = {
     wrapperDiv: 'col-span-3 lg:col-span-1 flex flex-col text-center h-full',
@@ -21,7 +22,8 @@ const styles = {
     propertyValue: 'text-black text-2xl lg:text-3xl xxl:text-5xl font-bold mx-auto',
     propertyName: 'text-gray-600 text-sm lg:text-lg mx-auto',
     header: 'text-xl md:text-2xl xl:text-3xl text-gray-500 mb-4 italic focus:ring-0',
-    button: 'p-4 rounded-xl border border-gray-200 bg-gray-200 hover:bg-gray-100 mt-5 w-fit mx-auto'
+    button: 'p-4 rounded-xl border border-gray-200 bg-gray-200 hover:bg-gray-100 mt-5 w-fit mx-auto',
+    timelineText: 'text-gray-500 font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm flex flex-col text-center'
 }
 const HomeBanner = ({worksByType}) => {
     return <>
@@ -75,61 +77,47 @@ const HomeBanner = ({worksByType}) => {
                 </Card>
             </div>
         </div>
-        <div className={'flex flex-col mt-6'}>
-            {/*<NewUserSVG width={64} height={64} className={'mx-auto'}/>*/}
-            {/*<div className={clsx(styles.text, 'text-center mb-10 text-lg lg:text-xl')}>*/}
-            {/*    Calling all authors! Elevate your presence by registering on our platform.*/}
-            {/*</div>*/}
-            <div className={styles.outerGrid}>
-                <div className={styles.wrapperDiv}>
-                    <Card className={styles.card}>
-                        <div
-                            className={'mx-auto text-lg lg:text-3xl border border-gray-300 rounded-full py-4 px-6 mb-4'}>
-                            1
+        <div className={'flex flex-col lg:flex-row gap-5 w-full mt-10'}>
+            <Card className={'w-full mx-auto bg-transparent'}>
+                <div className={'w-full text-center flex gap-3'}>
+                    <RiNumber1 className={'my-auto text-2xl'}/>
+                    <div className={'w-full flex flex-col gap-4'}>
+                        <div>
+                            Kickstart your journey by creating an account on our platform.
                         </div>
-                        <div className={styles.text}>
-                            Kickstart your journey by creating an account on our platform. It is the first step to
-                            boosting
-                            your
-                            authorial presence.
-                        </div>
-                        <a className={'text-blue-700 text-xl p-4 hover:underline hover:text-blue-500 cursor-pointer mt-5'}>
+                        <a className={'text-blue-700 text-xl hover:underline hover:text-blue-500 cursor-pointer'}>
                             Create an account
                         </a>
-                    </Card>
+                    </div>
                 </div>
-                <div className={styles.wrapperDiv}>
-                    <Card className={styles.card}>
-                        <div
-                            className={'mx-auto text-lg lg:text-3xl border border-gray-300 rounded-full py-4 px-6 mb-4'}>
-                            2
+            </Card>
+            <Card className={'w-full mx-auto text-center bg-transparent'}>
+                <div className={'w-full text-center flex gap-3'}>
+                    <RiNumber2 className={'my-auto text-2xl'}/>
+                    <div className={'w-full flex flex-col'}>
+                        <div>
+                            Tell us who you are by providing your unique identifiers, along with some essential
+                            details.
                         </div>
-                        <div className={styles.text}>
-                            Tell us who you are by providing your unique identifiers, along with some essential details.
-                            This
-                            helps us tailor your profile.
-                        </div>
-                        <div className={'flex gap-4 mx-auto mt-7'}>
+                        <div className={'flex gap-4 mx-auto mt-2'}>
                             <OrcidSVG height={24} width={24}/>
                             <OpenAlexSVG height={24} width={24}/>
                             <ScopusSVG height={24} width={24}/>
                         </div>
-                    </Card>
+                    </div>
                 </div>
-                <div className={styles.wrapperDiv}>
-                    <Card className={styles.card}>
-                        <div
-                            className={'mx-auto text-lg lg:text-3xl border border-gray-300 rounded-full py-4 px-6 mb-4'}>
-                            3
+            </Card>
+            <Card className={'w-full mx-auto text-center flex bg-transparent'}>
+                <div className={'w-full text-center flex gap-3'}>
+                    <RiNumber3 className={'my-auto text-2xl'}/>
+                    <div className={'w-full flex flex-col'}>
+                        <div>
+                            Once you have shared your info, leave the rest to us.
+                            We will seamlessly fetch your works and build your profile.
                         </div>
-                        <div className={styles.text}>
-                            Once you have shared your info, leave the rest to us. We will smoothly gather your works
-                            and build up your author profile hassle-free.
-                        </div>
-                        <CheckGearSVG width={56} height={56} className={'mx-auto mt-4'}/>
-                    </Card>
+                    </div>
                 </div>
-            </div>
+            </Card>
         </div>
     </>
 }
@@ -141,3 +129,11 @@ HomeBanner.propTypes = {
     }))
 }
 export default HomeBanner;
+{/*<NewUserSVG width={64} height={64} className={'mx-auto'}/>*/
+}
+{/*<div className={clsx(styles.text, 'text-center mb-10 text-lg lg:text-xl')}>*/
+}
+{/*    Calling all authors! Elevate your presence by registering on our platform.*/
+}
+{/*</div>*/
+}
