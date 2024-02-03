@@ -7,10 +7,10 @@ import {Author} from "@/Models/Author/Author.js";
 import {Work} from "@/Models/Work/Work.js";
 import {bool} from "prop-types";
 import SearchTips from "@/Components/Search/SearchTips.jsx";
-import useSaveRecentSearchQueries from "@/Hooks/useSaveRecentSearchQueries/useSaveRecentSearchQueries.js";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
 import {useClickAway} from "@uidotdev/usehooks";
 import {User} from "@/Models/User/User.js";
+import RecentSearches from "@/Components/Search/RecentSearches.jsx";
 
 const styles = {
     extendedHomeInputContainer: 'bg-white rounded-lg w-full lg:w-4/12 m-auto ',
@@ -39,7 +39,6 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
         onlyUsers
     });
 
-    const recentQueries = useSaveRecentSearchQueries(query);
 
     const queryIsEmpty = query.length >= 0 && query.length <= 2;
     const handleQueryChange = (e) => {
@@ -58,19 +57,19 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
                        inputClassName={styles.plainInput}
                        containerClassName={styles.extendedHomeInputContainer} type={'search'} autoFocus
                        leadingElement={'children'}>
-            <SearchSVG/>
+            <SearchSVG onClick={() => setOpenModal(true)}/>
         </ExtendedInput> :
         <ExtendedInput name={'Search'} onClick={() => setOpenModal(true)}
                        placeholder={'Search'}
                        inputClassName={styles.extendedInput}
                        containerClassName={'bg-white rounded-lg'} type={'search'} autoFocus
                        leadingElement={'children'}>
-            <SearchSVG/>
+            <SearchSVG onClick={() => setOpenModal(true)}/>
         </ExtendedInput>
 
     const belowMinimumChars = query.length > 0 && query.length <= 2;
 
-    const content = queryIsEmpty ? <SearchTips setData={setQuery} recentQueries={recentQueries}/> :
+    const content = queryIsEmpty ? <SearchTips/> :
         noResultsFound && <h4 className={styles.noResults}>No results meet the specified criteria</h4>
 
     return (
@@ -93,6 +92,7 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
                                 <h4 className={styles.belowMinChars}>Type at least {3 - query.length} more
                                     characters</h4>
                             }
+                            <RecentSearches setData={setQuery} query={query} visible={queryIsEmpty}/>
                             {
                                 content
                             }

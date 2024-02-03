@@ -22,6 +22,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property mixed scopus_id
  * @property mixed email
  * @property mixed orc_id
+ * @property mixed isAdmin
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)
  * @method static openAlex(string|null $open_alex_id)
@@ -64,7 +65,12 @@ class User extends Authenticatable {
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'isAdmin' => 'boolean'
     ];
+
+    public function isAdmin(): bool {
+        return $this->isAdmin === 1;
+    }
 
     /**
      * @param string $open_alex_id
@@ -190,7 +196,7 @@ class User extends Authenticatable {
 
     public function scopeSearchName($query, $name) {
         if ($name !== '')
-            return $query->orWhere('first_name', $name)->orWhere('first_name', 'LIKE', "%{$name}%")->orWhere('last_name', $name)->orWhere('last_name', 'LIKE', "%{$name}%");
+            return $query->where('first_name', $name)->orWhere('first_name', 'LIKE', "%{$name}%")->orWhere('last_name', $name)->orWhere('last_name', 'LIKE', "%{$name}%");
         return $query;
     }
 

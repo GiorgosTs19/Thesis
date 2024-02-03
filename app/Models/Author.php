@@ -314,7 +314,7 @@ class Author extends Model {
     }
 
     public function scopeSearchName($query, $name) {
-        return $query->orWhere('display_name', $name)->orWhere('display_name', 'LIKE', "%{$name}%");
+        return $query->where('display_name', $name)->orWhere('display_name', 'LIKE', "%{$name}%");
     }
 
     public function scopeSearchScopus($query, $scopus_id) {

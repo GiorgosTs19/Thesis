@@ -1,5 +1,5 @@
 import React from 'react';
-import {array, bool, func, string} from "prop-types";
+import {array, arrayOf, bool, func, node, oneOfType, string} from "prop-types";
 
 /**
  * PaginatedList Component.
@@ -40,23 +40,27 @@ const List = ({
                   listClassName = '',
                   header,
                   footer,
-                  emptyListPlaceholder = 'The list is empty'
+                  emptyListPlaceholder = 'The list is empty',
+                  children
               }) => {
     const items = parser ? data.map(parser) : data;
 
     return <div className={`rounded-lg bg-gray-200 p-4 flex flex-col ${wrapperClassName}`}>
-        <div className={`${header ? 'mb-2' : 'mb-6'} md:text-lg font-semibold text-yellow-800 w-fit`}>
+        <div className={`${header ? 'mb-2' : 'mb-6'} md:text-lg font-semibold text-yellow-800 w-fit flex`}>
             {title}
+            {children}
         </div>
         {header && <div className={'text-gray-500 text-sm mb-3'}>
             {header}
         </div>}
-        {items.length ? <ul
-            className={`list-disc pl-2 gap-8 ${listClassName} ${vertical ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 '}`}>
-            {items.map((item, index) =>
-                renderFn(item, index)
-            )}
-        </ul> : <h4 className={'text-xl m-auto'}>{emptyListPlaceholder}</h4>}
+        {items.length ?
+            <ul
+                className={`list-disc pl-2 gap-8 ${listClassName} ${vertical ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 '}`}>
+                {items.map((item, index) =>
+                    renderFn(item, index)
+                )}
+            </ul>
+            : <h4 className={'text-xl m-auto'}>{emptyListPlaceholder}</h4>}
         {footer && <div className={'text-gray-500 text-sm mt-2'}>
             {footer}
         </div>}
@@ -74,5 +78,6 @@ List.propTypes = {
     wrapperClassName: string,
     listClassName: string,
     emptyListPlaceholder: string,
+    children: oneOfType([node, arrayOf(node)])
 }
 export default List;

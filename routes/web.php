@@ -24,6 +24,8 @@ Route::prefix('search')->group(function () {
     Route::prefix('authors')->group(function () {
         Route::get('/', [SearchController::class, 'search'])->name('Search.Authors');
         Route::get('/users', [SearchController::class, 'searchAuthorUsers'])->name('Search.Authors.Users');
+        Route::get('/users/group', [SearchController::class, 'searchWhereNotInGroup'])->name('Search.Authors.Users.Group');
+
     });
 
     Route::get('/works', [SearchController::class, 'search'])->name('Search.Works');
@@ -34,9 +36,9 @@ Route::prefix('search')->group(function () {
 
 // TODO Make sure only admins can access these routes ( when roles are implemented in THESIS-5 )
 Route::prefix('/groups')->group(function () {
-    Route::get('/', [\App\Http\Controllers\GroupController::class, 'showGroupsPage'])->name('Groups.Page');
-    Route::post('/create', [\App\Http\Controllers\GroupController::class, 'createGroup'])->name('Group.Create');
-    Route::post('/delete', [\App\Http\Controllers\GroupController::class, 'deleteGroup'])->name('Group.Delete');
+    Route::get('/', [\App\Http\Controllers\GroupController::class, 'show'])->name('Groups.Page');
+    Route::post('/create', [\App\Http\Controllers\GroupController::class, 'create'])->name('Group.Create');
+    Route::post('/delete', [\App\Http\Controllers\GroupController::class, 'destroy'])->name('Group.Delete');
     Route::post('/add/member', [\App\Http\Controllers\GroupController::class, 'addMember'])->name('Group.Add.Member');
     Route::post('/remove/member', [\App\Http\Controllers\GroupController::class, 'removeMember'])->name('Group.Remove.Member');
 });

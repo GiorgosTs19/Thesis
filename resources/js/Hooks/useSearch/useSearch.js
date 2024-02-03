@@ -4,6 +4,7 @@ import {useForm} from "@inertiajs/inertia-react";
 const useSearch = (params = {}) => {
     const {data, setData, get, processing, errors} = useForm({
         query: '',
+        group: params.group
     });
 
     const {query} = data;
@@ -14,7 +15,7 @@ const useSearch = (params = {}) => {
     const noResultsFound = !processing && !queryIsEmpty && searchWorksResult.length === 0 && searchAuthorsResult.length === 0 && searchUsersResult.length === 0;
 
     const setQuery = (query) => {
-        setData({query});
+        setData({...data, query});
     }
 
     useEffect(() => {
@@ -29,7 +30,7 @@ const useSearch = (params = {}) => {
         if (queryIsEmpty)
             return;
 
-        const {onlyWorks, onlyAuthors, onlyUsers} = params;
+        const {onlyWorks, onlyAuthors, onlyUsers, onlyUserAuthors} = params;
 
         let url = route('Search');
 
@@ -37,13 +38,13 @@ const useSearch = (params = {}) => {
         // if (onlyWorks) {
         //     url = route('Search.Users');
         // }
-        // if (onlyAuthors) {
-        //     url = appendUrlParams(url, {only_authors: true});
-        // }
-
-        if (onlyUsers) {
-            url = route('Search.Users');
+        if (onlyUserAuthors) {
+            url = route('Search.Authors.Users.Group');
         }
+
+        // if (onlyUsers) {
+        //     url = route('Search.Users');
+        // }
 
         // eslint-disable-next-line no-undef
         get(url, {
@@ -51,6 +52,7 @@ const useSearch = (params = {}) => {
             },
             onSuccess: res => {
                 const searchResults = res.props.searchResults;
+                console.log(searchResults)
                 if (!queryIsEmpty) {
                     setSearchWorksResult(searchResults.works);
                     setSearchAuthorsResult(searchResults.authors);

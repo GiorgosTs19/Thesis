@@ -13,8 +13,12 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class GroupController extends Controller {
-    public function showGroupsPage(): Response {
-        $groups = Group::with(['members', 'parent'])->orderBy('name')->get();
+    private function getAllGroups() {
+        return GroupResource::collection(Group::with(['members', 'parent'])->orderBy('name')->get());
+    }
+
+    public function show(): Response {
+        $groups = self::getAllGroups();
 
         return Inertia::render('Routes/Groups/GroupsPage', ['groups' => GroupResource::collection($groups)]);
     }
@@ -24,7 +28,7 @@ class GroupController extends Controller {
      * Handles the request to create a new group.
      * @return JsonResponse - A message indicating whether the action as successful and a status code.
      */
-    public function createGroup(Request $request): JsonResponse {
+    public function create(Request $request): JsonResponse {
         $input = $request->only(['name', 'parent']);
 
         if (!isset($input['name'])) {
@@ -55,15 +59,14 @@ class GroupController extends Controller {
         ]);
 
         $success = $new_group->save();
-
-        return $success ? response()->json(Requests::success('Group created successfully')) : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? response()->json(Requests::success('Group created successfully', ['groups' => self::getAllGroups()])) : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 
     /**
      * @param Request $request
      * @return JsonResponse
      */
-    public function deleteGroup(Request $request): JsonResponse {
+    public function destroy(Request $request): JsonResponse {
         $input = $request->only(['id']);
 
         if (!isset($input['id'])) {
@@ -78,20 +81,18 @@ class GroupController extends Controller {
         }
 
         $success = $Group->delete();
-
-        return $success ? response()->json(Requests::success('Group deleted successfully')) : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? response()->json(Requests::success('Group deleted successfully', ['groups' => self::getAllGroups()])) : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 
     public function addMember(Request $request): JsonResponse {
-        $input = $request->only(['author', 'group']);
+        $input = $request->only(['authors', 'group']);
 
-        if (!isset($input['author']) || !isset($input['group'])) {
+        if (!isset($input['authors']) || !isset($input['group'])) {
             return response()->json(Requests::clientError('Group and author parameters are marked as required'), 400);
         }
 
-        $author = $input['author'];
+        $authors = $input['authors'];
         $group = $input['group'];
-
 
         $Group = Group::find($group);
         // Return a 404 if the group is not found
@@ -99,21 +100,23 @@ class GroupController extends Controller {
             return response()->json(Requests::clientError('Group not found', 200));
         }
 
-        $existing_member = AuthorGroup::entry($group, $author)->first();
-        // Return a 404 if the author is not found
-        if ($existing_member) {
-            return response()->json(Requests::clientError('The author is already a member of this group', 200));
+        foreach ($authors as $author) {
+            $existing_member = AuthorGroup::entry($group, $author)->first();
+            // Return a 404 if the author is not found
+            if ($existing_member) {
+                return response()->json(Requests::clientError('The author is already a member of this group', 200));
+            }
+
+            $Author = Author::find($author);
+            // Return a 404 if the author is not found
+            if (!$Author) {
+                return response()->json(Requests::clientError('Author not found', 200));
+            }
+
+            $success = $Group->addMember($author);
         }
 
-        $Author = Author::find($author);
-        // Return a 404 if the author is not found
-        if (!$Author) {
-            return response()->json(Requests::clientError('Author not found', 200));
-        }
-
-        $success = $Group->addMember($author);
-
-        return $success ? response()->json(Requests::success('Member added successfully')) : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? response()->json(Requests::success('Member added successfully', ['groups' => self::getAllGroups()])) : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 
     public function removeMember(Request $request): JsonResponse {
@@ -146,7 +149,6 @@ class GroupController extends Controller {
         }
 
         $success = $existing_member->delete();
-
-        return $success ? response()->json(Requests::success('Member removed successfully')) : response()->json(Requests::clientError('Something went wrong'), 400);
+        return $success ? response()->json(Requests::success('Member removed successfully', ['groups' => self::getAllGroups()])) : response()->json(Requests::clientError('Something went wrong'), 400);
     }
 }

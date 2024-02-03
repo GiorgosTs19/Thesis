@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
+            $table->string('isAdmin')->default(false);
             $table->string(Ids::ORC_ID_ID)->nullable()->unique();
             $table->string(Ids::SCOPUS_ID)->nullable()->unique();
             $table->string(Ids::OPEN_ALEX_ID)->nullable()->unique();

@@ -6,6 +6,7 @@ use App\Http\Resources\AuthorResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\WorkResource;
 use App\Models\Author;
+use App\Models\Group;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Http\RedirectResponse;
@@ -40,7 +41,8 @@ class SearchController extends Controller {
             'query' => $query,
             'authors' => AuthorResource::collection($authorResults),
             'works' => WorkResource::collection($workResults),
-            'users' => []
+            'users' => [],
+            'error' => null
         ];
 
         return redirect()->back()->with(['searchResults' => $results]);
@@ -55,6 +57,7 @@ class SearchController extends Controller {
             'authors' => [],
             'works' => [],
             'users' => UserResource::collection($userResults),
+            'error' => null
         ];
 
         return redirect()->back()->with(['searchResults' => $results]);
@@ -73,9 +76,47 @@ class SearchController extends Controller {
             'query' => $query,
             'authors' => AuthorResource::collection($authorResults),
             'works' => [],
-            'users' => []
+            'users' => [],
+            'error' => null
         ];
 
         return redirect()->back()->with(['searchResults' => $results]);
     }
+
+    public function searchWhereNotInGroup(Request $request): RedirectResponse {
+        $query = $request->input('query');
+        $group_id = $request->input('group');
+
+        // If there's no valid group id just return an empty array.
+        if (!$group_id) {
+            return redirect()->back()->with(['searchResults' => [
+                'query' => $query,
+                'authors' => [],
+                'works' => [],
+                'users' => [],
+                'error' => 'The group id parameter is'
+            ]]);
+        }
+
+        // Make sure to exclude the authors who are already members of that group
+        $authors_to_exclude = Group::find($group_id)->members()->pluck('author_id');
+
+        $authorResults = Author::user()->whereNotIn('id', $authors_to_exclude)->searchName($query)
+            ->searchOpenAlex($query)
+            ->searchScopus($query)
+            ->searchOrcId($query)->limit(5)
+            ->get();
+
+        $results = [
+            'query' => $query,
+            'authors' => AuthorResource::collection($authorResults),
+            'works' => [],
+            'users' => [],
+            'error' => null
+        ];
+
+        return redirect()->back()->with(['searchResults' => $results]);
+    }
+
+
 }
