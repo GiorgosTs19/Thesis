@@ -29,13 +29,18 @@ class GroupController extends Controller {
      * @return JsonResponse - A message indicating whether the action as successful and a status code.
      */
     public function create(Request $request): JsonResponse {
-        $input = $request->only(['name', 'parent']);
+        $input = $request->only(['name', 'description', 'parent']);
 
-        if (!isset($input['name'])) {
-            return response()->json(Requests::clientError('The name parameter is marked as required'), 400);
+        if (!isset($input['name']) || !isset($input['description'])) {
+            return response()->json(Requests::clientError('The name and description parameters are  marked as required'), 400);
         }
 
         $name = $input['name'];
+        $description = $input['description'];
+
+        if ($name === '' || $description === '') {
+            return response()->json(Requests::clientError('The name and description parameters cannot be empty'), 400);
+        }
 
         $Group = Group::name($name)->first();
 
@@ -55,7 +60,8 @@ class GroupController extends Controller {
 
         $new_group = new Group([
             'name' => $name,
-            'parent_id' => $parent_id
+            'parent_id' => $parent_id,
+            'description' => $description
         ]);
 
         $success = $new_group->save();

@@ -6,7 +6,6 @@ const useSearch = (params = {}) => {
         query: '',
         group: params.group
     });
-
     const {query} = data;
     const queryIsEmpty = query.length <= 2;
     const [searchWorksResult, setSearchWorksResult] = useState([]);
@@ -27,7 +26,7 @@ const useSearch = (params = {}) => {
     }, [queryIsEmpty]);
 
     useEffect(() => {
-        if (queryIsEmpty)
+        if (queryIsEmpty && !params.bypassLengthRestriction)
             return;
 
         const {onlyWorks, onlyAuthors, onlyUsers, onlyUserAuthors} = params;
@@ -38,13 +37,13 @@ const useSearch = (params = {}) => {
         // if (onlyWorks) {
         //     url = route('Search.Users');
         // }
-        if (onlyUserAuthors) {
-            url = route('Search.Authors.Users.Group');
-        }
-
         // if (onlyUsers) {
         //     url = route('Search.Users');
         // }
+
+        if (onlyUserAuthors) {
+            url = route('Search.Authors.Users.Group');
+        }
 
         // eslint-disable-next-line no-undef
         get(url, {
@@ -52,8 +51,7 @@ const useSearch = (params = {}) => {
             },
             onSuccess: res => {
                 const searchResults = res.props.searchResults;
-                console.log(searchResults)
-                if (!queryIsEmpty) {
+                if (searchResults) {
                     setSearchWorksResult(searchResults.works);
                     setSearchAuthorsResult(searchResults.authors);
                     setSearchUsersResult(searchResults.users)
@@ -61,7 +59,7 @@ const useSearch = (params = {}) => {
             },
             preserveState: true, preserveScroll: true
         });
-    }, [queryIsEmpty, query]);
+    }, [queryIsEmpty, query, params.bypassLengthRestriction]);
 
     return [query, setQuery, {
         works: searchWorksResult,

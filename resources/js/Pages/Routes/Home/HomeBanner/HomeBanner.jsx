@@ -11,20 +11,19 @@ import {OrcidSVG} from "@/SVGS/OrcidSVG.jsx.jsx";
 import './styles.css'
 import {RiNumber1, RiNumber2, RiNumber3} from "react-icons/ri";
 
-const styles = {
-    wrapperDiv: 'col-span-3 lg:col-span-1 flex flex-col text-center h-full',
-    card: 'shadow-xl h-full',
-    image: 'mx-auto mb-4',
-    text: 'text-gray-500 font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base',
-    outerGrid: 'grid grid-cols-3 gap-6 lg:gap-8 mb-8',
-    propertiesWrapper: 'flex flex-wrap gap-10 m-auto py-7 text-center flex px-4 rounded-3xl',
-    propertyWrapper: 'flex-grow flex text-center mx-auto',
-    propertyValue: 'text-black text-2xl lg:text-3xl xxl:text-5xl font-bold mx-auto',
-    propertyName: 'text-gray-600 text-sm lg:text-lg mx-auto',
-    header: 'text-xl md:text-2xl xl:text-3xl text-gray-500 mb-4 italic focus:ring-0',
-    button: 'p-4 rounded-xl border border-gray-200 bg-gray-200 hover:bg-gray-100 mt-5 w-fit mx-auto',
-    timelineText: 'text-gray-500 font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm flex flex-col text-center'
-}
+/**
+ * HomeBanner Component
+ *
+ * A component representing the home page banner with sections for exploring authors and works,
+ * along with a step-by-step guide for users to kickstart their journey on the platform.
+ *
+ * @component
+ * @example
+ * <HomeBanner worksByType={worksByType} />
+ *
+ * @param {Array} worksByType - An array of objects representing different types of works and their counts.
+ * @returns The rendered HomeBanner component.
+ */
 const HomeBanner = ({worksByType}) => {
     return <>
         <div className={styles.outerGrid}>
@@ -68,8 +67,7 @@ const HomeBanner = ({worksByType}) => {
                     <WorksSVG width={64} height={64} className={styles.image}/>
                     <div className={styles.text}>
                         Search through an extensive catalog of papers, discover details about each piece,
-                        and explore statistical analyses. A comprehensive experience for
-                        literature enthusiasts
+                        and explore statistical analyses.
                     </div>
                     <button className={styles.button}>
                         Explore Works
@@ -122,6 +120,21 @@ const HomeBanner = ({worksByType}) => {
     </>
 }
 
+const styles = {
+    wrapperDiv: 'col-span-3 lg:col-span-1 flex flex-col text-center h-full',
+    card: 'shadow-lg h-full',
+    image: 'mx-auto mb-4',
+    text: 'text-gray-500 truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base italic',
+    outerGrid: 'grid grid-cols-3 gap-6 lg:gap-8 mb-8',
+    propertiesWrapper: 'flex flex-wrap gap-10 m-auto py-7 text-center flex px-4 rounded-3xl',
+    propertyWrapper: 'flex-grow flex text-center mx-auto',
+    propertyValue: 'text-black text-2xl lg:text-3xl xxl:text-5xl font-bold mx-auto',
+    propertyName: 'text-gray-600 text-sm lg:text-lg mx-auto',
+    header: 'text-xl md:text-2xl xl:text-3xl text-gray-500 mb-4 italic focus:ring-0',
+    button: 'px-4 py-2 rounded-xl border border-gray-200 bg-gray-200 hover:bg-gray-100 mt-5 w-fit mx-auto',
+    timelineText: 'text-gray-500 font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm flex flex-col text-center'
+}
+
 HomeBanner.propTypes = {
     worksByType: arrayOf(shape({
         type: string.isRequired,
@@ -129,11 +142,3 @@ HomeBanner.propTypes = {
     }))
 }
 export default HomeBanner;
-{/*<NewUserSVG width={64} height={64} className={'mx-auto'}/>*/
-}
-{/*<div className={clsx(styles.text, 'text-center mb-10 text-lg lg:text-xl')}>*/
-}
-{/*    Calling all authors! Elevate your presence by registering on our platform.*/
-}
-{/*</div>*/
-}

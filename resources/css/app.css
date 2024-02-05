@@ -5,3 +5,24 @@
 #app {
     height: 100%;
 }
+
+input, select {
+    background-color: white !important;
+}
+
+.toast {
+    position: absolute;
+    top: 10%; /* Adjust this value to position it towards the top */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@media (min-width: 1024px) {
+    /* Adjust the min-width as needed for your lg-sized screen and above */
+    .toast {
+        top: 8%;
+        left: auto; /* Reset left to default */
+        right: 5%;
+        transform: translateX(0);
+    }
+}

@@ -12,14 +12,20 @@ import {useClickAway} from "@uidotdev/usehooks";
 import {User} from "@/Models/User/User.js";
 import RecentSearches from "@/Components/Search/RecentSearches.jsx";
 
-const styles = {
-    extendedHomeInputContainer: 'bg-white rounded-lg w-full lg:w-4/12 m-auto ',
-    plainInput: 'p-2 border border-gray-300 rounded-3 rounded-l-3 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm',
-    extendedInput: 'p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none',
-    noResults: 'text-sm font-semibold my-2 text-gray-500 text-center',
-    content: 'space-y-6 flex flex-col',
-    belowMinChars: 'mx-auto text-sm text-red-400 opacity-75 mt-2'
-}
+/**
+ * @component
+ * Search Component
+ * A component for searching authors, works, and users with optional filters.
+ *
+ * @example
+ * <Search isHomeScreen={true} onlyWorks={false} onlyAuthors={true} onlyUsers={false} />
+ *
+ * @param {boolean} isHomeScreen - Indicates whether the search is on the home screen.
+ * @param {boolean} onlyWorks - If true, only search for works.
+ * @param {boolean} onlyAuthors - If true, only search for authors.
+ * @param {boolean} onlyUsers - If true, only search for users.
+ * @returns The rendered Search component.
+ */
 const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
     const [openModal, setOpenModal] = useState(false);
     const modalRef = useClickAway((e) => {
@@ -62,7 +68,7 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
         <ExtendedInput name={'Search'} onClick={() => setOpenModal(true)}
                        placeholder={'Search'}
                        inputClassName={styles.extendedInput}
-                       containerClassName={'bg-white rounded-lg'} type={'search'} autoFocus
+                       containerClassName={'bg-white rounded-lg shadow-sm border border-gray-100'} type={'search'} autoFocus
                        leadingElement={'children'}>
             <SearchSVG onClick={() => setOpenModal(true)}/>
         </ExtendedInput>
@@ -117,6 +123,16 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
             </Modal>
         </>
     )
+}
+
+
+const styles = {
+    extendedHomeInputContainer: 'bg-white rounded-lg w-full lg:w-4/12 m-auto shadow-xl border border-gray-100',
+    plainInput: 'p-2 border border-gray-300 rounded-3 rounded-l-3 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm',
+    extendedInput: 'p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none',
+    noResults: 'text-sm font-semibold my-2 text-gray-500 text-center',
+    content: 'space-y-6 flex flex-col',
+    belowMinChars: 'mx-auto text-sm text-red-400 opacity-75 mt-2'
 }
 
 Search.propTypes = {

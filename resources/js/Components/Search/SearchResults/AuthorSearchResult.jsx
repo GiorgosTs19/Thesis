@@ -14,9 +14,7 @@ const styles = {
     name: "pl-3 text-black font-bold truncate whitespace-pre-wrap hover:underline text-sm lg:text-lg",
 };
 export const AuthorSearchResult = ({
-                                       author,
-                                       query,
-                                       selectable,
+                                       author, query, selectable,
                                        onSelect = (any) => {
                                            any
                                        },
@@ -54,7 +52,7 @@ export const AuthorSearchResult = ({
             {selectable ? (
                 <>
                     <Checkbox id={author.id} className={"mr-5"} onChange={() => onSelect(author)} checked={selected(author)}/>
-                    <Label htmlFor={author.id}>{content}</Label>
+                    <Label htmlFor={author.id} className={'w-full h-full'}>{content}</Label>
                 </>
             ) : (
                 <a className={styles.a} href={localUrl}>

@@ -38,7 +38,7 @@ export const WorkItem = ({work, index, authorToExclude}) => {
 
     const authorElements = filteredAuthors.map((author, index) => (
         <React.Fragment key={index}>
-            <a href={`http://127.0.0.1:8000/Author/${author.openAlexId}`}
+            <a href={author.localUrl}
                className={styles.authorElement}>{author.name} </a>
             {index < filteredAuthors.length - 1 && ', '}
         </React.Fragment>

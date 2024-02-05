@@ -4,7 +4,7 @@ import React, {Fragment} from 'react';
 export function FooterNavigation() {
 
     return (
-        <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-white border-t border-t-gray-100">
             <>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">

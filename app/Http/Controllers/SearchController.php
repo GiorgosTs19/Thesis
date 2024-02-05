@@ -101,11 +101,15 @@ class SearchController extends Controller {
         // Make sure to exclude the authors who are already members of that group
         $authors_to_exclude = Group::find($group_id)->members()->pluck('author_id');
 
-        $authorResults = Author::user()->whereNotIn('id', $authors_to_exclude)->searchName($query)
-            ->searchOpenAlex($query)
-            ->searchScopus($query)
-            ->searchOrcId($query)->limit(5)
-            ->get();
+        if (!$query) {
+            $authorResults = Author::user()->whereNotIn('id', $authors_to_exclude)->get();
+        } else {
+            $authorResults = Author::user()->whereNotIn('id', $authors_to_exclude)->searchName($query)
+                ->searchOpenAlex($query)
+                ->searchScopus($query)
+                ->searchOrcId($query)->limit(5)
+                ->get();
+        }
 
         $results = [
             'query' => $query,

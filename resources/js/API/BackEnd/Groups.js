@@ -1,4 +1,4 @@
-import { AbstractAPI } from "@/API/AbstractAPI.js";
+import {AbstractAPI} from "@/API/AbstractAPI.js";
 
 export class Groups extends AbstractAPI {
     async addMembers(group, authors) {
@@ -27,7 +27,7 @@ export class Groups extends AbstractAPI {
         });
     }
 
-    async createGroup(name, description) {
+    async createGroup(name, description, parent) {
         if (!name || !description) {
             throw new Error(
                 "The name and description parameters are marked as required for createGroup()",
@@ -36,6 +36,8 @@ export class Groups extends AbstractAPI {
 
         return this.post(route("Group.Create"), {
             name,
+            description,
+            parent
         });
     }
 

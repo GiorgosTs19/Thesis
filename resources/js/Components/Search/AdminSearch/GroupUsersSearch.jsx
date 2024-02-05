@@ -4,24 +4,24 @@ import {SearchSVG} from "@/SVGS/SearchSVG.jsx";
 import {Badge, Modal} from "flowbite-react";
 import SearchResultsList from "@/Components/Search/SearchResults/SearchResultsList.jsx";
 import {Author} from "@/Models/Author/Author.js";
-import {bool, func, node, number} from "prop-types";
-import SearchTips from "@/Components/Search/SearchTips.jsx";
+import {func, object} from "prop-types";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
 import {useClickAway} from "@uidotdev/usehooks";
-import {IoPersonAddOutline} from "react-icons/io5";
 import {API} from "@/API/API.js";
+import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
+import {RiUserAddLine} from "react-icons/ri";
 
-const styles = {
-    extendedHomeInputContainer: "bg-white rounded-lg w-full lg:w-4/12 m-auto ",
-    plainInput:
-        "p-2 border border-gray-300 rounded-3 rounded-l-3 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm",
-    extendedInput:
-        "p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none",
-    noResults: "text-sm font-semibold my-2 text-gray-500 text-center",
-    hint: "text-lg font-semibold my-2 text-gray-500 text-center italic",
-    content: "space-y-6 flex flex-col",
-    belowMinChars: "mx-auto text-sm text-red-400 opacity-75 mt-2",
-};
+/**
+ * GroupUsersSearch Component
+ * @component
+ * A component for searching and adding authors to a group, with a modal interface.
+ * @example
+ * <GroupUsersSearch group={group} setGroups={setGroups} />;
+ *
+ * @param {object} group - The group object to which authors will be added.
+ * @param {Function} setGroups - The function to update the list of groups after adding authors.
+ * @returns The rendered GroupUsersSearch component.
+ */
 const GroupUsersSearch = ({group, setGroups}) => {
     const [openModal, setOpenModal] = useState(false);
     const modalRef = useClickAway((e) => {
@@ -35,11 +35,13 @@ const GroupUsersSearch = ({group, setGroups}) => {
     });
 
     const [query, setQuery, {authors}, noResultsFound] = useSearch({
-        group: group,
+        group: group.id,
         onlyUserAuthors: true,
+        bypassLengthRestriction: openModal
     });
+
     const [selectedAuthors, setSelectedAuthors] = useState([]);
-    const queryIsEmpty = query.length >= 0 && query.length <= 2;
+
     const handleQueryChange = (e) => {
         const query = e.target.value;
         setQuery(query);
@@ -50,17 +52,17 @@ const GroupUsersSearch = ({group, setGroups}) => {
         setQuery("");
     };
 
-    const belowMinimumChars = query.length > 0 && query.length <= 2;
+    const {
+        showToast,
+    } = useToast();
 
-    const content = queryIsEmpty ? (
-        <SearchTips onlyAuthors/>
-    ) : (
-        noResultsFound && (
+
+    const content = noResultsFound && (
             <h4 className={styles.noResults}>
                 No results meet the specified criteria
             </h4>
         )
-    );
+    ;
 
     const handleSelectAuthor = (author) => {
         const index = selectedAuthors.findIndex(
@@ -88,27 +90,19 @@ const GroupUsersSearch = ({group, setGroups}) => {
         setQuery('');
         setSelectedAuthors([]);
     }, [openModal]);
+
     return (
         <>
-            <div
-                className={
-                    "p-1 rounded-full hover:bg-gray-100 text-black cursor-pointer ml-4 my-auto"
-                }
-            >
-                <IoPersonAddOutline onClick={() => setOpenModal(true)}/>
+            <div className={styles.addIcon} onClick={() => setOpenModal(true)}>
+                <RiUserAddLine className={'text-lg'}/>
             </div>
-            <Modal
-                show={openModal}
-                onClose={handleSearchModalClose}
-                dismissible
-                position={"top-center"}
-            >
+            <Modal show={openModal} onClose={handleSearchModalClose} dismissible position={"top-center"}>
                 <div ref={modalRef}>
                     <ExtendedInput
                         onChange={handleQueryChange}
                         name={"Search"}
                         value={query}
-                        placeholder={"Search authors to add to this group"}
+                        placeholder={`Search authors to add to ${group.name}`}
                         inputClassName={styles.extendedInput}
                         containerClassName={"top-0 bg-white rounded-t-xl"}
                         type={"search"}
@@ -117,24 +111,18 @@ const GroupUsersSearch = ({group, setGroups}) => {
                     >
                         <SearchSVG className={"bg-transparent"}/>
                     </ExtendedInput>
-                    <Modal.Body className={"p-3 bg-white rounded-b-2xl"}>
+                    <Modal.Body className={styles.modalBody}>
                         <div className={styles.content}>
-                            <div className={"flex gap-5 flex-wrap"}>
-                                {selectedAuthors.map((author) => (
+                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200"}>
+                                {selectedAuthors.length ? selectedAuthors.map((author) => (
                                     <Badge color="gray" key={author.id}>
                                         {author.name}
                                     </Badge>
-                                ))}
+                                )) : <div className={'mx-auto mt-2 mb-4 opacity-90 text-gray-600'}>No authors selected</div>}
                             </div>
-                            {belowMinimumChars && (
-                                <h4 className={styles.belowMinChars}>
-                                    Type at least {3 - query.length} more
-                                    characters
-                                </h4>
-                            )}
-                            {content}
-                            {authors.length > 0 && !queryIsEmpty && (
+                            {authors.length > 0 && (
                                 <SearchResultsList
+                                    listClassName={'max-h-96 overflow-y-auto'}
                                     data={authors}
                                     parser={Author.parseResponseAuthor}
                                     query={query}
@@ -144,24 +132,23 @@ const GroupUsersSearch = ({group, setGroups}) => {
                                     selected={isAuthorSelected}
                                 />
                             )}
+                            {content}
                         </div>
                     </Modal.Body>
-                    <Modal.Footer>
+                    <Modal.Footer className={authorsToAdd.length ? '' : 'border-0'}>
                         {authorsToAdd.length > 0 && (
-                            <button
-                                className={
-                                    "border border-gray-800 rounded-full p-2 ml-auto"
-                                }
-                                onClick={() =>
-                                    API.instance.groups
-                                        .addMembers(group, authorsToAdd)
-                                        .then((data) => {
-                                                setGroups(data.data.groups);
-                                                setOpenModal(false)
+                            <button className={styles.deleteIcon}
+                                    onClick={() => API.instance.groups.addMembers(group.id, authorsToAdd).then((data) => {
+                                            if (data.success) {
+                                                showToast(`${selectedAuthors.length} ${selectedAuthors.length > 1 ? 'author' : 'authors'} added successfully`, ToastTypes.SUCCESS)
+                                            } else if (data.error) {
+                                                showToast(data.error, ToastTypes.ERROR, 5000);
                                             }
-                                        )
-                                }
-                            >
+                                            setGroups(data.data.groups);
+                                            setOpenModal(false)
+                                        }
+                                    )
+                                    }>
                                 Add {authorsToAdd.length} authors
                             </button>
                         )}
@@ -172,18 +159,24 @@ const GroupUsersSearch = ({group, setGroups}) => {
     );
 };
 
+const styles = {
+    extendedHomeInputContainer: "bg-white rounded-lg w-full lg:w-4/12 m-auto ",
+    plainInput:
+        "p-2 border border-gray-300 rounded-3 rounded-l-3 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm",
+    extendedInput:
+        "p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none",
+    noResults: "text-sm font-semibold my-2 text-gray-500 text-center",
+    hint: "text-lg font-semibold my-2 text-gray-500 text-center italic",
+    content: "space-y-6 flex flex-col",
+    belowMinChars: "mx-auto text-sm text-red-400 opacity-75 mt-2",
+    deleteIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
+    addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
+    modalBody: 'p-3 bg-white rounded-b-2xl'
+};
+
 GroupUsersSearch.propTypes = {
-    onlyWorks: bool,
-    onlyAuthors: bool,
-    onlyUsers: bool,
-    onlyUserAuthors: bool,
-    children: node,
-    disableOtherChoices: bool,
-    showTips: bool,
-    selectable: bool,
-    selectedRenderFn: func,
-    onSelect: func,
-    group: number.isRequired,
+    group: object.isRequired,
+    setGroups: func.isRequired
 };
 
 export default GroupUsersSearch;

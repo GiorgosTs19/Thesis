@@ -4,8 +4,7 @@ import {Author} from "@/Models/Author/Author.js";
 import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
 
 export const AuthorItem = ({
-                               author, index, extraProperties = [],
-                               utilityColClassName, children
+                               author, index, extraProperties = [], children
                            }) => {
     const {
         name,
@@ -17,7 +16,7 @@ export const AuthorItem = ({
 
     return <li className="mb-4 flex-grow list-none flex">
         <div className={'flex'}>
-            <div className="top-0 left-0 text-black text-sm text-center mr-2 flex flex-col">
+            <div className="top-0 left-0 text-black text-center mr-2 flex flex-col">
                 {index + 1}
                 {children}
             </div>
