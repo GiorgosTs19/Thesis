@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 class AuthorWork extends Model {
     use HasFactory;
 
-    protected $table = 'author_works';
+    protected $table = 'author_work';
     protected $fillable = [
         'Author_Id',
         'Work_Id',

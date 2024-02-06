@@ -1,10 +1,10 @@
 import React from "react";
 import {WorksSVG} from "@/SVGS/WorksSVG.jsx";
 import {AuthorSVG} from "@/SVGS/AuthorSVG.jsx";
-import {arrayOf, number, shape, string} from "prop-types";
+import {arrayOf, number, object, shape, string} from "prop-types";
 import {capitalizeFirstLetter} from "@/Utility/Strings/Utils.js";
 import clsx from "clsx";
-import {Card} from "flowbite-react";
+import {Banner, Card} from "flowbite-react";
 import {ScopusSVG} from "@/SVGS/ScopusSVG.jsx";
 import {OpenAlexSVG} from "@/SVGS/OpenAlexSVG.jsx";
 import {OrcidSVG} from "@/SVGS/OrcidSVG.jsx.jsx";
@@ -27,34 +27,34 @@ import {Work} from "@/Models/Work/Work.js";
  * <HomeBanner worksByType={worksByType} />
  *
  * @param {Array} worksByType - An array of objects representing different types of works and their counts.
+ * @param mostWorksAuthors - An array of author objects
+ * @param mostWorksUsers - An array of author objects
+ * @param mostCitationsWorks - An array of work objects
  * @returns The rendered HomeBanner component.
  */
 const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
     return <>
         <div className={styles.outerGrid}>
-            <div className={clsx(styles.statistics, 'order-first xl:order-none')}>
-                <Card className={styles.statisticsCard}>
-                    <div className={styles.header}>
-                        Discover notable authors and their literary works
-                    </div>
-                    <div className={styles.propertiesWrapper}>
-                        {
-                            worksByType.map(({type, count}) => <div key={type}
-                                                                    className={styles.propertyWrapper}>
-                                    <div className={'mx-auto'}>
-                                        <p className={styles.propertyValue}>
-                                            {count}
-                                        </p>
-                                        <p className={styles.propertyName}>
-                                            {`${capitalizeFirstLetter(type)}s`}
-                                        </p>
-                                    </div>
-                                </div>
-                            )
-                        }
-                    </div>
-                </Card>
-            </div>
+            {/*<div className={clsx(styles.statistics, 'order-first xl:order-none')}>*/}
+            {/*    <Card className={styles.statisticsCard} >*/}
+            {/*        <div className={styles.propertiesWrapper}>*/}
+            {/*            {*/}
+            {/*                worksByType.map(({type, count}) => <div key={type}*/}
+            {/*                                                        className={styles.propertyWrapper}>*/}
+            {/*                        <div className={'mx-auto'}>*/}
+            {/*                            <p className={styles.propertyValue}>*/}
+            {/*                                {count}*/}
+            {/*                            </p>*/}
+            {/*                            <p className={styles.propertyName}>*/}
+            {/*                                {`${capitalizeFirstLetter(type)}s`}*/}
+            {/*                            </p>*/}
+            {/*                        </div>*/}
+            {/*                    </div>*/}
+            {/*                )*/}
+            {/*            }*/}
+            {/*        </div>*/}
+            {/*    </Card>*/}
+            {/*</div>*/}
             <div className={clsx(styles.wrapperDiv)}>
                 <div className={styles.card}>
                     <div className={'m-auto'}>
@@ -71,11 +71,11 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
                 <div className={'flex flex-col md:flex-row gap-5 mt-10 xl:mt-0 xl:ml-10 w-full'}>
                     <List data={mostWorksAuthors} renderFn={renderAuthorItem} vertical
                           title={'Top Authors by Prolificacy'} parser={Author.parseResponseAuthor}
-                          wrapperClassName={'w-full'}/>
+                          wrapperClassName={'w-full shadow-lg'}/>
 
                     <List data={mostWorksUsers} renderFn={renderAuthorItem} vertical
                           title={'Top Users by Prolificacy'} parser={Author.parseResponseAuthor}
-                          wrapperClassName={'w-full'}/>
+                          wrapperClassName={'w-full shadow-lg'}/>
                 </div>
             </div>
             <div className={clsx(styles.wrapperDiv, 'order-3 xl:order-3')}>
@@ -94,10 +94,13 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
                 <div className={'w-full mt-10 xl:mt-0 xl:ml-10'}>
                     <List data={mostCitationsWorks} renderFn={renderWorkItem}
                           title={'Most Cited Works: A Citation Powerhouse'} parser={Work.parseResponseWork}
-                          wrapperClassName={'h-full'}/>
+                          wrapperClassName={'h-full shadow-lg'}/>
                 </div>
             </div>
         </div>
+        <Banner className={'text-center text-xl mt-7 mb-3'}>
+            Advance your scholarly presence effortlessly with our platform. Follow these streamlined steps to create your account and showcase your work seamlessly.
+        </Banner>
         <div className={'flex flex-col xl:flex-row gap-5 w-full mt-10'}>
             <Card className={'w-full mx-auto bg-transparent'}>
                 <div className={'w-full text-center flex gap-3'}>
@@ -146,12 +149,12 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
 const styles = {
     wrapperDiv: 'col-span-3 flex flex-col xl:flex-row text-center h-full ',
     statistics: 'col-span-3 flex flex-col text-center h-full',
-    card: 'shadow-lg h-full w-full xl:w-8/12 p-3 flex',
-    statisticsCard: 'shadow-lg h-full w-full',
+    card: 'shadow-lg border border-gray-300 rounded-xl h-full w-full xl:w-8/12 p-3 flex',
+    statisticsCard: 'shadow-lg h-full w-full xl:w-4/12 mx-auto',
     image: 'mx-auto mb-4',
     text: 'text-gray-500 truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base italic',
     outerGrid: 'grid grid-cols-3 gap-6 lg:gap-8 mb-8',
-    propertiesWrapper: 'flex flex-wrap gap-10 m-auto py-7 text-center flex px-4 rounded-3xl',
+    propertiesWrapper: 'flex flex-wrap gap-10 m-auto py-1 text-center flex px-4 rounded-3xl',
     propertyWrapper: 'flex-grow flex text-center mx-auto',
     propertyValue: 'text-black text-2xl lg:text-3xl xxl:text-5xl font-bold mx-auto',
     propertyName: 'text-gray-600 text-sm lg:text-lg mx-auto',
@@ -166,6 +169,9 @@ HomeBanner.propTypes = {
     worksByType: arrayOf(shape({
         type: string.isRequired,
         count: number.isRequired
-    }))
+    })),
+    mostWorksAuthors: arrayOf(object),
+    mostWorksUsers: arrayOf(object),
+    mostCitationsWorks:arrayOf(object)
 }
 export default HomeBanner;

@@ -12,7 +12,9 @@ const HomePage = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks, worksBy
                     <div className={styles.header}>
                         MyPubsV2
                     </div>
-                    <Search isHomeScreen/>
+                    <div className={'flex my-7'}>
+                        <Search isHomeScreen/>
+                    </div>
                 </div>
                 <HomeBanner worksByType={worksByType} mostWorksAuthors={mostWorksAuthors} mostWorksUsers={mostWorksUsers} mostCitationsWorks={mostCitationsWorks}/>
             </div>

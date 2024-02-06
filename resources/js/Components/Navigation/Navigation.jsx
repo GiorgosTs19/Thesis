@@ -31,7 +31,7 @@ export function Navigation() {
     </div>
 
     const searchVisible = window.location.href.replace(/\/+$/, '') !== route('Home.Page')
-    console.log(searchVisible, window.location.href.replace(/\/+$/, ''), route('Home.Page'))
+
     return (
         <Disclosure as="nav" className={styles.disclosure}>
             {({open}) => (
