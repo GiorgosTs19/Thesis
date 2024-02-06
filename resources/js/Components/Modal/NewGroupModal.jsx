@@ -17,7 +17,7 @@ import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
  * @param {Array} groups - An array of existing groups to select as the parent group (optional).
  * @returns The rendered NewGroupModal component.
  */
-const NewGroupModal = ({setGroups, groups}) => {
+const NewGroupModal = ({handleNewGroupCreated, groups}) => {
     const [openModal, setOpenModal] = useState(false);
     const [groupName, setGroupName] = useState('');
     const [groupDesc, setGroupDesc] = useState('');
@@ -28,8 +28,9 @@ const NewGroupModal = ({setGroups, groups}) => {
     const handleAccept = () => {
         API.instance.groups.createGroup(groupName, groupDesc, groupParent).then(response => {
             if (response.success) {
+                console.log(response.data)
                 showToast(`${groupName} created`, ToastTypes.SUCCESS);
-                setGroups(response.data.groups)
+                handleNewGroupCreated(response.data.groups, response.data.newGroup)
             } else if (response.error) {
                 showToast(response.error, ToastTypes.ERROR);
             }
@@ -99,8 +100,7 @@ const styles = {
 }
 
 NewGroupModal.propTypes = {
-    setGroups: func.isRequired,
-    onDecline: func,
+    handleNewGroupCreated: func.isRequired,
     groups: array
 }
 

@@ -13,9 +13,9 @@ export function Navigation() {
     };
 
     const navigation = [
-        {name: 'Authors', href: '#', current: false},
-        {name: 'Works', href: '#', current: false},
-        {name: 'Groups', href: route('Groups.Page'), current: window.location.href === route('Groups.Page')},
+        {name: 'Authors', href: '#', current: false, disabled: true},
+        {name: 'Works', href: '#', current: false, disabled: true},
+        {name: 'Groups', href: route('Groups.Page'), current: window.location.href === route('Groups.Page'), disabled: false},
     ];
 
     const userNavigation = [
@@ -43,13 +43,13 @@ export function Navigation() {
                                     <div className="ml-10 flex items-baseline space-x-4">
                                         {logo}
                                         {navigation.map((item) => (
-                                            <a key={item.name} href={item.href} aria-current={item.current ? 'page' : undefined}
-                                               className={clsx(
-                                                   item.current
-                                                       ? styles.activeGroupItem
-                                                       : styles.inactiveGroupItem,
-                                                   styles.groupItem
-                                               )}>
+                                            !item.disabled && <a key={item.name} href={item.href} aria-current={item.current ? 'page' : undefined}
+                                                                 className={clsx(
+                                                                     styles.groupItem,
+                                                                     item.current
+                                                                         ? styles.activeGroupItem
+                                                                         : styles.inactiveGroupItem
+                                                                 )}>
                                                 {item.name}
                                             </a>
                                         ))}
@@ -120,8 +120,11 @@ export function Navigation() {
                     <Disclosure.Panel className="md:hidden">
                         <div className={styles.navigationWrapper}>
                             {navigation.map((item) => (
-                                <Disclosure.Button key={item.name} as="a" href={item.href} aria-current={item.current ? 'page' : undefined}
-                                                   className={clsx(item.current ? styles.activeGroupItem : styles.inactiveGroupItem, styles.groupItem)}>
+                                !item.disabled && <Disclosure.Button key={item.name} as="a" href={item.href} aria-current={item.current ? 'page' : undefined} disabled={item.disabled}
+                                                                     className={clsx(styles.groupItem,
+                                                                         item.current
+                                                                             ? styles.activeGroupItem
+                                                                             : styles.inactiveGroupItem)}>
                                     {item.name}
                                 </Disclosure.Button>
                             ))}
@@ -151,6 +154,7 @@ export function Navigation() {
 
 const styles = {
     logo: 'text-black mr-4 sm:text-xl md:text-2xl',
+    disabledLink: 'opacity-50 cursor-default',
     disclosure: 'bg-white border-b border-b-gray-100',
     activeGroupItem: 'bg-gray-500 text-white',
     inactiveGroupItem: 'text-black hover:bg-gray-400 hover:text-white',

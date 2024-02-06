@@ -6,6 +6,7 @@ const useSearch = (params = {}) => {
         query: '',
         group: params.group
     });
+
     const {query} = data;
     const queryIsEmpty = query.length <= 2;
     const [searchWorksResult, setSearchWorksResult] = useState([]);
@@ -26,9 +27,14 @@ const useSearch = (params = {}) => {
     }, [queryIsEmpty]);
 
     useEffect(() => {
+        setData({...data, group: params.group});
+    }, [params.group])
+
+    const extraDependencies = params.dependencies ?? [];
+
+    useEffect(() => {
         if (queryIsEmpty && !params.bypassLengthRestriction)
             return;
-
         const {onlyWorks, onlyAuthors, onlyUsers, onlyUserAuthors} = params;
 
         let url = route('Search');
@@ -59,13 +65,13 @@ const useSearch = (params = {}) => {
             },
             preserveState: true, preserveScroll: true
         });
-    }, [queryIsEmpty, query, params.bypassLengthRestriction]);
+    }, [queryIsEmpty, query, ...extraDependencies]);
 
     return [query, setQuery, {
         works: searchWorksResult,
         authors: searchAuthorsResult,
         users: searchUsersResult
-    }, noResultsFound];
+    }, noResultsFound, processing];
 }
 
 export default useSearch;

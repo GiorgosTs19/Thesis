@@ -33,15 +33,15 @@ export const AuthorItem = ({
                     </div>
                     {
                         extraProperties.map((property, index) =>
-                            <div key={index} className="text-gray-600 pl-3 text-xs lg:text-sm">
+                            <div key={index} className="text-gray-600 pl-3 text-xs lg:text-sm ">
                                 {property.name} : {property.value}
                             </div>
                         )
                     }
                 </div>
-                <div className={'pl-3'}>
+                <div className={'pl-3 text-left'}>
                     <a href={localUrl} className="text-black text-sm
-                        font-bold truncate whitespace-pre-wrap hover:underline">
+                        font-bold truncate whitespace-pre-wrap hover:underline left-0">
                         {name}
                     </a>
                 </div>

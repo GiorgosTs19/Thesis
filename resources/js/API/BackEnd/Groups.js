@@ -52,4 +52,15 @@ export class Groups extends AbstractAPI {
             id,
         });
     }
+
+    async getGroup(id) {
+        console.log(id)
+        if (!id) {
+            throw new Error(
+                "id parameter is marked as required for getGroup()",
+            );
+        }
+        const url = route("Groups.Get.Group", id)
+        return this.get(url);
+    }
 }

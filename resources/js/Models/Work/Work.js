@@ -84,7 +84,7 @@ export class Work {
         return new Work({
             id,
             doi,
-            title,
+            title: title !== '' ? title : 'Title not available',
             type,
             publishedAt: published_at,
             publicationYear: published_at_year,

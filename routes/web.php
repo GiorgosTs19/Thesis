@@ -37,6 +37,7 @@ Route::prefix('search')->group(function () {
 // TODO Make sure only admins can access these routes ( when roles are implemented in THESIS-5 )
 Route::prefix('/groups')->group(function () {
     Route::get('/', [\App\Http\Controllers\GroupController::class, 'show'])->name('Groups.Page');
+    Route::get('/{id}', [\App\Http\Controllers\GroupController::class, 'getGroup'])->name('Groups.Get.Group');
     Route::post('/create', [\App\Http\Controllers\GroupController::class, 'create'])->name('Group.Create');
     Route::post('/delete', [\App\Http\Controllers\GroupController::class, 'destroy'])->name('Group.Delete');
     Route::post('/add/member', [\App\Http\Controllers\GroupController::class, 'addMember'])->name('Group.Add.Member');

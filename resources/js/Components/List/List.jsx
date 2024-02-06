@@ -61,7 +61,7 @@ const List = ({
 }
 
 const styles = {
-    wrapper: 'rounded-lg bg-gray-100 p-4 flex flex-col',
+    wrapper: 'rounded-lg bg-gray-50 p-4 flex flex-col',
     title: 'md:text-lg font-semibold text-yellow-800 w-fit flex',
     header: 'text-gray-500 text-sm mb-3',
     verticalList: 'md:grid-cols-2 lg:grid-cols-3',

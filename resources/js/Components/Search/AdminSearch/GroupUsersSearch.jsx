@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import ExtendedInput from "@/Components/ExtendedInput/ExtendedInput.jsx";
 import {SearchSVG} from "@/SVGS/SearchSVG.jsx";
-import {Badge, Modal} from "flowbite-react";
+import {Badge, Modal, Spinner} from "flowbite-react";
 import SearchResultsList from "@/Components/Search/SearchResults/SearchResultsList.jsx";
 import {Author} from "@/Models/Author/Author.js";
 import {func, object} from "prop-types";
@@ -34,10 +34,11 @@ const GroupUsersSearch = ({group, setGroups}) => {
         setOpenModal(false);
     });
 
-    const [query, setQuery, {authors}, noResultsFound] = useSearch({
+    const [query, setQuery, {authors}, noResultsFound, loading] = useSearch({
         group: group.id,
         onlyUserAuthors: true,
-        bypassLengthRestriction: openModal
+        bypassLengthRestriction: openModal,
+        dependencies: [openModal, group.id]
     });
 
     const [selectedAuthors, setSelectedAuthors] = useState([]);
@@ -113,20 +114,24 @@ const GroupUsersSearch = ({group, setGroups}) => {
                     </ExtendedInput>
                     <Modal.Body className={styles.modalBody}>
                         <div className={styles.content}>
-                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200"}>
+                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200 pb-3"}>
                                 {selectedAuthors.length ? selectedAuthors.map((author) => (
                                     <Badge color="gray" key={author.id}>
                                         {author.name}
                                     </Badge>
                                 )) : <div className={'mx-auto mt-2 mb-4 opacity-90 text-gray-600'}>No authors selected</div>}
                             </div>
-                            {authors.length > 0 && (
+                            <div className={'text-sm opacity-80 text-gray-700 text-center'}>
+                                Only showing registered authors who are not members of this group
+                            </div>
+                            {loading && <span className={'m-auto text-center'}><Spinner aria-label="Loading"/></span>}
+                            {authors.length > 0 && !loading && (
                                 <SearchResultsList
                                     listClassName={'max-h-96 overflow-y-auto'}
                                     data={authors}
                                     parser={Author.parseResponseAuthor}
                                     query={query}
-                                    title={"Authors"}
+                                    title={`Authors ( ${authors.length} )`}
                                     selectable
                                     onSelect={handleSelectAuthor}
                                     selected={isAuthorSelected}
@@ -140,7 +145,7 @@ const GroupUsersSearch = ({group, setGroups}) => {
                             <button className={styles.deleteIcon}
                                     onClick={() => API.instance.groups.addMembers(group.id, authorsToAdd).then((data) => {
                                             if (data.success) {
-                                                showToast(`${selectedAuthors.length} ${selectedAuthors.length > 1 ? 'author' : 'authors'} added successfully`, ToastTypes.SUCCESS)
+                                                showToast(`Added ${selectedAuthors.length} ${selectedAuthors.length < 2 ? 'author' : 'authors'} to ${group.name}`, ToastTypes.SUCCESS)
                                             } else if (data.error) {
                                                 showToast(data.error, ToastTypes.ERROR, 5000);
                                             }
@@ -149,7 +154,7 @@ const GroupUsersSearch = ({group, setGroups}) => {
                                         }
                                     )
                                     }>
-                                Add {authorsToAdd.length} authors
+                                Add {selectedAuthors.length} {selectedAuthors.length < 2 ? 'author' : 'authors'}
                             </button>
                         )}
                     </Modal.Footer>
@@ -167,7 +172,7 @@ const styles = {
         "p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none",
     noResults: "text-sm font-semibold my-2 text-gray-500 text-center",
     hint: "text-lg font-semibold my-2 text-gray-500 text-center italic",
-    content: "space-y-6 flex flex-col",
+    content: "space-y-3 flex flex-col",
     belowMinChars: "mx-auto text-sm text-red-400 opacity-75 mt-2",
     deleteIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
     addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',

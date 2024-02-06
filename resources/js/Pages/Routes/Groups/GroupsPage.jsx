@@ -78,7 +78,7 @@ const GroupsPage = ({groups}) => {
         return (
             <AuthorItem author={item} index={index} key={index}>
                 <UtilityModal acceptText={`Remove ${item.name}`} header={'Remove member'} onAccept={() => API.instance.groups.removeMember(selectedGroup.id, item.id).then((res) => {
-                        showToast(`${item.name} has been removed from the group`, ToastTypes.WARNING);
+                        showToast(`${item.name} has been removed from ${selectedGroup.name}`, ToastTypes.WARNING);
                         setCurrentGroups(res.data.groups);
                     }
                 )}
@@ -96,12 +96,17 @@ const GroupsPage = ({groups}) => {
         setSelectedGroup(newCurrentGroup)
     }, [currentGroups]);
 
+    const handleNewGroupCreated = (newGroups, newGroup) => {
+        setCurrentGroups(newGroups);
+        setSelectedGroup(newGroup);
+    }
+
     return (
         <>
             <div className={styles.grid}>
                 <div className={styles.listGroupCol}>
-                    <ListGroup aria-label="Groups List" className={clsx(styles.listGroup, currentGroups.length < 2 ? '' : '')}>
-                        <NewGroupModal setGroups={setCurrentGroups} groups={currentGroups}/>
+                    <ListGroup aria-label="Groups List" className={clsx(styles.listGroup)}>
+                        <NewGroupModal groups={currentGroups} handleNewGroupCreated={handleNewGroupCreated}/>
                         {currentGroups.map((group) => (
                             <Group key={group.id} group={group}
                                    depth={0} onClick={() => setSelectedGroup(group)} isSelected={selectedGroup?.id === group.id} setGroups={setCurrentGroups}/>
@@ -143,7 +148,7 @@ const styles = {
     selectedGroupCol: 'col-span-3 lg:col-span-4 xl:col-span-5 flex h-full',
     selectedGroupDesc: 'font-normal text-gray-700 dark:text-gray-400',
     badge: 'text-lg cursor-pointer w-fit px-3 py-1 rounded-lg',
-    listGroup: 'w-full lg:w-fit overflow-y-auto gap-3 m-auto h-full',
+    listGroup: 'w-full overflow-y-auto gap-3 m-auto h-full',
     listGroupCol: 'col-span-3 lg:col-span-2 xl:col-span-1 flex'
 };
 

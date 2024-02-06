@@ -23,6 +23,22 @@ class GroupController extends Controller {
         return Inertia::render('Routes/Groups/GroupsPage', ['groups' => GroupResource::collection($groups)]);
     }
 
+    public function getGroup(Request $request, $id) {
+
+        if (!isset($id)) {
+            return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
+        }
+
+        $Group = Group::find($id);
+
+        if (!$Group) {
+            return response()->json(Requests::clientError('A group with this id does not exist', 200));
+        }
+
+        $success = !!$Group;
+        return $success ? response()->json(Requests::success('Group retrieved successfully', ['group' => new GroupResource($Group->load('members'))])) : response()->json(Requests::serverError("Something went wrong"), 500);
+    }
+
     /**
      * @param Request $request
      * Handles the request to create a new group.
@@ -65,7 +81,7 @@ class GroupController extends Controller {
         ]);
 
         $success = $new_group->save();
-        return $success ? response()->json(Requests::success('Group created successfully', ['groups' => self::getAllGroups()])) : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? response()->json(Requests::success('Group created successfully', ['groups' => self::getAllGroups(), 'newGroup' => new GroupResource($new_group->load('members'))])) : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 
     /**

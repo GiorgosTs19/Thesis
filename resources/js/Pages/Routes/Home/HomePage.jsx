@@ -14,25 +14,12 @@ const HomePage = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks, worksBy
                     </div>
                     <Search isHomeScreen/>
                 </div>
-                <HomeBanner worksByType={worksByType}/>
+                <HomeBanner worksByType={worksByType} mostWorksAuthors={mostWorksAuthors} mostWorksUsers={mostWorksUsers} mostCitationsWorks={mostCitationsWorks}/>
             </div>
         </div>
     )
 }
 
-// <List data={mostWorksAuthors} renderFn={renderAuthorItem}
-//
-//       title={'Top Authors by Prolificacy'} parser={Author.parseResponseAuthor}
-//
-//       wrapperClassName={'w-fit mx-auto'}/>
-//
-// <List data={mostWorksUsers} renderFn={renderAuthorItem}
-//       title={'Top Users by Prolificacy'} parser={Author.parseResponseAuthor}
-//
-//       wrapperClassName={'w-fit mx-auto'}/>
-// <List data={mostCitationsWorks} renderFn={renderWorkItem}
-//       title={'Most Cited Works: A Citation Powerhouse'} parser={Work.parseResponseWork}
-//       wrapperClassName={'mx-auto'}/>
 
 const styles = {
     header: 'text-4xl xl:text-6xl text-gray-500 mb-6',
