@@ -24,7 +24,7 @@ export function Navigation() {
         {name: 'Sign out', href: '#'},
     ];
 
-    const logo = <div className="flex-shrink-0">
+    const logo = <div className="flex-shrink-0 px-2 border-r border-r-accent">
         <a className={styles.logo} href={route('Home.Page')}>
             MyPubsV2
         </a>
@@ -153,12 +153,12 @@ export function Navigation() {
 }
 
 const styles = {
-    logo: 'text-black mr-4 sm:text-xl md:text-2xl',
+    logo: 'text-accent mr-4 sm:text-xl md:text-2xl 2xl:text-4xl',
     disabledLink: 'opacity-50 cursor-default',
     disclosure: 'bg-background border-b border-b-gray-100',
     activeGroupItem: 'bg-gray-500 text-white',
     inactiveGroupItem: 'text-black hover:bg-gray-400 hover:text-white',
-    groupItem: 'block rounded-md px-3 py-2 text-base font-medium',
+    groupItem: 'block rounded-md px-3 py-2 text-base 2xl:text-xl font-medium hover:underline hover:bg-transparent hover:text-accent my-auto',
     disclosureButton: 'ml-3 relative inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400' +
         ' hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800',
     navigationWrapper: 'space-y-1 px-2 pb-3 pt-2 sm:px-3',

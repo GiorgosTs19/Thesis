@@ -108,7 +108,7 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
                     </p>
                 </div>
                 <div className={styles.bannerButtonContainer}>
-                    <Button href="#" className={'cursor-pointer mx-auto mt-3'}>Create an account</Button>
+                    <Button href="#" className={'cursor-pointer mx-auto'}>Create an account</Button>
                 </div>
             </div>
         </Banner>
@@ -153,11 +153,11 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
 const styles = {
     wrapperDiv: 'col-span-3 flex flex-col xl:flex-row text-center h-full min-h-96',
     statistics: 'col-span-3 flex flex-col text-center h-full',
-    card: 'bg-card shadow-lg border border-background rounded-xl h-full w-full xl:w-8/12 p-3 flex',
-    timeLineCard: 'w-full mx-auto bg-card border border-background',
+    card: 'bg-card  shadow-xl border border-border rounded-xl h-full w-full xl:w-8/12 p-3 flex',
+    timeLineCard: 'w-full mx-auto bg-card border border-border',
     timeLineCardInnerContainer: 'w-full text-center flex gap-3',
     statisticsCard: 'shadow-lg h-full w-full xl:w-4/12 mx-auto',
-    list: 'h-full shadow-lg bg-card border border-background text-left w-full',
+    list: 'h-full shadow-xl bg-card border border-border text-left w-full',
     listWrapper: 'mt-10 xl:mt-0 xl:ml-10 w-full',
     image: 'mx-auto mb-4',
     text: 'text-accent truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base xl:text-lg 2xl:text-2xl italic',
