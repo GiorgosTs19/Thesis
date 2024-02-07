@@ -114,7 +114,7 @@ const GroupUsersSearch = ({group, setGroups}) => {
                     </ExtendedInput>
                     <Modal.Body className={styles.modalBody}>
                         <div className={styles.content}>
-                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200 pb-3"}>
+                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto"}>
                                 {selectedAuthors.length ? selectedAuthors.map((author) => (
                                     <Badge color="gray" key={author.id}>
                                         {author.name}
