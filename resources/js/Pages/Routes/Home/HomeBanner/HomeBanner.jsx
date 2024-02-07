@@ -2,9 +2,8 @@ import React from "react";
 import {WorksSVG} from "@/SVGS/WorksSVG.jsx";
 import {AuthorSVG} from "@/SVGS/AuthorSVG.jsx";
 import {arrayOf, number, object, shape, string} from "prop-types";
-import {capitalizeFirstLetter} from "@/Utility/Strings/Utils.js";
 import clsx from "clsx";
-import {Banner, Card} from "flowbite-react";
+import {Banner, Button, Card} from "flowbite-react";
 import {ScopusSVG} from "@/SVGS/ScopusSVG.jsx";
 import {OpenAlexSVG} from "@/SVGS/OpenAlexSVG.jsx";
 import {OrcidSVG} from "@/SVGS/OrcidSVG.jsx.jsx";
@@ -33,6 +32,9 @@ import {Work} from "@/Models/Work/Work.js";
  * @returns The rendered HomeBanner component.
  */
 const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
+    const renderWork = (work, index) => {
+        return renderWorkItem(work, index, false);
+    }
     return <>
         <div className={styles.outerGrid}>
             {/*<div className={clsx(styles.statistics, 'order-first xl:order-none')}>*/}
@@ -68,14 +70,14 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
                         </button>
                     </div>
                 </div>
-                <div className={'flex flex-col md:flex-row gap-5 mt-10 xl:mt-0 xl:ml-10 w-full'}>
+                <div className={clsx('flex flex-col md:flex-row gap-5', styles.listWrapper)}>
                     <List data={mostWorksAuthors} renderFn={renderAuthorItem} vertical
                           title={'Top Authors by Prolificacy'} parser={Author.parseResponseAuthor}
-                          wrapperClassName={'w-full shadow-lg'}/>
+                          wrapperClassName={styles.list}/>
 
                     <List data={mostWorksUsers} renderFn={renderAuthorItem} vertical
                           title={'Top Users by Prolificacy'} parser={Author.parseResponseAuthor}
-                          wrapperClassName={'w-full shadow-lg'}/>
+                          wrapperClassName={styles.list}/>
                 </div>
             </div>
             <div className={clsx(styles.wrapperDiv, 'order-3 xl:order-3')}>
@@ -91,35 +93,39 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
                         </button>
                     </div>
                 </div>
-                <div className={'w-full mt-10 xl:mt-0 xl:ml-10'}>
-                    <List data={mostCitationsWorks} renderFn={renderWorkItem}
+                <div className={styles.listWrapper}>
+                    <List data={mostCitationsWorks} renderFn={renderWork}
                           title={'Most Cited Works: A Citation Powerhouse'} parser={Work.parseResponseWork}
-                          wrapperClassName={'h-full shadow-lg'}/>
+                          wrapperClassName={styles.list}/>
                 </div>
             </div>
         </div>
-        <Banner className={'text-center text-xl mt-7 mb-3'}>
-            Advance your scholarly presence effortlessly with our platform. Follow these streamlined steps to create your account and showcase your work seamlessly.
+        <Banner className={styles.banner}>
+            <div className={styles.bannerInnerContainer}>
+                <div className={styles.bannerTextContainer}>
+                    <p className={styles.bannerText}>
+                        Advance your scholarly presence effortlessly with our platform. Follow these streamlined steps to create your account and showcase your work seamlessly.
+                    </p>
+                </div>
+                <div className={styles.bannerButtonContainer}>
+                    <Button href="#" className={'cursor-pointer mx-auto mt-3'}>Create an account</Button>
+                </div>
+            </div>
         </Banner>
-        <div className={'flex flex-col xl:flex-row gap-5 w-full mt-10'}>
-            <Card className={'w-full mx-auto bg-transparent'}>
-                <div className={'w-full text-center flex gap-3'}>
-                    <RiNumber1 className={'my-auto text-2xl'}/>
-                    <div className={'w-full flex flex-col gap-4'}>
-                        <div>
-                            Kickstart your journey by creating an account on our platform.
-                        </div>
-                        <a className={'text-blue-700 text-xl hover:underline hover:text-blue-500 cursor-pointer'}>
-                            Create an account
-                        </a>
+        <div className={styles.timelineWrapper}>
+            <Card className={styles.timeLineCard}>
+                <div className={styles.timeLineCardInnerContainer}>
+                    <RiNumber1 className={styles.timelineStepNumber}/>
+                    <div className={styles.timelineText}>
+                        Kickstart your journey by creating an account on our platform.
                     </div>
                 </div>
             </Card>
-            <Card className={'w-full mx-auto text-center bg-transparent'}>
-                <div className={'w-full text-center flex gap-3'}>
-                    <RiNumber2 className={'my-auto text-2xl'}/>
+            <Card className={styles.timeLineCard}>
+                <div className={styles.timeLineCardInnerContainer}>
+                    <RiNumber2 className={styles.timelineStepNumber}/>
                     <div className={'w-full flex flex-col'}>
-                        <div>
+                        <div className={styles.timelineText}>
                             Tell us who you are by providing your unique identifiers, along with some essential
                             details.
                         </div>
@@ -131,14 +137,12 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
                     </div>
                 </div>
             </Card>
-            <Card className={'w-full mx-auto text-center flex bg-transparent'}>
-                <div className={'w-full text-center flex gap-3'}>
-                    <RiNumber3 className={'my-auto text-2xl'}/>
-                    <div className={'w-full flex flex-col'}>
-                        <div>
-                            Once you have shared your info, leave the rest to us.
-                            We will seamlessly fetch your works and build your profile.
-                        </div>
+            <Card className={styles.timeLineCard}>
+                <div className={styles.timeLineCardInnerContainer}>
+                    <RiNumber3 className={styles.timelineStepNumber}/>
+                    <div className={styles.timelineText}>
+                        Once you have shared your info, leave the rest to us.
+                        We will seamlessly fetch your works and build your profile.
                     </div>
                 </div>
             </Card>
@@ -147,22 +151,33 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
 }
 
 const styles = {
-    wrapperDiv: 'col-span-3 flex flex-col xl:flex-row text-center h-full ',
+    wrapperDiv: 'col-span-3 flex flex-col xl:flex-row text-center h-full min-h-96',
     statistics: 'col-span-3 flex flex-col text-center h-full',
-    card: 'shadow-lg border border-gray-300 rounded-xl h-full w-full xl:w-8/12 p-3 flex',
+    card: 'bg-card shadow-lg border border-background rounded-xl h-full w-full xl:w-8/12 p-3 flex',
+    timeLineCard: 'w-full mx-auto bg-card border border-background',
+    timeLineCardInnerContainer: 'w-full text-center flex gap-3',
     statisticsCard: 'shadow-lg h-full w-full xl:w-4/12 mx-auto',
+    list: 'h-full shadow-lg bg-card border border-background text-left w-full',
+    listWrapper: 'mt-10 xl:mt-0 xl:ml-10 w-full',
     image: 'mx-auto mb-4',
-    text: 'text-gray-500 truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base italic',
-    outerGrid: 'grid grid-cols-3 gap-6 lg:gap-8 mb-8',
+    text: 'text-accent truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base xl:text-lg 2xl:text-2xl italic',
+    outerGrid: 'grid grid-cols-3 gap-6 lg:gap-8 xl:gap-10 mb-8 space-y-12',
     propertiesWrapper: 'flex flex-wrap gap-10 m-auto py-1 text-center flex px-4 rounded-3xl',
     propertyWrapper: 'flex-grow flex text-center mx-auto',
     propertyValue: 'text-black text-2xl lg:text-3xl xxl:text-5xl font-bold mx-auto',
-    propertyName: 'text-gray-600 text-sm lg:text-lg mx-auto',
+    propertyName: 'text-yellow-800 text-sm lg:text-lg mx-auto',
     header: 'text-xl md:text-2xl xl:text-3xl text-gray-500 mb-4 italic focus:ring-0',
     button: 'px-4 py-2 rounded-xl border border-gray-200 bg-gray-200 mt-5 w-fit mx-auto',
     activeButton: 'hover:bg-gray-100',
     disabledButton: 'opacity-50',
-    timelineText: 'text-gray-500 font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm flex flex-col text-center'
+    timelineText: 'text-accent font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base 2xl:text-xl  flex flex-col text-center',
+    timelineWrapper: 'flex flex-col xl:flex-row gap-5 w-full mt-20',
+    timelineStepNumber: 'my-auto text-2xl',
+    banner: 'text-center mt-20 mb-3 rounded-xl col-span-5',
+    bannerInnerContainer: 'flex flex-col justify-between rounded-lg border-t-0 border border-background shadow-lg rounded-t-none bg-accent p-4 md:flex-row w-fit mx-auto',
+    bannerTextContainer: 'mb-3 mr-4 flex flex-col items-start md:mb-0 md:flex-row md:items-center',
+    bannerButtonContainer: 'flex flex-shrink-0 items-center',
+    bannerText: 'flex items-center text-xl 2xl:text-2xl font-normal text-background'
 }
 
 HomeBanner.propTypes = {
@@ -172,6 +187,6 @@ HomeBanner.propTypes = {
     })),
     mostWorksAuthors: arrayOf(object),
     mostWorksUsers: arrayOf(object),
-    mostCitationsWorks:arrayOf(object)
+    mostCitationsWorks: arrayOf(object)
 }
 export default HomeBanner;

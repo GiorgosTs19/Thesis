@@ -36,7 +36,7 @@ export function Navigation() {
         <Disclosure as="nav" className={styles.disclosure}>
             {({open}) => (
                 <>
-                    <div className="px-4 sm:px-6 lg:px-8">
+                    <div className="px-4 sm:px-6 lg:px-8 border-b border-b-gray-300">
                         <div className="flex h-16 items-center justify-between">
                             <div className="flex items-center">
                                 <div className="hidden md:block">
@@ -155,7 +155,7 @@ export function Navigation() {
 const styles = {
     logo: 'text-black mr-4 sm:text-xl md:text-2xl',
     disabledLink: 'opacity-50 cursor-default',
-    disclosure: 'bg-white border-b border-b-gray-100',
+    disclosure: 'bg-background border-b border-b-gray-100',
     activeGroupItem: 'bg-gray-500 text-white',
     inactiveGroupItem: 'text-black hover:bg-gray-400 hover:text-white',
     groupItem: 'block rounded-md px-3 py-2 text-base font-medium',

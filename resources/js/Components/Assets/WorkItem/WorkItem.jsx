@@ -1,22 +1,22 @@
 import React, {useState} from "react";
 import {ExternalSVG} from "@/SVGS/ExternalSVG.jsx";
 import {capitalizeFirstLetter} from "@/Utility/Strings/Utils.js";
-import {instanceOf, number} from "prop-types";
+import {bool, instanceOf, number} from "prop-types";
 import {Work} from "@/Models/Work/Work.js";
 
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
     authorElement: 'hover:underline text-xs lg:text-sm',
     li: 'flex-grow list-none flex',
-    index: 'top-0 left-0 text-black text-sm flex flex-col gap-4 text-center',
+    index: 'top-0 left-0 text-black text-sm lg:text-base 2xl:text-xl flex flex-col gap-4 text-center',
     infoContainer: 'flex flex-col',
     innerInfoContainer: 'flex flex-wrap border-l-2 border-l-blue-700',
-    infoProperty: 'text-gray-600  pl-3 text-xs lg:text-sm',
-    title: 'text-black text-sm font-bold truncate whitespace-pre-wrap hover:underline',
+    infoProperty: 'text-gray-600 pl-3 text-xs md:text-sm xl:text-base',
+    title: 'text-black text-sm lg:text-base xl:text-lg font-bold truncate whitespace-pre-wrap hover:underline',
     authorsList: 'pl-3 text-blue-500',
     showMoreLessAuthors: 'cursor-pointer underline text-amber-950 ml-2 text-xs lg:text-sm'
 }
-export const WorkItem = ({work, index, authorToExclude}) => {
+export const WorkItem = ({work, index, authorToExclude, shouldShowAuthors = true}) => {
     const {
         doi,
         title,
@@ -74,14 +74,14 @@ export const WorkItem = ({work, index, authorToExclude}) => {
                     {title ?? 'Title Unavailable'}
                 </a>
             </div>
-            <div className={styles.authorsList}>
+            {shouldShowAuthors && <div className={styles.authorsList}>
                 {authorElements}
                 {remainingAuthors > 0 && !showAllAuthors ? (
                         <span className={styles.showMoreLessAuthors}
                               onClick={() => setShowAllAuthors(true)}>{`+${remainingAuthors} more`}</span>) :
                     remainingAuthors > 0 && (<span className={styles.showMoreLessAuthors}
                                                    onClick={() => setShowAllAuthors(false)}>{`show less`}</span>)}
-            </div>
+            </div>}
         </div>
     </li>
 }
@@ -89,5 +89,6 @@ export const WorkItem = ({work, index, authorToExclude}) => {
 WorkItem.propTypes = {
     work: instanceOf(Work),
     index: number.isRequired,
-    authorToExclude: number
+    authorToExclude: number,
+    shouldShowAuthors: bool
 }

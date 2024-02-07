@@ -13,7 +13,7 @@ function BaseLayout({title, children}) {
         <div className="h-full flex flex-col">
             <ToastProvider>
                 <Navigation/>
-                <div className="bg-white w-full p-3 shadow-md mx-auto flex flex-col flex-grow xl:h-max">
+                <div className="bg-background w-full p-3 shadow-md mx-auto flex flex-col flex-grow xl:h-max">
                     <div className="flex items-center justify-self-end xl:h-full">
                         <div className="w-full px-6 flex flex-col rounded-lg xl:h-full">
                             {children}
