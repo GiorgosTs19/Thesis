@@ -127,8 +127,8 @@ const Search = ({isHomeScreen, onlyWorks, onlyAuthors, onlyUsers}) => {
 
 
 const styles = {
-    extendedHomeInputContainer: 'bg-white rounded-lg w-full lg:w-4/12 m-auto shadow-xl border border-gray-100',
-    plainInput: 'p-2 border border-gray-300 rounded-3 rounded-l-3 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm',
+    extendedHomeInputContainer: 'bg-white rounded-lg w-full lg:w-4/12 2xl:w-5/12 m-auto shadow-xl border border-gray-100',
+    plainInput: 'p-2 border border-gray-300 rounded-3 rounded-l-3 text-center focus:outline-none focus-visible:outline-none text-xs lg:text-sm 2xl:text-lg',
     extendedInput: 'p-4 m-auto w-full border-0 focus:border-0 focus-visible:border-0 focus:outline-none focus-visible:outline-none',
     noResults: 'text-sm font-semibold my-2 text-gray-500 text-center',
     content: 'space-y-6 flex flex-col',

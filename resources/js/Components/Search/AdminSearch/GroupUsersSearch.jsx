@@ -8,7 +8,6 @@ import {func, object} from "prop-types";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
 import {useClickAway} from "@uidotdev/usehooks";
 import {API} from "@/API/API.js";
-import {useToast} from "@/Contexts/ToastContext.jsx";
 import {RiUserAddLine} from "react-icons/ri";
 
 /**
@@ -52,11 +51,6 @@ const GroupUsersSearch = ({group, setGroup}) => {
         setOpenModal(false);
         setQuery("");
     };
-
-    const {
-        showToast,
-    } = useToast();
-
 
     const content = noResultsFound && (
             <h4 className={styles.noResults}>
@@ -114,7 +108,7 @@ const GroupUsersSearch = ({group, setGroup}) => {
                     </ExtendedInput>
                     <Modal.Body className={styles.modalBody}>
                         <div className={styles.content}>
-                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200 pb-3"}>
+                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto"}>
                                 {selectedAuthors.length ? selectedAuthors.map((author) => (
                                     <Badge color="gray" key={author.id}>
                                         {author.name}

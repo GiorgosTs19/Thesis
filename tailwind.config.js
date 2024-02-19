@@ -9,7 +9,8 @@ export default {
                 background: '#ffffff',
                 text: '#333333',
                 accent: '#6c757d',
-                card: '#f9f9f9'
+                card: '#f9f9f9',
+                border:'#e9e9ec'
             },
             screens: {
                 '3xl': '1600px',
