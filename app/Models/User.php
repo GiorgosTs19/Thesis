@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\APIController;
+use App\Http\Controllers\OpenAlexAPI;
 use App\Utility\Ids;
 use App\Utility\ULog;
 use Exception;
@@ -102,9 +102,9 @@ class User extends Authenticatable {
         $id_type = Ids::getIdType($id);
 
         $author = match ($id_type) {
-            Ids::ORC_ID, Ids::OPEN_ALEX => APIController::authorRequest($id),
+            Ids::ORC_ID, Ids::OPEN_ALEX => OpenAlexAPI::authorRequest($id),
             // Using a filter request since OpenAlex can only find Authors by scopus using filters.
-            Ids::SCOPUS => APIController::authorFilterRequest($id, false, true)
+            Ids::SCOPUS => OpenAlexAPI::authorFilterRequest($id, false, true)
         };
 
         if (!$author)

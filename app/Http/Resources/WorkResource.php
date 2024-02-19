@@ -21,6 +21,11 @@ use Illuminate\Support\Carbon;
  * @property mixed $id
  * @property mixed $type
  * @property mixed $open_alex_id
+ * @property mixed $event
+ * @property mixed $source_title
+ * @property mixed $subtype
+ * @property mixed $is_referenced_by_count
+ * @property mixed $abstract
  */
 class WorkResource extends JsonResource {
     /**
@@ -34,6 +39,11 @@ class WorkResource extends JsonResource {
             'doi' => $this->doi ?? '',
             'title' => $this->title,
             'type' => $this->type,
+            'event' => $this->event,
+            'subtype' => $this->subtype,
+            'source_title' => $this->source_title,
+            'referenced_by_count' => $this->is_referenced_by_count,
+            'abstract' => $this->abstract,
             'published_at' => Carbon::parse($this->publication_date)->format('d-m-Y'),
             'published_at_year' => $this->publication_year,
             'referenced_works_count' => $this->referenced_works_count,

@@ -22,7 +22,8 @@ class GroupResource extends JsonResource {
             'name' => $this->name,
             'description' => $this->description,
             'members' => AuthorResource::collection($this->whenLoaded('members')),
-            'parent' => new GroupResource($this->whenLoaded('parent'))
+            'parent' => new GroupResource($this->whenLoaded('parent')),
+            'works' => new WorkCollection($this->whenLoaded('works'))
         ];
     }
 }

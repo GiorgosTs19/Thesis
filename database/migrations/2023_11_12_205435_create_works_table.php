@@ -14,11 +14,16 @@ return new class extends Migration {
             $table->id();
             $table->string('doi')->nullable()->unique();
             $table->text('title');
+            $table->text('abstract')->nullable();
             $table->date('publication_date');
+            $table->string('source_title')->nullable();
             $table->unsignedSmallInteger('publication_year');
             $table->integer('referenced_works_count');
+            $table->integer('is_referenced_by_count')->nullable();
             $table->string('language');
             $table->string('type');
+            $table->string('subtype')->nullable();
+            $table->string('event')->nullable();
             $table->boolean('is_oa');
             $table->string('open_alex_url')->unique();
             $table->string(Ids::OPEN_ALEX_ID)->unique();

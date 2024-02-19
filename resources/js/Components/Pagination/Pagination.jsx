@@ -1,10 +1,17 @@
-import {Link} from "@inertiajs/inertia-react";
 import React from "react";
 import {usePagination} from "@/Hooks/usePagination/usePagination.js";
-import {STYLES} from "@/Components/Pagination/Styles.js";
-import {array, arrayOf, bool, number, shape, string} from "prop-types";
+import {array, arrayOf, bool, func, number, shape, string} from "prop-types";
+import PaginationLink from "@/Components/Pagination/PaginationLink.jsx";
 
-export function Pagination({response, className}) {
+const STYLES = {
+    BUTTON: 'text-white w-fit h-fit p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:shadow-outline-gray active:bg-gray-800 mx-1',
+    CURRENT_BG: 'bg-gray-700',
+    DEFAULT_BG: 'bg-gray-500',
+    DISABLED: 'cursor-not-allowed opacity-50',
+    DOTS: 'text-black px-2 py-2 md:px-4 md:py-3 rounded-md mx-2 md:mx-4 bg-transparent'
+}
+
+export function Pagination({response, className, useInertia = false, onLinkClick}) {
     const Meta = response.meta;
     const totalCount = Meta.total,
         pageSize = Meta.per_page,
@@ -35,12 +42,9 @@ export function Pagination({response, className}) {
             <nav aria-label="Page navigation" className={className}>
                 <div className={"flex"}>
                     {
-                        paginationRange.map((link, index) => <Link
-                                className={[link === currentPage ? STYLES.CURRENT_BG : STYLES.DEFAULT_BG, (link === '...' ? `${STYLES.DISABLED} ${STYLES.DOTS}` : STYLES.BUTTON)].join(' ')}
-                                key={link === '...' ? `dots${index}` : link} href={getUrl(link.toString())}
-                                preserveState={true}>
-                                {link}
-                            </Link>
+                        paginationRange.map((link, index) => <PaginationLink key={link === '...' ? `dots${index}` : link} index={index} link={link} url={getUrl(link.toString())}
+                                                                             className={[link === currentPage ? STYLES.CURRENT_BG : STYLES.DEFAULT_BG, (link === '...' ? `${STYLES.DISABLED} ${STYLES.DOTS}` : STYLES.BUTTON)].join(' ')} useInertia={useInertia}
+                                                                             onClick={onLinkClick}/>
                         )
                     }
                 </div>
@@ -53,19 +57,13 @@ export function Pagination({response, className}) {
 Pagination.propTypes = {
     response: shape({
         data: array.isRequired,
-        links: shape({
-            first: string.isRequired,
-            last: string.isRequired,
-            prev: string,
-            next: string,
-        }),
         meta: shape({
             current_page: number,
             from: number,
             last_page: number,
             per_page: number.isRequired,
             path: string.isRequired,
-            to: number.isRequired,
+            to: number,
             total: number.isRequired,
             links: arrayOf(shape({
                 url: string,
@@ -74,6 +72,8 @@ Pagination.propTypes = {
             })),
         })
     }),
-    className: string
+    className: string,
+    useInertia: bool,
+    onLinkClick: func
 }
 

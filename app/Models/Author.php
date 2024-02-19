@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\APIController;
+use App\Http\Controllers\OpenAlexAPI;
+use App\Http\Controllers\OrcIdAPI;
 use App\Utility\{Ids, SystemManager, ULog};
 use Exception;
 use Illuminate\Database\{Eloquent\Factories\HasFactory,
@@ -19,6 +20,7 @@ use JetBrains\PhpStorm\ArrayShape;
  * @method static mostWorks(int $int)
  * @method static name(mixed $query)
  * @method static searchName(mixed $query)
+ * @method static mostCitations(int $int)
  *
  * @property int id
  * @property string orc_id
@@ -31,6 +33,7 @@ use JetBrains\PhpStorm\ArrayShape;
  * @property string created_date
  * @property string open_alex_id
  * @property string last_updated_date
+ * @property string $biography
  */
 class Author extends Model {
     use HasFactory;
@@ -112,7 +115,7 @@ class Author extends Model {
     public static function createAuthor($author, array $ids = [], bool $is_user = false): ?Author {
         $newAuthor = new Author;
         if (!$is_user) {
-            $author = APIController::authorRequest($ids[Ids::OPEN_ALEX_ID]);
+            $author = OpenAlexAPI::authorRequest($ids[Ids::OPEN_ALEX_ID]);
         }
         try {
             // If an author with this OpenAlex id already exists, update them,
@@ -150,15 +153,6 @@ class Author extends Model {
      */
     public function isUser(): bool {
         return !!$this->is_user;
-    }
-
-    /**
-     * Relationship
-     * @return BelongsToMany
-     * All the works associated with the author.
-     */
-    public function works(): BelongsToMany {
-        return $this->belongsToMany(Work::class);
     }
 
     /**
@@ -224,7 +218,7 @@ class Author extends Model {
      */
     public function updateSelf(): void {
 
-        $requestAuthor = APIController::authorUpdateRequest($this->open_alex_id);
+        $requestAuthor = OpenAlexAPI::authorUpdateRequest($this->open_alex_id);
 
         if ($requestAuthor->works_count !== $this->works_count) {
             ULog::log("New works found for $this->display_name");
@@ -275,7 +269,7 @@ class Author extends Model {
      *  It will also create an association for each work and for each of the authors that exist and are associated with them.
      */
     public function parseWorks(int $prev_count = 0, int $page = 1, bool $checkNew = false): void {
-        [$works, $meta, $works_count] = APIController::authorWorksRequest($this->open_alex_id, $page, false,
+        [$works, $meta, $works_count] = OpenAlexAPI::authorWorksRequest($this->open_alex_id, $page, false,
             $checkNew ? ['publication_year' => date('Y')] : []);
         $total_work_count = $meta->count;
 
@@ -300,6 +294,42 @@ class Author extends Model {
         }
     }
 
+    public function syncWithOrcId() {
+        if (!$this->orc_id)
+            return;
+        $orc_id_response = OrcIdAPI::authorRequest($this->orc_id);
+        $this->biography = $orc_id_response->biography;
+        $this->save();
+        $this->syncWorksWithOrcId($orc_id_response->works);
+    }
+
+    private function syncWorksWithOrcId($works): void {
+        foreach ($works as $work) {
+            $work_doi_object = collect(data_get($work, 'external-ids'))->filter(function ($item) {
+                if (is_null($item) || sizeof($item) === 0)
+                    return false;
+                return data_get($item[0], 'external-id-type') === 'doi';
+            })->first();
+
+            if (!$work_doi_object)
+                continue;
+
+            $work_doi_parsed_value = data_get($work_doi_object[0], 'external-id-value');
+
+            if (!$work_doi_parsed_value)
+                continue;
+
+            $work_doi = Ids::formDoiUrl($work_doi_parsed_value);
+
+            $database_work = Work::where('doi', $work_doi)->first();
+
+            if ($database_work) {
+                $database_work->syncWithOrcId($work);
+                $database_work->syncWithDOI();
+            }
+        }
+    }
+
     /**
      * Relationship
      * @return MorphMany
@@ -311,6 +341,10 @@ class Author extends Model {
 
     public function scopeMostWorks($query, int $limit) {
         return $query->orderBy('works_count', 'desc')->limit($limit);
+    }
+
+    public function scopeMostCitations($query, int $limit) {
+        return $query->orderBy('cited_by_count', 'desc')->limit($limit);
     }
 
     public function scopeSearchName($query, $name) {
@@ -327,5 +361,18 @@ class Author extends Model {
 
     public function scopeSearchOpenAlex($query, $open_alex_id) {
         return $query->orWhere(Ids::OPEN_ALEX_ID, $open_alex_id)->orWhere(Ids::OPEN_ALEX_ID, 'LIKE', "%{$open_alex_id}%");
+    }
+
+    public function groups(): BelongsToMany {
+        return $this->belongsToMany(Group::class, 'author_group');
+    }
+
+    /**
+     * Relationship
+     * @return BelongsToMany
+     * All the works associated with the author.
+     */
+    public function works(): BelongsToMany {
+        return $this->belongsToMany(Work::class, 'author_work');
     }
 }

@@ -47,3 +47,7 @@ Route::prefix('/groups')->group(function () {
 Route::prefix('work')->group(function () {
 
 });
+
+Route::prefix('test')->group(function () {
+    Route::get('orcIdAuthor', [\App\Http\Controllers\Controller::class, 'testOrcIdAuthorRequest']);
+});

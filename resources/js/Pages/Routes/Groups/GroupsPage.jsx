@@ -1,60 +1,14 @@
-import React, {useEffect, useState} from "react";
-import {Badge, Card, ListGroup} from "flowbite-react";
-import {arrayOf, bool, func, object, oneOfType} from "prop-types";
-import List from "@/Components/List/List.jsx";
-import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
-import {Author} from "@/Models/Author/Author.js";
-import {AiOutlineDelete} from "react-icons/ai";
-import clsx from "clsx";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {Card, Spinner} from "flowbite-react";
+import {arrayOf, object, oneOfType} from "prop-types";
 import {API} from "@/API/API.js";
-import GroupUsersSearch from "@/Components/Search/AdminSearch/GroupUsersSearch.jsx";
-import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
 import NewGroupModal from "@/Components/Modal/NewGroupModal.jsx";
-import UtilityModal from "@/Components/Modal/UtilityModal.jsx";
-
-
-/**
- * Group Component
- * @component
- * A component representing a single group in the list of groups, providing the option to delete the group.
- *
- * @example
- * <Group onClick={onClick} isSelected={isSelected} setGroups={setGroups} group={group}/>;
- *
- * @param {Object} props - The component's properties.
- * @param {Object} group - The group object to be displayed.
- * @param {Function} onClick - The function to be called when the group is clicked.
- * @param {boolean} isSelected - Indicates whether the group is currently selected.
- * @param {Function} setGroups - The function to update the list of groups after a delete operation.
- * @returns The rendered Group component.
- */
-const Group = ({group, onClick, isSelected, setGroups}) => {
-    const handleDelete = async () => {
-        API.instance.groups.deleteGroup(group.id).then(response => setGroups(response.data.groups));
-    };
-
-    return (
-        <>
-            <ListGroup.Item key={group.id} active={isSelected} className={styles.listGroupItem}
-                            onClick={onClick}>
-                <div className={"mr-5"}>{group.name}</div>
-                <div className={clsx("ml-auto p-2 rounded-full  ", `hover:${isSelected ? "bg-gray-700" : "bg-gray-200"}`)}>
-                    <UtilityModal acceptText={'Delete'} header={`Delete ${group.name}`} message={`Are you sure you want to permanently delete ${group.name}?`}
-                                  declineText={'Cancel'} buttonClassName={'cursor-pointer'} onAccept={handleDelete}>
-                        <AiOutlineDelete className={""}/>
-                    </UtilityModal>
-                </div>
-            </ListGroup.Item>
-        </>
-    );
-};
-
-Group.propTypes = {
-    group: object,
-    onClick: func,
-    isSelected: bool,
-    setGroups: func
-};
+import useAsync from "@/Hooks/useAsync/useAsync.js";
+import GroupBadge from "@/Components/Assets/GroupItem/GroupBadge.jsx";
+import {SelectedGroup} from "@/Pages/Routes/Groups/SelectedGroup.jsx";
+import {useScrollIntoView} from "@/Hooks/useScrollIntoView/useScrollIntoView.js";
+import {useGroupUpdatedEventListener} from "@/Events/GroupUpdatedEvent/GroupUpdatedEvent.js";
+import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
 
 /**
  * @component
@@ -68,72 +22,77 @@ Group.propTypes = {
  * @returns The rendered GroupsPage component.
  */
 const GroupsPage = ({groups}) => {
-    const [selectedGroup, setSelectedGroup] = useState(groups[0]);
-    const [currentGroups, setCurrentGroups] = useState(groups);
+    const [groupToShow, setGroupToShow] = useState(null);
+    const [groupsList, setGroupsList] = useState(groups);
+    const [selectedGroup, setSelectedGroup] = useState(null);
+    const [worksPaginationInfo, setWorksPaginationInfo] = useState(null);
+    const [worksShouldRefresh, setWorksShouldRefresh] = useState(false);
+    const activeGroupBadgeRef = useRef(null);
+    useScrollIntoView(activeGroupBadgeRef);
     const {
         showToast,
     } = useToast();
+    useGroupUpdatedEventListener((e) => {
+        console.log(e)
+        if (e.success) {
+            showToast(e.data.action, e.data.toastType);
+        } else if (e.error) {
+            showToast(e.error, ToastTypes.ERROR, 5000);
+        }
+        setWorksShouldRefresh(prev => !prev)
+    })
 
-    const renderAuthorItem = (item, index) => {
-        return (
-            <AuthorItem author={item} index={index} key={index}>
-                <UtilityModal acceptText={`Remove ${item.name}`} header={'Remove member'} onAccept={() => API.instance.groups.removeMember(selectedGroup.id, item.id).then((res) => {
-                        showToast(`${item.name} has been removed from ${selectedGroup.name}`, ToastTypes.WARNING);
-                        setCurrentGroups(res.data.groups);
-                    }
-                )}
-                              message={`Are you sure you want to remove ${item.name} from ${selectedGroup.name}?`} declineText={'Cancel'}>
-                    <div className={styles.deleteIcon}>
-                        <AiOutlineDelete/>
-                    </div>
-                </UtilityModal>
-            </AuthorItem>
-        );
-    };
-
+    // * Every time a group changes, find the selected group inside the new array returned from the back-end and set it as the selected.
     useEffect(() => {
-        const newCurrentGroup = currentGroups.find(item => item.id === selectedGroup.id) ?? null;
-        setSelectedGroup(newCurrentGroup)
-    }, [currentGroups]);
+        const newCurrentGroup = groupsList.find(item => item.id === selectedGroup) ?? null;
+        setSelectedGroup(newCurrentGroup?.id)
+    }, [groupsList]);
 
     const handleNewGroupCreated = (newGroups, newGroup) => {
-        setCurrentGroups(newGroups);
+        setGroupsList(newGroups);
         setSelectedGroup(newGroup);
     }
+    const handleFetchGroup = useCallback(() => {
+        if (!selectedGroup)
+            return;
+        return API.instance.groups.getGroup(selectedGroup).then(data => {
+            setGroupToShow(data.data.group)
+            setWorksPaginationInfo(data.data.works)
+        })
+    }, [selectedGroup]);
+
+    const {data, loading} = useAsync(handleFetchGroup, !!selectedGroup, [worksShouldRefresh]);
+
+    useEffect(() => {
+        if (!data) return;
+        if (data.success) {
+            setGroupToShow({group: data.data.group, works: data.data.works})
+            setSelectedGroup(data.data.group.id)
+        }
+    }, [data])
+
+
+    const showCurrentGroup = !loading && !!groupToShow && !!worksPaginationInfo;
 
     return (
         <>
-            <div className={styles.grid}>
-                <div className={styles.listGroupCol}>
-                    <ListGroup aria-label="Groups List" className={clsx(styles.listGroup)}>
-                        <NewGroupModal groups={currentGroups} handleNewGroupCreated={handleNewGroupCreated}/>
-                        {currentGroups.map((group) => (
-                            <Group key={group.id} group={group}
-                                   depth={0} onClick={() => setSelectedGroup(group)} isSelected={selectedGroup?.id === group.id} setGroups={setCurrentGroups}/>
-                        ))}
-                    </ListGroup>
-                </div>
-                <div className={styles.selectedGroupCol}>
-                    {selectedGroup ? <Card className={styles.selectedGroup}>
-                        <h5 className={styles.groupName}>
-                            {selectedGroup.name}
-                        </h5>
-                        <p className={styles.selectedGroupDesc}>
-                            {selectedGroup.description}
-                        </p>
-                        {selectedGroup.parent && (
-                            <Badge className={styles.badge} onClick={() => setSelectedGroup(selectedGroup.parent)}>
-                                Subgroup of : {selectedGroup.parent.name}
-                            </Badge>
-                        )}
-                        <List data={selectedGroup.members} renderFn={renderAuthorItem} wrapperClassName={"w-full h-full"}
-                              title={`Group Members ${selectedGroup.members.length ? ` ( ${selectedGroup.members.length} )` : ""}`}
-                              parser={Author.parseResponseAuthor} emptyListPlaceholder={"This group has no members"}>
-                            <GroupUsersSearch group={selectedGroup} setGroups={setCurrentGroups}/>
-                        </List>
-                    </Card> : <h4 className={'m-auto'}>Select a group to see more details</h4>}
+            <div className={'flex flex-col gap-3 my-10'}>
+                <span className={'mx-auto text-2xl text-accent'}>Groups</span>
+                <div className={'flex gap-3 overflow-x-auto p-3 overflow-y-hidden border-b border-b-gray-400'}>
+                    <NewGroupModal groups={groupsList} handleNewGroupCreated={handleNewGroupCreated}/>
+                    {groupsList.map((group) => (
+                        <GroupBadge key={group.id} group={group}
+                                    depth={0} onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id} setGroups={setGroupsList}/>
+                    ))}
                 </div>
             </div>
+
+            {loading && <div className={'m-auto'}><Spinner size="xl"/></div>}
+            {!loading && !selectedGroup && <h4 className={'m-auto text-2xl'}>Select a group to see more details</h4>}
+            {showCurrentGroup && <Card className={styles.selectedGroup}>
+                <SelectedGroup group={groupToShow} setSelectedGroup={setSelectedGroup} setGroupsList={setGroupsList} selectedGroup={selectedGroup}
+                               worksPaginationInfo={worksPaginationInfo} setWorksPaginationInfo={setWorksPaginationInfo} setGroupToShow={setGroupToShow}/>
+            </Card>}
         </>
     );
 };
@@ -141,15 +100,11 @@ const GroupsPage = ({groups}) => {
 const styles = {
     listGroupItem: `w-full cursor-pointer text-lg justify-between`,
     deleteIcon: 'p-1 rounded-full hover:bg-gray-300 my-auto cursor-pointer',
-    card: '',
-    grid: 'grid grid-cols-3 lg:grid-cols-6 gap-5 h-full p-3',
-    groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white',
-    selectedGroup: 'mx-auto w-full h-full',
-    selectedGroupCol: 'col-span-3 lg:col-span-4 xl:col-span-5 flex h-full',
-    selectedGroupDesc: 'font-normal text-gray-700 dark:text-gray-400',
-    badge: 'text-lg cursor-pointer w-fit px-3 py-1 rounded-lg',
-    listGroup: 'w-full overflow-y-auto gap-3 m-auto h-full',
-    listGroupCol: 'col-span-3 lg:col-span-2 xl:col-span-1 flex'
+    wrapper: 'flex flex-col gap-5 p-3',
+    selectedGroup: 'my-auto',
+    listGroup: 'w-full overflow-y-auto gap-3 m-auto',
+    listGroupCol: 'flex min-w-60',
+    selectedGroupCol: 'w-full flex',
 };
 
 GroupsPage.propTypes = {

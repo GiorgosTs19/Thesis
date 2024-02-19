@@ -8,7 +8,7 @@ import {func, object} from "prop-types";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
 import {useClickAway} from "@uidotdev/usehooks";
 import {API} from "@/API/API.js";
-import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
+import {useToast} from "@/Contexts/ToastContext.jsx";
 import {RiUserAddLine} from "react-icons/ri";
 
 /**
@@ -22,7 +22,7 @@ import {RiUserAddLine} from "react-icons/ri";
  * @param {Function} setGroups - The function to update the list of groups after adding authors.
  * @returns The rendered GroupUsersSearch component.
  */
-const GroupUsersSearch = ({group, setGroups}) => {
+const GroupUsersSearch = ({group, setGroup}) => {
     const [openModal, setOpenModal] = useState(false);
     const modalRef = useClickAway((e) => {
         if (e instanceof TouchEvent) {
@@ -95,7 +95,7 @@ const GroupUsersSearch = ({group, setGroups}) => {
     return (
         <>
             <div className={styles.addIcon} onClick={() => setOpenModal(true)}>
-                <RiUserAddLine className={'text-lg'}/>
+                <RiUserAddLine className={'text-lg m-auto'}/>
             </div>
             <Modal show={openModal} onClose={handleSearchModalClose} dismissible position={"top-center"}>
                 <div ref={modalRef}>
@@ -143,13 +143,8 @@ const GroupUsersSearch = ({group, setGroups}) => {
                     <Modal.Footer className={authorsToAdd.length ? '' : 'border-0'}>
                         {authorsToAdd.length > 0 && (
                             <button className={styles.deleteIcon}
-                                    onClick={() => API.instance.groups.addMembers(group.id, authorsToAdd).then((data) => {
-                                            if (data.success) {
-                                                showToast(`Added ${selectedAuthors.length} ${selectedAuthors.length < 2 ? 'author' : 'authors'} to ${group.name}`, ToastTypes.SUCCESS)
-                                            } else if (data.error) {
-                                                showToast(data.error, ToastTypes.ERROR, 5000);
-                                            }
-                                            setGroups(data.data.groups);
+                                    onClick={() => API.instance.groups.addMembers(group, authorsToAdd).then((data) => {
+                                            setGroup(data.data.group);
                                             setOpenModal(false)
                                         }
                                     )
@@ -175,13 +170,13 @@ const styles = {
     content: "space-y-3 flex flex-col",
     belowMinChars: "mx-auto text-sm text-red-400 opacity-75 mt-2",
     deleteIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
-    addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
+    addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer flex',
     modalBody: 'p-3 bg-white rounded-b-2xl'
 };
 
 GroupUsersSearch.propTypes = {
     group: object.isRequired,
-    setGroups: func.isRequired
+    setGroup: func.isRequired
 };
 
 export default GroupUsersSearch;

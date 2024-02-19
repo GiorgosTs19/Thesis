@@ -18,6 +18,7 @@ import clsx from "clsx";
  * @param footer - An optional footer to display below the list.
  * @param emptyListPlaceholder - An optional placeholder to show if the list of items to render is empty.
  * @param children - Children items passed to the list component
+ * @param scrollable - Whether the list can should be scrollable when the content overflows
  * @returns The PaginatedList component.
  *
  * @example
@@ -34,11 +35,11 @@ import clsx from "clsx";
  */
 const List = ({
                   data, title, renderFn, parser, vertical = false, wrapperClassName = '', listClassName = '', header, footer,
-                  emptyListPlaceholder = 'The list is empty', children
+                  emptyListPlaceholder = 'The list is empty', children, scrollable = true
               }) => {
     const items = parser ? data.map(parser) : data;
 
-    return <div className={clsx(wrapperClassName, styles.wrapper)}>
+    return <div className={clsx(wrapperClassName, styles.wrapper, scrollable ? (vertical ? 'overflow-y-auto' : 'overflow-x-auto') : '')}>
         <div className={clsx(header ? 'mb-2' : 'mb-6', styles.title)}>
             {title}
             {children}
@@ -61,9 +62,9 @@ const List = ({
 }
 
 const styles = {
-    wrapper: 'rounded-lg bg-gray-50 p-4 flex flex-col h-full',
-    title: 'md:text-lg 2xl:text-2xl font-semibold text-yellow-800 w-fit flex',
-    header: 'text-gray-500 text-sm 2xl:text-xl mb-3',
+    wrapper: 'rounded-lg p-4 flex flex-col ',
+    title: 'md:text-lg 2xl:text-xl font-semibold text-yellow-800 w-fit flex',
+    header: 'text-gray-500 text-sm 2xl:text-base mb-3',
     verticalList: 'md:grid-cols-2 lg:grid-cols-3',
     horizontalList: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
     footer: 'text-gray-500 text-sm mt-2'
@@ -76,6 +77,7 @@ List.propTypes = {
     parser: func,
     data: array.isRequired,
     vertical: bool,
+    scrollable: bool,
     wrapperClassName: string,
     listClassName: string,
     emptyListPlaceholder: string,

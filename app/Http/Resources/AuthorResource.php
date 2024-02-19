@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property mixed updated_at
  * @property mixed cited_by_count
  * @property mixed $id
+ * @property mixed $biography
  */
 class AuthorResource extends JsonResource {
     /**
@@ -75,7 +76,8 @@ class AuthorResource extends JsonResource {
             'updated_at' => Carbon::parse($this->updated_at)->format('d-m-Y'),
             'works' => WorkResource::collection($this->whenLoaded('works')),
             'statistics' => $statisticsAreValid ? StatisticResource::collection($statistics) : [],
-            'local_url' => route('Author.Page', ['id' => $this->open_alex_id])
+            'local_url' => route('Author.Page', ['id' => $this->open_alex_id]),
+            'biography' => $this->biography,
         ];
     }
 }

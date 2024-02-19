@@ -11,6 +11,11 @@ export default {
                 accent: '#6c757d',
                 card: '#f9f9f9'
             },
+            screens: {
+                '3xl': '1600px',
+                '4xl': '2000px',
+                '5xl': '2200px'
+            },
         },
     },
     plugins: ['flowbite/plugin'],

@@ -56,7 +56,7 @@ export function Navigation() {
                                     </div>
                                 </div>
                                 <div className={'md:hidden'}>
-                                    <div className="flex items-center px-2 bg-white">
+                                    <div className="flex items-center px-2 bg-white ">
                                         {logo}
                                         <button type="button" className={styles.notificationsButton}>
                                             <span className="absolute -inset-1.5"/>
@@ -102,7 +102,7 @@ export function Navigation() {
                                     </Menu>
                                 </div>
                             </div>
-                            <div className="-mr-2 flex md:hidden">
+                            <div className="-mr-2 flex md:hidden w-full">
                                 <Search/>
                                 <Disclosure.Button className={styles.disclosureButton}>
                                     <span className="absolute -inset-0.5"/>
@@ -155,7 +155,7 @@ export function Navigation() {
 const styles = {
     logo: 'text-black mr-4 sm:text-xl md:text-2xl',
     disabledLink: 'opacity-50 cursor-default',
-    disclosure: 'bg-background border-b border-b-gray-100',
+    disclosure: 'bg-background border-b border-b-gray-100 sticky top-0 z-40',
     activeGroupItem: 'bg-gray-500 text-white',
     inactiveGroupItem: 'text-black hover:bg-gray-400 hover:text-white',
     groupItem: 'block rounded-md px-3 py-2 text-base font-medium',

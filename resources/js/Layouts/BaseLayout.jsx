@@ -10,15 +10,12 @@ BaseLayout.propTypes = {
 
 function BaseLayout({title, children}) {
     return (
-        <div className="h-full flex flex-col">
+        <div className="min-h-screen">
             <ToastProvider>
+                <div id={'off-canvas'}></div>
                 <Navigation/>
-                <div className="bg-background w-full p-3 shadow-md mx-auto flex flex-col flex-grow xl:h-max">
-                    <div className="flex items-center justify-self-end xl:h-full">
-                        <div className="w-full px-6 flex flex-col rounded-lg xl:h-full">
-                            {children}
-                        </div>
-                    </div>
+                <div className="bg-background w-full px-3 shadow-md mx-auto flex flex-col min-h-[calc(100vh-4rem)] relative">
+                    {children}
                 </div>
                 {/*<FooterNavigation/>*/}
             </ToastProvider>

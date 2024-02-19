@@ -1,8 +1,10 @@
 import {AbstractAPI} from "@/API/AbstractAPI.js";
+import {dispatchGroupUpdatedEvent} from "@/Events/GroupUpdatedEvent/GroupUpdatedEvent.js";
+import {ToastTypes} from "@/Contexts/ToastContext.jsx";
 
 export class Groups extends AbstractAPI {
     async addMembers(group, authors) {
-        if (!authors || !group) {
+        if (!authors || !group.id) {
             throw new Error(
                 "The authors and group parameters are marked as required for addMember()",
             );
@@ -10,20 +12,46 @@ export class Groups extends AbstractAPI {
 
         return this.post(route("Group.Add.Member"), {
             authors,
-            group,
-        });
+            group: group.id,
+        }).then((res) => {
+            dispatchGroupUpdatedEvent({
+                type: 'Members Added',
+                success: res.success,
+                error: res.error,
+                data: {
+                    action: `Added ${authors.length} ${authors.length < 2 ? 'author' : 'authors'} to ${group.name}`,
+                    toastType: ToastTypes.SUCCESS,
+                    group: group.name,
+                    res: res.data
+                }
+            })
+            return res;
+        })
     }
 
     async removeMember(group, author) {
-        if (!author || !group) {
+        if (!author.id || !group.id) {
             throw new Error(
                 "The author and group parameters are marked as required for removeMember()",
             );
         }
 
         return this.post(route("Group.Remove.Member"), {
-            author,
-            group,
+            author: author.id,
+            group: group.id,
+        }).then((res) => {
+            dispatchGroupUpdatedEvent({
+                type: 'Member Removed',
+                success: res.success,
+                error: res.error,
+                data: {
+                    action: `${author.name} has been removed from ${group.name}`,
+                    toastType: ToastTypes.WARNING,
+                    group: group.name,
+                    res: res.data
+                }
+            })
+            return res;
         });
     }
 
@@ -54,7 +82,6 @@ export class Groups extends AbstractAPI {
     }
 
     async getGroup(id) {
-        console.log(id)
         if (!id) {
             throw new Error(
                 "id parameter is marked as required for getGroup()",

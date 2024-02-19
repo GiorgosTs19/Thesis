@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\WorkCollection;
 use App\Models\Author;
 use App\Models\AuthorGroup;
 use App\Models\Group;
+use App\Models\Work;
 use App\Utility\Requests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ use Inertia\Response;
 
 class GroupController extends Controller {
     private function getAllGroups() {
-        return GroupResource::collection(Group::with(['members', 'parent'])->orderBy('name')->get());
+        return GroupResource::collection(Group::with(['childrenRecursive', 'parent'])->orderBy('name')->get());
     }
 
     public function show(): Response {
@@ -24,19 +26,28 @@ class GroupController extends Controller {
     }
 
     public function getGroup(Request $request, $id) {
-
         if (!isset($id)) {
             return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
         }
 
-        $Group = Group::find($id);
+        $Group = Group::with('members.works', 'parent')->find($id);
 
         if (!$Group) {
             return response()->json(Requests::clientError('A group with this id does not exist', 200));
         }
 
         $success = !!$Group;
-        return $success ? response()->json(Requests::success('Group retrieved successfully', ['group' => new GroupResource($Group->load('members'))])) : response()->json(Requests::serverError("Something went wrong"), 500);
+
+        $works = collect();
+
+        foreach ($Group->members as $member) {
+            $works = $works->merge($member->works);
+        }
+
+        $uniqueWorkIds = $works->unique('id')->pluck('id');
+
+        $uniqueWorks = Work::with(['authors'])->whereIn('id', $uniqueWorkIds)->paginate(9);
+        return $success ? response()->json(Requests::success('Group retrieved successfully', ['group' => new GroupResource($Group), 'works' => new WorkCollection($uniqueWorks)])) : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 
     /**
@@ -138,7 +149,7 @@ class GroupController extends Controller {
             $success = $Group->addMember($author);
         }
 
-        return $success ? response()->json(Requests::success('Member added successfully', ['groups' => self::getAllGroups()])) : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? response()->json(Requests::success('Member added successfully', ['group' => new GroupResource(Group::with('members.works', 'parent')->find($group))])) : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 
     public function removeMember(Request $request): JsonResponse {
@@ -171,6 +182,6 @@ class GroupController extends Controller {
         }
 
         $success = $existing_member->delete();
-        return $success ? response()->json(Requests::success('Member removed successfully', ['groups' => self::getAllGroups()])) : response()->json(Requests::clientError('Something went wrong'), 400);
+        return $success ? response()->json(Requests::success('Member removed successfully', ['group' => new GroupResource(Group::with('members.works', 'parent')->find($group))])) : response()->json(Requests::clientError('Something went wrong'), 400);
     }
 }

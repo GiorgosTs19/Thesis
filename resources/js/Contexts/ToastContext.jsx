@@ -106,7 +106,7 @@ export const ToastProvider = ({children}) => {
 
     return (
         <ToastContext.Provider value={contextValue}>
-            {toastState.visible && <Toast className={clsx('toast opacity-80', toastState.className)}>
+            {toastState.visible && <Toast className={clsx('toast', toastState.className)}>
                 {toastState.icon}
                 <div className="ml-3 text-lg font-normal text-black">{toastState.message}</div>
                 <Toast.Toggle onDismiss={hideToast} className={toastState.className}/>

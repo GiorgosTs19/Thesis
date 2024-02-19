@@ -179,13 +179,16 @@ class Ids {
             null;
     }
 
-    function extractDoiFromUrl($url): array|string {
+    public static function extractDoiFromUrl($url): array|string {
         $prefix = 'https://doi.org/';
         return str_replace($prefix, '', $url);
     }
 
-    public static function toDxDoiUrl($url) {
+    public static function toDxDoiUrl($url): array|string {
         return str_replace('https://doi.org/', 'http://dx.doi.org/', $url);
     }
 
+    public static function formDoiUrl($doi): string {
+        return 'https://doi.org/' . $doi;
+    }
 }

@@ -18,18 +18,18 @@ class ULog {
      * @return void
      * Display the message to the console and also log it ( if it is a string ).
      */
-    static function log(object|string|array|null $message, array $metadata = []): void  {
+    static function log(object|string|array|null $message, array $metadata = []): void {
         $meta = '';
         $display_meta_data = sizeof($metadata) !== 0;
-        if($display_meta_data) {
+        if ($display_meta_data) {
             $meta = self::parseMetaData($metadata);
         }
 
-        if(is_string($message)) {
-            $logMessage = $message.($display_meta_data ? $meta : '');
+        if (is_string($message)) {
+            $logMessage = $message . ($display_meta_data ? $meta : '');
             Log::info($logMessage);
             dump("🚀 ~ $logMessage");
-        } else dump("🚀 ~ ", $meta , $message);
+        } else dump("🚀 ~ ", $meta, $message);
     }
 
     private static function parseMetaData($metadata): string {
@@ -58,7 +58,7 @@ class ULog {
      * Logs and displays current memory usage to the console.
      */
     public static function memory(): void {
-        self::log(number_format(memory_get_usage() * (10 ** -6), 1)."MB / ".ini_get('memory_limit'));
+        self::log(number_format(memory_get_usage() * (10 ** -6), 1) . "MB / " . ini_get('memory_limit'));
     }
 
     /**
@@ -74,12 +74,12 @@ class ULog {
     public static function error(string $error, array $metadata = []): void {
         $meta = '';
         $display_meta_data = sizeof($metadata) !== 0;
-        if($display_meta_data) {
+        if ($display_meta_data) {
             $meta = self::parseMetaData($metadata);
         }
 
-            $logMessage = $error.($display_meta_data ? $meta : '');
-            Log::error($logMessage);
-            dump("🚀 ~ $logMessage");
+        $logMessage = $error . ' ' . ($display_meta_data ? $meta : '');
+        Log::error($logMessage);
+        dump("🚀 ~ $logMessage");
     }
 }

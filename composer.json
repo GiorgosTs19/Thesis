@@ -12,7 +12,9 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "tightenco/ziggy": "^1.8",
-        "ext-simplexml": "*"
+        "ext-simplexml": "*",
+      "ext-dom": "*",
+        "ext-libxml": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -31,32 +31,16 @@ import {Work} from "@/Models/Work/Work.js";
  * @param mostCitationsWorks - An array of work objects
  * @returns The rendered HomeBanner component.
  */
-const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
-    const renderWork = (work, index) => {
-        return renderWorkItem(work, index, false);
-    }
+const HomeBanner = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
+    const renderWork = (work, index) => renderWorkItem(work, index + 1, {authors: false, type: true, oa: true, publicationDate: false, language: true, citations: false}, {authors: true});
+
+
+    const renderProductivityAuthors = (author, index) => renderAuthorItem(author, index, {works: true, citations: false});
+    const renderCitationsAuthors = (author, index) => renderAuthorItem(author, index, {works: false, citations: true})
+
+
     return <>
         <div className={styles.outerGrid}>
-            {/*<div className={clsx(styles.statistics, 'order-first xl:order-none')}>*/}
-            {/*    <Card className={styles.statisticsCard} >*/}
-            {/*        <div className={styles.propertiesWrapper}>*/}
-            {/*            {*/}
-            {/*                worksByType.map(({type, count}) => <div key={type}*/}
-            {/*                                                        className={styles.propertyWrapper}>*/}
-            {/*                        <div className={'mx-auto'}>*/}
-            {/*                            <p className={styles.propertyValue}>*/}
-            {/*                                {count}*/}
-            {/*                            </p>*/}
-            {/*                            <p className={styles.propertyName}>*/}
-            {/*                                {`${capitalizeFirstLetter(type)}s`}*/}
-            {/*                            </p>*/}
-            {/*                        </div>*/}
-            {/*                    </div>*/}
-            {/*                )*/}
-            {/*            }*/}
-            {/*        </div>*/}
-            {/*    </Card>*/}
-            {/*</div>*/}
             <div className={clsx(styles.wrapperDiv)}>
                 <div className={styles.card}>
                     <div className={'m-auto'}>
@@ -71,12 +55,12 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
                     </div>
                 </div>
                 <div className={clsx('flex flex-col md:flex-row gap-5', styles.listWrapper)}>
-                    <List data={mostWorksAuthors} renderFn={renderAuthorItem} vertical
-                          title={'Top Authors by Prolificacy'} parser={Author.parseResponseAuthor}
+                    <List data={mostWorksAuthors} renderFn={renderProductivityAuthors} vertical
+                          title={'Top Users by Productivity ( Works )'} parser={Author.parseResponseAuthor}
                           wrapperClassName={styles.list}/>
 
-                    <List data={mostWorksUsers} renderFn={renderAuthorItem} vertical
-                          title={'Top Users by Prolificacy'} parser={Author.parseResponseAuthor}
+                    <List data={mostWorksUsers} renderFn={renderCitationsAuthors} vertical
+                          title={'Top Users by Citations'} parser={Author.parseResponseAuthor}
                           wrapperClassName={styles.list}/>
                 </div>
             </div>
@@ -153,14 +137,14 @@ const HomeBanner = ({worksByType, mostWorksAuthors, mostWorksUsers, mostCitation
 const styles = {
     wrapperDiv: 'col-span-3 flex flex-col xl:flex-row text-center h-full min-h-96',
     statistics: 'col-span-3 flex flex-col text-center h-full',
-    card: 'bg-card shadow-lg border border-background rounded-xl h-full w-full xl:w-8/12 p-3 flex',
-    timeLineCard: 'w-full mx-auto bg-card border border-background',
+    card: 'shadow-lg border border-gray-200 rounded-xl h-full w-full xl:w-5/12 p-3 flex',
+    timeLineCard: 'w-full mx-auto border border-gray-200',
     timeLineCardInnerContainer: 'w-full text-center flex gap-3',
     statisticsCard: 'shadow-lg h-full w-full xl:w-4/12 mx-auto',
-    list: 'h-full shadow-lg bg-card border border-background text-left w-full',
+    list: 'h-full shadow-lg bg-card border border-gray-200 text-left w-full ',
     listWrapper: 'mt-10 xl:mt-0 xl:ml-10 w-full',
     image: 'mx-auto mb-4',
-    text: 'text-accent truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base xl:text-lg 2xl:text-2xl italic',
+    text: 'text-accent truncate whitespace-pre-wrap mx-auto text-sm lg:text-base xl:text-lg 2xl:text-2xl italic',
     outerGrid: 'grid grid-cols-3 gap-6 lg:gap-8 xl:gap-10 mb-8 space-y-12',
     propertiesWrapper: 'flex flex-wrap gap-10 m-auto py-1 text-center flex px-4 rounded-3xl',
     propertyWrapper: 'flex-grow flex text-center mx-auto',

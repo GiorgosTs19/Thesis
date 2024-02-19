@@ -32,7 +32,8 @@ export class Author {
                     statistics,
                     updatedAt,
                     id,
-                    localUrl
+                    localUrl,
+                    biography
                 }) {
         this.id = id;
         this.name = name;
@@ -47,11 +48,13 @@ export class Author {
         this.updatedAt = updatedAt;
         this.className = className;
         this.localUrl = localUrl;
+        this.biography = biography;
     }
 
     static parseResponseAuthor({
                                    name, is_user, citation_count, works_count, open_alex_id,
-                                   scopus_id, orc_id, works = [], statistics, updated_at, id, local_url
+                                   scopus_id, orc_id, works = [], statistics, updated_at, id, local_url,
+                                   biography
                                }) {
         return new Author({
             id,
@@ -60,6 +63,7 @@ export class Author {
             scopusId: scopus_id,
             orcId: orc_id,
             isUser: is_user,
+            biography,
             citationCount: citation_count,
             worksCount: works_count,
             works: works ? works.map(work => Work.parseResponseWork(work)) : [],

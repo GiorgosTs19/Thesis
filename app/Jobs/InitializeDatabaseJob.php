@@ -79,7 +79,10 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
                 $User_Authors = Author::user()->get();
 
                 // Loop through all the authors, retrieve their works and parse them.
-                foreach ($User_Authors as $user_Author) $user_Author->parseWorks();
+                foreach ($User_Authors as $user_Author) {
+                    $user_Author->parseWorks();
+                    $user_Author->syncWithOrcId();
+                }
             });
 
         } catch (Exception $err) {

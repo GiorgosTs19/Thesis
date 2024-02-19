@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string(Ids::ORC_ID_ID)->nullable()->unique();
             $table->string(Ids::SCOPUS_ID)->nullable()->unique();
             $table->string('display_name');
+            $table->text('biography')->nullable();
             $table->string('works_url')->nullable()->unique();
             $table->boolean('is_user')->default(false);
             $table->integer('cited_by_count')->nullable();

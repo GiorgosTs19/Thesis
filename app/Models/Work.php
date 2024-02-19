@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\APIController;
+use App\Http\Controllers\DOIAPI;
+use App\Http\Controllers\OpenAlexAPI;
 use App\Utility\Ids;
 use App\Utility\ULog;
 use Exception;
 use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\BelongsToMany, Relations\MorphMany};
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -24,11 +26,19 @@ use Illuminate\Support\Facades\Auth;
  * @property mixed publication_date
  * @property string last_updated_date
  * @property int referenced_works_count
+ * @property string $source_title
+ * @property string $subtype
+ * @property string $event
+ * @property string $abstract
+ * @property int $is_referenced_by_count
  *
  * @method static openAlex($id)
  * @method static mostCitations(int $int)
  * @method static searchTitle(mixed $query)
  * @method static countByType()
+ * @method static whereIn(string $string, Collection $uniqueWorkIds)
+ * @method static where(string $string, mixed $mixed)
+ * @method static find(int $int)
  */
 class Work extends Model {
     use HasFactory;
@@ -162,7 +172,7 @@ class Work extends Model {
      * @return void
      */
     public function updateSelf(): void {
-        $requestWork = APIController::workUpdateRequest($this->open_alex_id);
+        $requestWork = OpenAlexAPI::workUpdateRequest($this->open_alex_id);
 
         $shouldUpdate = $requestWork->updated_date !== $this->last_updated_date;
         if (!$shouldUpdate)
@@ -261,4 +271,20 @@ class Work extends Model {
         return $filteredTypes;
     }
 
+    public function syncWithOrcId($orc_id_work): void {
+        $work_summary = data_get($orc_id_work, 'work-summary');
+        if (!is_null($work_summary) && sizeof($work_summary) > 0) {
+            $this->source_title = data_get($work_summary[0], 'journal-title.value');
+            $this->save();
+        }
+    }
+
+    public function syncWithDOI(): void {
+        $doi_object = DOIAPI::DOIRequest($this->doi);
+        $this->subtype = $doi_object->type ?? null;
+        $this->event = $doi_object->event ?? null;
+        $this->abstract = $doi_object->abstract ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
+        $this->is_referenced_by_count = data_get($doi_object, 'is-referenced-by-count') ?? null;
+        $this->save();
+    }
 }

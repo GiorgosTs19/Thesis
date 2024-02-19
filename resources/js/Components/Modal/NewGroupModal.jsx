@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Button, Label, ListGroup, Modal, Select, Textarea, TextInput} from "flowbite-react";
+import {Badge, Button, Label, Modal, Select, Textarea, TextInput} from "flowbite-react";
 import {IoAdd} from "react-icons/io5";
 import {array, func} from "prop-types";
 import {API} from "@/API/API.js";
@@ -47,12 +47,7 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
 
     return (
         <>
-            <ListGroup.Item key={"createNewGroup"} onClick={() => setOpenModal(true)}>
-                <div className={styles.newGroupButton}>
-                    New Group
-                    <IoAdd className={"my-auto"}/>
-                </div>
-            </ListGroup.Item>
+            <Badge key={"createNewGroup"} icon={IoAdd} onClick={() => setOpenModal(true)} color={'success'} className={'px-6 py-2 rounded-full my-auto'}/>
             <Modal show={openModal} onClose={() => setOpenModal(false)} dismissible>
                 <Modal.Header>Create a group</Modal.Header>
                 <Modal.Body>
@@ -96,7 +91,7 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
 }
 
 const styles = {
-    newGroupButton: 'w-full text-lg justify-between text-center flex cursor-pointer',
+    newGroupButton: 'w-full text-lg justify-between text-center flex cursor-pointer gap-2',
 }
 
 NewGroupModal.propTypes = {

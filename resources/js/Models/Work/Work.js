@@ -27,6 +27,10 @@ export class Work {
      * @param openAlexId
      * @param statistics
      * @param localUrl
+     * @param event - The event where the work was first presented.
+     * @param sourceTitle - The title of the journal where the work was published.
+     * @param subtype - A more specific name for the work type.
+     * @param abstract - The work's abstract.
      */
     constructor({
                     id,
@@ -43,7 +47,12 @@ export class Work {
                     type,
                     openAlexId,
                     statistics,
-                    localUrl
+                    localUrl,
+                    event,
+                    sourceTitle,
+                    subtype,
+                    abstract,
+                    referencedByCount
                 }) {
         this.title = title;
         this.id = id;
@@ -61,6 +70,11 @@ export class Work {
         this.openAlexId = openAlexId;
         this.statistics = statistics;
         this.localUrl = localUrl;
+        this.event = event;
+        this.sourceTitle = sourceTitle;
+        this.subtype = subtype;
+        this.abstract = abstract;
+        this.referencedByCount = referencedByCount;
     }
 
     static parseResponseWork({
@@ -79,8 +93,15 @@ export class Work {
                                  type,
                                  open_alex_id,
                                  statistics,
-                                 local_url
+                                 local_url,
+                                 event,
+                                 subtype,
+                                 abstract,
+                                 source_title,
+                                 referenced_by_count
                              }) {
+        if (abstract)
+            console.log(doi)
         return new Work({
             id,
             doi,
@@ -98,17 +119,31 @@ export class Work {
             openAlexId: open_alex_id,
             statistics: statistics?.map(statistic => Statistic.parseResponseStatistic(
                 {assetType: className, citedCount: statistic.cited_count, assetId: id, year: statistic.year})) ?? [],
-            localUrl: local_url
+            localUrl: local_url,
+            event,
+            abstract,
+            sourceTitle: source_title,
+            subtype,
+            referencedByCount: referenced_by_count
         });
     }
 
     getProperties() {
-        return [
+        const properties = [
             {name: 'Type', value: capitalizeFirstLetter(this.type)},
             {name: 'References', value: this.referencedWorksCount},
             {name: 'Published', value: this.publishedAt},
             {name: 'Open Alex', value: this.openAlexId},
             {name: 'Open Access', value: this.isOA ? 'Available' : 'Unavailable'},
         ];
+        if (this.sourceTitle)
+            properties.push({name: 'Source', value: this.sourceTitle});
+        if (this.event)
+            properties.push({name: 'Published At', value: this.event});
+        if (this.subtype && this.subtype !== this.type)
+            properties.push({name: 'Subtype', value: this.subtype});
+        if (this.referencedByCount)
+            properties.push({name: 'Referenced By', value: this.referencedByCount});
+        return properties;
     }
 }

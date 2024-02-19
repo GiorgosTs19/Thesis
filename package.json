@@ -27,6 +27,7 @@
         "@uidotdev/usehooks": "^2.4.1",
         "chart.js": "^4.4.1",
         "clsx": "^2.1.0",
+        "flowbite": "^2.2.1",
         "flowbite-react": "^0.7.2",
         "lodash": "^4.17.21",
         "prop-types": "^15.8.1",

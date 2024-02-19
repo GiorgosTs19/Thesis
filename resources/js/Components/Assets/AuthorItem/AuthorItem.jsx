@@ -1,11 +1,10 @@
 import React from "react";
-import {arrayOf, instanceOf, node, number, oneOfType, shape, string} from "prop-types";
+import {arrayOf, bool, instanceOf, node, number, oneOfType, shape, string} from "prop-types";
 import {Author} from "@/Models/Author/Author.js";
 import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
+import clsx from "clsx";
 
-export const AuthorItem = ({
-                               author, index, extraProperties = [], children
-                           }) => {
+export const AuthorItem = ({author, index, extraProperties = [], children, highlightCitations = false, highlightWorks = false}) => {
     const {
         name,
         citationCount,
@@ -16,31 +15,31 @@ export const AuthorItem = ({
 
     return <li className="mb-4 flex-grow list-none flex">
         <div className={'flex'}>
-            <div className="top-0 left-0 text-black text-center mr-2 flex flex-col text-sm lg:text-base 2xl:text-xl ">
+            <div className="top-0 left-0 text-black text-center mr-2 flex flex-col text-sm lg:text-base">
                 {index + 1}
                 {children}
             </div>
             <div className={'flex flex-col'}>
                 <div className={'flex flex-wrap border-l-2 border-l-blue-700'}>
-                    <div className="text-gray-600 pl-3 text-xs md:text-sm xl:text-base">
+                    <div className="text-gray-600 pl-3 text-xs md:text-sm ">
                         {isUser ? 'Registered User' : 'Guest User'}
                     </div>
-                    <div className="text-gray-600 pl-3 text-xs md:text-sm xl:text-base">
+                    <div className={clsx('text-gray-600 pl-3 text-xs md:text-sm ', highlightCitations ? 'font-bold' : '')}>
                         Citations : {numberToDotNotation(citationCount)}
                     </div>
-                    <div className="text-gray-600 pl-3 text-xs md:text-sm xl:text-base">
+                    <div className={clsx('text-gray-600 pl-3 text-xs md:text-sm ', highlightWorks ? 'font-bold' : '')}>
                         Works : {numberToDotNotation(worksCount)}
                     </div>
                     {
                         extraProperties.map((property, index) =>
-                            <div key={index} className="text-gray-600 pl-3 text-xs md:text-sm xl:text-base">
+                            <div key={index} className="text-gray-600 pl-3 text-xs md:text-sm ">
                                 {property.name} : {property.value}
                             </div>
                         )
                     }
                 </div>
                 <div className={'pl-3 text-left'}>
-                    <a href={localUrl} className="text-black text-sm md:text-base xl:text-lg
+                    <a href={localUrl} className="text-text text-sm md:text-base
                         font-bold truncate whitespace-pre-wrap hover:underline left-0">
                         {name}
                     </a>
@@ -58,5 +57,7 @@ AuthorItem.propTypes = {
         value: oneOfType([number, string])
     })),
     utilityColClassName: string,
-    children: oneOfType([node, arrayOf(node)])
+    children: oneOfType([node, arrayOf(node)]),
+    highlightCitations: bool,
+    highlightWorks: bool
 }

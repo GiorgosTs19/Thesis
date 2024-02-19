@@ -121,6 +121,4 @@ class SearchController extends Controller {
 
         return redirect()->back()->with(['searchResults' => $results]);
     }
-
-
 }

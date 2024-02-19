@@ -14,6 +14,7 @@ class VerifyCsrfToken extends Middleware {
         'groups/add/member',
         'groups/remove/member',
         'groups/create',
-        'groups/delete'
+        'groups/delete',
+        'test/*'
     ];
 }
