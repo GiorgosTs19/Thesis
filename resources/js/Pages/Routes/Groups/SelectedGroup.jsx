@@ -105,7 +105,7 @@ export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, set
                             <OffCanvas isOpen={canvasOpen === true} position={'bottom'} onClose={handleOnClose}>
                                 <Tabs style={"fullWidth"} className={'w-full'} ref={tabsRef} onActiveTabChange={(tab) => setActiveTab(tab)}>
                                     <Tabs.Item title="Members" icon={HiUserCircle} disabled={activeTab === 0}>
-                                        <List data={group.members} renderFn={renderAuthorItem} wrapperClassName={"shadow-xl w-full xl:w-3/12"} vertical={width >= 1280}
+                                        <List data={group.members} renderFn={renderAuthorItem} wrapperClassName={"w-full"} vertical={width >= 1280}
                                               title={`Group Members ${group.members.length ? ` ( ${group.members.length} )` : (0)}`}
                                               parser={Author.parseResponseAuthor} emptyListPlaceholder={"This group has no members"}>
                                             <GroupUsersSearch group={group} setGroup={setGroupToShow}/>

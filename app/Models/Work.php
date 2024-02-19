@@ -283,7 +283,7 @@ class Work extends Model {
         $doi_object = DOIAPI::DOIRequest($this->doi);
         $this->subtype = $doi_object->type ?? null;
         $this->event = $doi_object->event ?? null;
-        $this->abstract = $doi_object->abstract ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
+        $this->abstract = isset($doi_object->abstract) ? (string) simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
         $this->is_referenced_by_count = data_get($doi_object, 'is-referenced-by-count') ?? null;
         $this->save();
     }
