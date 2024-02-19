@@ -1,6 +1,7 @@
 import React from 'react';
 import {array, arrayOf, bool, func, node, oneOfType, string} from "prop-types";
 import clsx from "clsx";
+import {themeStyles} from "@/Theme/Theme.js";
 
 /**
  * PaginatedList Component.
@@ -63,7 +64,7 @@ const List = ({
 
 const styles = {
     wrapper: 'rounded-lg p-4 flex flex-col ',
-    title: 'md:text-lg 2xl:text-xl font-semibold text-yellow-800 w-fit flex',
+    title: themeStyles.listTitle,
     header: 'text-gray-500 text-sm 2xl:text-base mb-3',
     verticalList: 'md:grid-cols-2 lg:grid-cols-3',
     horizontalList: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',

@@ -1,5 +1,5 @@
 import {AbstractAPI} from "@/API/AbstractAPI.js";
-import {dispatchGroupUpdatedEvent} from "@/Events/GroupUpdatedEvent/GroupUpdatedEvent.js";
+import {dispatchGroupUpdatedEvent} from "@/Events/GroupEvent/GroupEvent.js";
 import {ToastTypes} from "@/Contexts/ToastContext.jsx";
 
 export class Groups extends AbstractAPI {

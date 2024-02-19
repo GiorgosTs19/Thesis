@@ -100,8 +100,6 @@ export class Work {
                                  source_title,
                                  referenced_by_count
                              }) {
-        if (abstract)
-            console.log(doi)
         return new Work({
             id,
             doi,

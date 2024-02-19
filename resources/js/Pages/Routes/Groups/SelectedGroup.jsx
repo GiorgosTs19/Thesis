@@ -22,6 +22,7 @@ const styles = {
     badge: 'text-lg cursor-pointer w-fit px-3 py-1 rounded-lg mb-2',
     selectedGroupDesc: 'font-normal text-gray-700 dark:text-gray-400 my-1',
     listTitle: 'md:text-lg 2xl:text-xl font-semibold text-yellow-800 w-fit flex',
+    button: 'hover:scale-110 transition-transform duration-300 cursor-pointer'
 }
 export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, setWorksPaginationInfo, setGroupToShow, selectedGroup}) => {
     const {width} = useWindowSize();
@@ -41,7 +42,7 @@ export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, set
             <AuthorItem author={item} index={index} key={index}>
                 <UtilityModal acceptText={`Remove ${item.name}`} header={'Remove member'} onAccept={() => API.instance.groups.removeMember(group, item).then((res) => {
                     setGroupToShow(res.data.group);
-                })}
+                })} buttonClassName={styles.button}
                               message={`Are you sure you want to remove ${item.name} from ${group.name}?`} declineText={'Cancel'}>
                     <div className={styles.deleteIcon}>
                         <AiOutlineDelete/>

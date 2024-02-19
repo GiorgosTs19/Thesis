@@ -38,13 +38,14 @@ const ToastContext = createContext(null);
 export const ToastProvider = ({children}) => {
     const [toastState, setToastState] = useState({
         visible: false,
-        message: '',
+        message: null,
         type: ToastTypes.INFO,
         icon: ToastIcons.INFO,
-        className: ''
+        className: null,
+        title: null
     });
-
-    const showToast = (message, type = ToastTypes, duration = 3000) => {
+    console.log(toastState)
+    const showToast = (message, type = ToastTypes.INFO, title = null, duration = 55000) => {
         let icon;
         let className;
         switch (type) {
@@ -80,7 +81,8 @@ export const ToastProvider = ({children}) => {
             message,
             type,
             icon,
-            className
+            className,
+            title
         });
 
         setTimeout(() => {
@@ -106,9 +108,12 @@ export const ToastProvider = ({children}) => {
 
     return (
         <ToastContext.Provider value={contextValue}>
-            {toastState.visible && <Toast className={clsx('toast', toastState.className)}>
+            {toastState.visible && <Toast className={clsx('toast flex', toastState.className)}>
                 {toastState.icon}
-                <div className="ml-3 text-lg font-normal text-black">{toastState.message}</div>
+                <div className={'flex flex-col gap-2 text-center text-sm'}>
+                    {toastState.title}
+                    <div className="ml-3 font-normal text-base text-black text-left">{toastState.message}</div>
+                </div>
                 <Toast.Toggle onDismiss={hideToast} className={toastState.className}/>
             </Toast>}
             {children}

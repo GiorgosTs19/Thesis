@@ -15,6 +15,7 @@ input, select {
     top: 10%; /* Adjust this value to position it towards the top */
     left: 50%;
     transform: translateX(-50%);
+    z-index: 9999;
 }
 
 @media (min-width: 1024px) {

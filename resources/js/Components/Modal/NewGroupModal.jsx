@@ -28,9 +28,8 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
     const handleAccept = () => {
         API.instance.groups.createGroup(groupName, groupDesc, groupParent).then(response => {
             if (response.success) {
-                console.log(response.data)
                 showToast(`${groupName} created`, ToastTypes.SUCCESS);
-                handleNewGroupCreated(response.data.groups, response.data.newGroup)
+                handleNewGroupCreated(response.data.groups, response.data.newGroup.id)
             } else if (response.error) {
                 showToast(response.error, ToastTypes.ERROR);
             }
@@ -47,7 +46,7 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
 
     return (
         <>
-            <Badge key={"createNewGroup"} icon={IoAdd} onClick={() => setOpenModal(true)} color={'success'} className={'px-6 py-2 rounded-full my-auto'}/>
+            <Badge key={"createNewGroup"} icon={IoAdd} onClick={() => setOpenModal(true)} color={'success'} className={'px-6 py-2 rounded-full my-auto cursor-pointer hover:scale-110 transition-transform duration-300'}/>
             <Modal show={openModal} onClose={() => setOpenModal(false)} dismissible>
                 <Modal.Header>Create a group</Modal.Header>
                 <Modal.Body>

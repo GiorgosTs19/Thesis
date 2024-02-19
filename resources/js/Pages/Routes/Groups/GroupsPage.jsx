@@ -7,7 +7,7 @@ import useAsync from "@/Hooks/useAsync/useAsync.js";
 import GroupBadge from "@/Components/Assets/GroupItem/GroupBadge.jsx";
 import {SelectedGroup} from "@/Pages/Routes/Groups/SelectedGroup.jsx";
 import {useScrollIntoView} from "@/Hooks/useScrollIntoView/useScrollIntoView.js";
-import {useGroupUpdatedEventListener} from "@/Events/GroupUpdatedEvent/GroupUpdatedEvent.js";
+import {useGroupUpdatedEventListener} from "@/Events/GroupEvent/GroupEvent.js";
 import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
 
 /**
@@ -33,14 +33,13 @@ const GroupsPage = ({groups}) => {
         showToast,
     } = useToast();
     useGroupUpdatedEventListener((e) => {
-        console.log(e)
         if (e.success) {
-            showToast(e.data.action, e.data.toastType);
+            showToast(e.data.action, e.data.toastType, e.success);
         } else if (e.error) {
-            showToast(e.error, ToastTypes.ERROR, 5000);
+            showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
         }
         setWorksShouldRefresh(prev => !prev)
-    })
+    });
 
     // * Every time a group changes, find the selected group inside the new array returned from the back-end and set it as the selected.
     useEffect(() => {
