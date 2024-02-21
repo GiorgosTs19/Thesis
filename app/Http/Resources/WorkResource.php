@@ -55,7 +55,8 @@ class WorkResource extends JsonResource {
             'authors' => AuthorResource::collection($this->whenLoaded('authors')),
             'statistics' => StatisticResource::collection($this->whenLoaded('statistics')),
             'open_alex_id' => $this->open_alex_id,
-            'local_url' => route('Work.Page', ['id' => $this->open_alex_id])
+            'local_url' => route('Work.Page', ['id' => $this->open_alex_id]),
+            'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
         ];
     }
 }

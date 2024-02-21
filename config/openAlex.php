@@ -37,6 +37,7 @@ return [
         'publication_year',
         'cited_by_api_url',
         'referenced_works_count',
+        'concepts'
     ],
 
     'required_work_update_fields' => ['id',

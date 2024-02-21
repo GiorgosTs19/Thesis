@@ -26,15 +26,13 @@ import {Work} from "@/Models/Work/Work.js";
  * <HomeBanner worksByType={worksByType} />
  *
  * @param {Array} worksByType - An array of objects representing different types of works and their counts.
- * @param mostWorksAuthors - An array of author objects
+ * @param mostCitationsUsers - An array of author objects
  * @param mostWorksUsers - An array of author objects
  * @param mostCitationsWorks - An array of work objects
  * @returns The rendered HomeBanner component.
  */
-const HomeBanner = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
+const HomeBanner = ({mostCitationsUsers, mostWorksUsers, mostCitationsWorks}) => {
     const renderWork = (work, index) => renderWorkItem(work, index + 1, {authors: false, type: true, oa: true, publicationDate: false, language: true, citations: false}, {authors: true});
-
-
     const renderProductivityAuthors = (author, index) => renderAuthorItem(author, index, {works: true, citations: false});
     const renderCitationsAuthors = (author, index) => renderAuthorItem(author, index, {works: false, citations: true})
 
@@ -55,11 +53,11 @@ const HomeBanner = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
                     </div>
                 </div>
                 <div className={clsx('flex flex-col md:flex-row gap-5', styles.listWrapper)}>
-                    <List data={mostWorksAuthors} renderFn={renderProductivityAuthors} vertical
+                    <List data={mostWorksUsers} renderFn={renderProductivityAuthors} vertical
                           title={'Top Users by Productivity ( Works )'} parser={Author.parseResponseAuthor}
                           wrapperClassName={styles.list}/>
 
-                    <List data={mostWorksUsers} renderFn={renderCitationsAuthors} vertical
+                    <List data={mostCitationsUsers} renderFn={renderCitationsAuthors} vertical
                           title={'Top Users by Citations'} parser={Author.parseResponseAuthor}
                           wrapperClassName={styles.list}/>
                 </div>
@@ -79,7 +77,7 @@ const HomeBanner = ({mostWorksAuthors, mostWorksUsers, mostCitationsWorks}) => {
                 </div>
                 <div className={styles.listWrapper}>
                     <List data={mostCitationsWorks} renderFn={renderWork}
-                          title={'Most Cited Works: A Citation Powerhouse'} parser={Work.parseResponseWork}
+                          title={'Most Cited Works'} parser={Work.parseResponseWork}
                           wrapperClassName={styles.list}/>
                 </div>
             </div>
@@ -169,7 +167,7 @@ HomeBanner.propTypes = {
         type: string.isRequired,
         count: number.isRequired
     })),
-    mostWorksAuthors: arrayOf(object),
+    mostCitationsUsers: arrayOf(object),
     mostWorksUsers: arrayOf(object),
     mostCitationsWorks: arrayOf(object)
 }

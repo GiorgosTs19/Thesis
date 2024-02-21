@@ -44,7 +44,7 @@ export const ToastProvider = ({children}) => {
         className: null,
         title: null
     });
-    console.log(toastState)
+
     const showToast = (message, type = ToastTypes.INFO, title = null, duration = 55000) => {
         let icon;
         let className;

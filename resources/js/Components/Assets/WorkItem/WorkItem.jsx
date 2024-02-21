@@ -72,7 +72,7 @@ export const WorkItem = ({
     return <li className={styles.li}>
         <div className={styles.index}>
             {index}
-            <a href={doi} title={'Open to source'} className={'mr-1'}><ExternalSVG width={26} height={26}/></a>
+            <a href={doi} title={'Go to source'} className={'mr-1'}><ExternalSVG width={26} height={26}/></a>
         </div>
         <div className={styles.infoContainer}>
             <div className={styles.innerInfoContainer}>

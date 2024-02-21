@@ -93,6 +93,7 @@ class Work extends Model {
 
             // Associate all authors from the array with the work being processed
             $newWork->parseAuthors($work->authorships);
+            $newWork->generateConcepts($work->concepts);
             ULog::memory();
         } catch (Exception $exception) {
             ULog::error($exception->getMessage(), ULog::META);
@@ -141,6 +142,15 @@ class Work extends Model {
      */
     public function authors(): BelongsToMany {
         return $this->belongsToMany(Author::class, self::AUTHOR_WORKS_TABLE);
+    }
+
+    /**
+     * Relationship
+     * @return BelongsToMany
+     * All the concepts associated with the work.
+     */
+    public function concepts(): BelongsToMany {
+        return $this->belongsToMany(Concept::class, 'work_concept');
     }
 
     /**
@@ -283,8 +293,20 @@ class Work extends Model {
         $doi_object = DOIAPI::DOIRequest($this->doi);
         $this->subtype = $doi_object->type ?? null;
         $this->event = $doi_object->event ?? null;
-        $this->abstract = isset($doi_object->abstract) ? (string) simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
+        $this->abstract = isset($doi_object->abstract) ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
         $this->is_referenced_by_count = data_get($doi_object, 'is-referenced-by-count') ?? null;
         $this->save();
+    }
+
+    private function generateConcepts($concepts): void {
+        foreach ($concepts as $concept) {
+            $database_concept = Concept::existsByName($concept->display_name)->first();
+            if (!$database_concept) {
+                $database_concept = new Concept(['name' => $concept->display_name, 'open_alex_id' => $concept->id]);
+                $database_concept->save();
+            }
+
+            (new WorkConcept(['work_id' => $this->id, 'concept_id' => $database_concept->id]))->save();
+        }
     }
 }

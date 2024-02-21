@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Work;
+use App\Models\Concept;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
@@ -14,12 +14,9 @@ class Controller extends BaseController {
 //        return OrcIdAPI::authorRequest('0000-0003-2366-1365');
 //        return Author::find(6)->syncWithOrcId();
 //        return Work::find(1)->syncWithDOI();
-        $Works = Work::whereNotNull('abstract')->get();
-        foreach ($Works as $work) {
-            $work->abstract = (string)simplexml_load_string($work->abstract, null, LIBXML_NOERROR, 'jats', true);
-            $work->save();
-        }
-
+//        return new WorkResource(Work::find(1)->with(['concepts'])->first());
+        return Concept::getDynamicConceptsList();
+//        return ConceptResource::collection(Concept::all());
     }
 
 
