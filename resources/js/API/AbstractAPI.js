@@ -1,55 +1,65 @@
+import {handleAPIError} from "@/Services/AppError.js";
+
+const headers = {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+}
+
 export class AbstractAPI {
     async get(endpoint) {
-        const response = await fetch(endpoint);
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
-        }
-
-        return response.json();
+        return fetch(endpoint).then(response => {
+            // * Check if the request was unsuccessful and raise the appropriate error.
+            if (!response.ok) {
+                handleAPIError(response)
+            }
+            // * Parse the response and return it
+            return response.json();
+        });
     }
 
     async post(endpoint, data) {
-        const response = await fetch(endpoint, {
+        return fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers,
             body: JSON.stringify(data),
+        }).then(response => {
+            // * Check if the request was unsuccessful and raise the appropriate error.
+            if (!response.ok) {
+                handleAPIError(response)
+            }
+            // * Parse the response and return it
+            return response.json();
         });
 
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
-        }
-
-        return response.json();
     }
 
     async patch(endpoint, data) {
-        const response = await fetch(endpoint, {
+        return fetch(endpoint, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers,
             body: JSON.stringify(data),
+        }).then(response => {
+            // * Check if the request was unsuccessful and raise the appropriate error.
+            if (!response.ok) {
+                handleAPIError(response)
+            }
+            // * Parse the response and return it
+            return response.json();
         });
 
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
-        }
-
-        return response.json();
     }
 
     async delete(endpoint) {
-        const response = await fetch(endpoint, {
+        return fetch(endpoint, {
             method: 'DELETE',
+        }).then(response => {
+            // * Check if the request was unsuccessful and raise the appropriate error.
+            if (!response.ok) {
+                handleAPIError(response)
+            }
+            // * Parse the response and return it
+            return response.json();
         });
 
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
-        }
-
-        return response.json();
     }
 }

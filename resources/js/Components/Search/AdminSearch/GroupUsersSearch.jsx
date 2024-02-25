@@ -7,8 +7,8 @@ import {Author} from "@/Models/Author/Author.js";
 import {func, object} from "prop-types";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
 import {useClickAway} from "@uidotdev/usehooks";
-import {API} from "@/API/API.js";
 import {RiUserAddLine} from "react-icons/ri";
+import useAPI from "@/Hooks/useAPI/useAPI.js";
 
 /**
  * GroupUsersSearch Component
@@ -23,6 +23,9 @@ import {RiUserAddLine} from "react-icons/ri";
  */
 const GroupUsersSearch = ({group, setGroup}) => {
     const [openModal, setOpenModal] = useState(false);
+    const [selectedAuthors, setSelectedAuthors] = useState([]);
+    const authorsToAdd = selectedAuthors.map((author) => author.id);
+    const api = useAPI();
     const modalRef = useClickAway((e) => {
         if (e instanceof TouchEvent) {
             // * Prevent closing the modal if the user is just trying to navigate back
@@ -32,7 +35,6 @@ const GroupUsersSearch = ({group, setGroup}) => {
         }
         setOpenModal(false);
     });
-
     const [query, setQuery, {authors}, noResultsFound, loading] = useSearch({
         group: group.id,
         onlyUserAuthors: true,
@@ -40,25 +42,24 @@ const GroupUsersSearch = ({group, setGroup}) => {
         dependencies: [openModal, group.id]
     });
 
-    const [selectedAuthors, setSelectedAuthors] = useState([]);
+    useEffect(() => {
+        setQuery('');
+        setSelectedAuthors([]);
+    }, [openModal]);
 
+    // Handles the change of the search query
     const handleQueryChange = (e) => {
         const query = e.target.value;
         setQuery(query);
     };
 
+    // Handles the closing of the search modal.
     const handleSearchModalClose = () => {
         setOpenModal(false);
         setQuery("");
     };
 
-    const content = noResultsFound && (
-            <h4 className={styles.noResults}>
-                No results meet the specified criteria
-            </h4>
-        )
-    ;
-
+    // Handles the selection of an author ( adds / remove them from the selectedAuthors list ).
     const handleSelectAuthor = (author) => {
         const index = selectedAuthors.findIndex(
             (item) => item.id === author.id,
@@ -77,14 +78,15 @@ const GroupUsersSearch = ({group, setGroup}) => {
         }
         setSelectedAuthors(newAuthorsList);
     };
-    const authorsToAdd = selectedAuthors.map((author) => author.id);
+
     const isAuthorSelected = (author) =>
         selectedAuthors.findIndex((item) => item.id === author.id) !== -1;
 
-    useEffect(() => {
-        setQuery('');
-        setSelectedAuthors([]);
-    }, [openModal]);
+    const content = noResultsFound && (
+        <h4 className={styles.noResults}>
+            No results meet the specified criteria
+        </h4>
+    );
 
     return (
         <>
@@ -108,20 +110,20 @@ const GroupUsersSearch = ({group, setGroup}) => {
                     </ExtendedInput>
                     <Modal.Body className={styles.modalBody}>
                         <div className={styles.content}>
-                            <div className={"flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto"}>
+                            <div className={styles.selectedAuthorBadges}>
                                 {selectedAuthors.length ? selectedAuthors.map((author) => (
                                     <Badge color="gray" key={author.id}>
                                         {author.name}
                                     </Badge>
-                                )) : <div className={'mx-auto mt-2 mb-4 opacity-90 text-gray-600'}>No authors selected</div>}
+                                )) : <div className={styles.noAuthorsSelected}>No authors selected</div>}
                             </div>
-                            <div className={'text-sm opacity-80 text-gray-700 text-center'}>
+                            <div className={styles.authorSearchTip}>
                                 Only showing registered authors who are not members of this group
                             </div>
                             {loading && <span className={'m-auto text-center'}><Spinner aria-label="Loading"/></span>}
                             {authors.length > 0 && !loading && (
                                 <SearchResultsList
-                                    listClassName={'max-h-96 overflow-y-auto'}
+                                    listClassName={styles.searchResultList}
                                     data={authors}
                                     parser={Author.parseResponseAuthor}
                                     query={query}
@@ -137,7 +139,7 @@ const GroupUsersSearch = ({group, setGroup}) => {
                     <Modal.Footer className={authorsToAdd.length ? '' : 'border-0'}>
                         {authorsToAdd.length > 0 && (
                             <button className={styles.deleteIcon}
-                                    onClick={() => API.instance.groups.addMembers(group, authorsToAdd).then((data) => {
+                                    onClick={() => api.groups.addMembers(group, authorsToAdd).then((data) => {
                                             setGroup(data.data.group);
                                             setOpenModal(false)
                                         }
@@ -165,7 +167,11 @@ const styles = {
     belowMinChars: "mx-auto text-sm text-red-400 opacity-75 mt-2",
     deleteIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
     addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer flex',
-    modalBody: 'p-3 bg-white rounded-b-2xl'
+    modalBody: 'p-3 bg-white rounded-b-2xl',
+    searchResultList: 'max-h-96 overflow-y-auto',
+    selectedAuthorBadges: 'flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto',
+    noAuthorsSelected: 'mx-auto mt-2 mb-4 opacity-90 text-gray-600',
+    authorSearchTip: 'text-sm opacity-80 text-gray-700 text-center'
 };
 
 GroupUsersSearch.propTypes = {

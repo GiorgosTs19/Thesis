@@ -1,14 +1,14 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {Card, Spinner} from "flowbite-react";
 import {arrayOf, object, oneOfType} from "prop-types";
-import {API} from "@/API/API.js";
 import NewGroupModal from "@/Components/Modal/NewGroupModal.jsx";
 import useAsync from "@/Hooks/useAsync/useAsync.js";
 import GroupBadge from "@/Components/Assets/GroupItem/GroupBadge.jsx";
 import {SelectedGroup} from "@/Pages/Routes/Groups/SelectedGroup.jsx";
 import {useScrollIntoView} from "@/Hooks/useScrollIntoView/useScrollIntoView.js";
-import {useGroupUpdatedEventListener} from "@/Events/GroupEvent/GroupEvent.js";
+import {useGroupDeletedEventListener, useGroupUpdatedEventListener} from "@/Events/GroupEvent/GroupEvent.js";
 import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
+import useAPI from "@/Hooks/useAPI/useAPI.js";
 
 /**
  * @component
@@ -28,10 +28,10 @@ const GroupsPage = ({groups}) => {
     const [worksPaginationInfo, setWorksPaginationInfo] = useState(null);
     const [worksShouldRefresh, setWorksShouldRefresh] = useState(false);
     const activeGroupBadgeRef = useRef(null);
+    const api = useAPI();
+    const {showToast} = useToast();
     useScrollIntoView(activeGroupBadgeRef);
-    const {
-        showToast,
-    } = useToast();
+
     useGroupUpdatedEventListener((e) => {
         if (e.success) {
             showToast(e.data.action, e.data.toastType, e.success);
@@ -39,6 +39,18 @@ const GroupsPage = ({groups}) => {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
         }
         setWorksShouldRefresh(prev => !prev)
+    });
+
+    useGroupDeletedEventListener((e) => {
+        if (e.success) {
+            showToast(e.data.action, e.data.toastType, e.success);
+            setWorksShouldRefresh(prev => !prev)
+            // * Remove the group from the list of groups.
+            setGroupsList(prev => prev.filter(group => group.id !== e.data.group.id))
+            setGroupToShow(null)
+        } else if (e.error) {
+            showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
+        }
     });
 
     // * Every time a group changes, find the selected group inside the new array returned from the back-end and set it as the selected.
@@ -54,7 +66,7 @@ const GroupsPage = ({groups}) => {
     const handleFetchGroup = useCallback(() => {
         if (!selectedGroup)
             return;
-        return API.instance.groups.getGroup(selectedGroup).then(data => {
+        return api.groups.getGroup(selectedGroup).then(data => {
             setGroupToShow(data.data.group)
             setWorksPaginationInfo(data.data.works)
         })
@@ -81,7 +93,7 @@ const GroupsPage = ({groups}) => {
                     <NewGroupModal groups={groupsList} handleNewGroupCreated={handleNewGroupCreated}/>
                     {groupsList.map((group) => (
                         <GroupBadge key={group.id} group={group}
-                                    depth={0} onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id} setGroups={setGroupsList}/>
+                                    onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id}/>
                     ))}
                 </div>
             </div>

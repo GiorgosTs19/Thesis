@@ -3,8 +3,7 @@ import {createRoot} from 'react-dom/client';
 import {createInertiaApp} from '@inertiajs/inertia-react';
 import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import React from "react";
-import BaseLayout from "@/Layouts/BaseLayout.jsx";
-import {API} from "@/API/API.js";
+import AppProvider from "@/AppProvider/AppProvider.jsx";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -29,9 +28,7 @@ createInertiaApp({
     setup({el, App, props}) {
         const root = createRoot(el);
 
-        root.render(<BaseLayout title={''}><App {...props}/></BaseLayout>);
+        root.render(<AppProvider><App {...props}/></AppProvider>);
     },
 }).then(() => {
 });
-
-const api = new API();

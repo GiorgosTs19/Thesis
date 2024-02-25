@@ -22,15 +22,15 @@ class Requests {
     }
 
     public static function success($message, $data = [], $code = 200): array {
-        return ['success' => $message, 'code' => $code, 'data' => $data];
+        return ['ok' => true, 'success' => $message, 'code' => $code, 'data' => $data];
     }
 
     public static function clientError($message, $code = 400, $data = []): array {
-        return ['error' => $message, 'code' => $code, 'data' => $data];
+        return ['ok' => false, 'error' => $message, 'code' => $code, 'data' => $data];
     }
 
     public static function serverError($message, $code = 500, $data = []): array {
-        return ['error' => $message, 'code' => $code, 'data' => $data];
+        return ['ok' => false, 'error' => $message, 'code' => $code, 'data' => $data];
     }
 
     public static function getResponseBody($response) {

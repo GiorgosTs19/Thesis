@@ -2,8 +2,8 @@ import React, {useState} from "react";
 import {Badge, Button, Label, Modal, Select, Textarea, TextInput} from "flowbite-react";
 import {IoAdd} from "react-icons/io5";
 import {array, func} from "prop-types";
-import {API} from "@/API/API.js";
 import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
+import useAPI from "@/Hooks/useAPI/useAPI.js";
 
 /**
  * NewGroupModal Component
@@ -22,53 +22,59 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
     const [groupName, setGroupName] = useState('');
     const [groupDesc, setGroupDesc] = useState('');
     const [groupParent, setGroupParent] = useState(null);
-    const {
-        showToast,
-    } = useToast();
+    const {showToast} = useToast();
+    const api = useAPI();
+    const [errors, setErrors] = useState(null);
     const handleAccept = () => {
-        API.instance.groups.createGroup(groupName, groupDesc, groupParent).then(response => {
-            if (response.success) {
-                showToast(`${groupName} created`, ToastTypes.SUCCESS);
+        api.groups.createGroup(groupName, groupDesc, groupParent).then(response => {
+            if (response.ok) {
+                showToast(`${groupName}`, ToastTypes.SUCCESS, response.success);
                 handleNewGroupCreated(response.data.groups, response.data.newGroup.id)
-            } else if (response.error) {
-                showToast(response.error, ToastTypes.ERROR);
+                setGroupDesc('')
+                setGroupName('')
+                setGroupParent(null)
+                setOpenModal(false);
+                setErrors(null)
+            } else if (response.errors) {
+                setErrors(response.errors)
             }
         });
-        setGroupDesc('')
-        setGroupName('')
-        setGroupParent(null)
-        setOpenModal(false);
     }
-
     const handleDecline = () => {
         setOpenModal(false);
     }
 
     return (
         <>
-            <Badge key={"createNewGroup"} icon={IoAdd} onClick={() => setOpenModal(true)} color={'success'} className={'px-6 py-2 rounded-full my-auto cursor-pointer hover:scale-110 transition-transform duration-300'}/>
+            <Badge key={"createNewGroup"} icon={IoAdd} onClick={() => setOpenModal(true)} color={'success'} className={styles.newGroupButton}/>
             <Modal show={openModal} onClose={() => setOpenModal(false)} dismissible>
                 <Modal.Header>Create a group</Modal.Header>
                 <Modal.Body>
                     <div className="space-y-10">
-                        <div className="max-w-md mb-4">
+                        <div className={styles.section}>
                             <div className="mb-2 block">
                                 <Label htmlFor="groupName" value="Group name ( Required )"/>
                             </div>
                             <TextInput id={'groupName'} type={'text'} value={groupName} placeholder="New group name" required onChange={(e) => {
                                 setGroupName(e.target.value)
                             }}/>
+                            {
+                                errors?.name?.map((error, index) => <p key={index} className={styles.error}>{error}</p>)
+                            }
                         </div>
                     </div>
-                    <div className="max-w-md mb-4">
+                    <div className={styles.section}>
                         <div className="mb-2 block">
                             <Label htmlFor="description" value="Group description ( Required )"/>
                         </div>
-                        <Textarea id="description" value={groupDesc} placeholder="Give a description for the new group" required rows={4} className={'p-2 bg-white'} onChange={(e) => {
+                        <Textarea id="description" value={groupDesc} placeholder="Give a description for the new group" required rows={4} className={styles.groupDesc} onChange={(e) => {
                             setGroupDesc(e.target.value)
                         }}/>
+                        {
+                            errors?.description?.map((error, index) => <p key={index} className={styles.error}>{error}</p>)
+                        }
                     </div>
-                    <div className="max-w-md">
+                    <div className={styles.section}>
                         <div className="mb-2 block">
                             <Label htmlFor="groups" value="Parent Group ( Optional )"/>
                         </div>
@@ -76,6 +82,9 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
                             <option key={'none'} value={null}>None</option>
                             {groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}
                         </Select>
+                        {
+                            errors?.parent?.map((error, index) => <p key={index} className={styles.error}>{error}</p>)
+                        }
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -90,12 +99,15 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
 }
 
 const styles = {
-    newGroupButton: 'w-full text-lg justify-between text-center flex cursor-pointer gap-2',
+    newGroupButton: 'px-6 py-2 rounded-full my-auto cursor-pointer hover:scale-110 transition-transform duration-300',
+    groupDesc: 'p-2 bg-white',
+    error: 'bold text-red-400 px-1',
+    section: 'max-w-full mb-4'
 }
 
 NewGroupModal.propTypes = {
     handleNewGroupCreated: func.isRequired,
-    groups: array
+    groups: array,
 }
 
 export default NewGroupModal;

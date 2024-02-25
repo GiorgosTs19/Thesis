@@ -45,33 +45,39 @@ export const ToastProvider = ({children}) => {
         title: null
     });
 
-    const showToast = (message, type = ToastTypes.INFO, title = null, duration = 55000) => {
+    /**
+     * @param message - The message to be displayed.
+     * @param type - The type of toast to be displayed ( defines the background and the icon that will be used ).
+     * @param title - An optional title to add to the toast message.
+     * @param duration - An optional duration to by-pass the default of 3 seconds.
+     */
+    const showToast = (message, type = ToastTypes.INFO, title = null, duration = 3000) => {
         let icon;
         let className;
         switch (type) {
             case ToastTypes.ERROR : {
                 icon = ToastIcons.ERROR
-                className = 'bg-red-600 text-black';
+                className = 'bg-red-600';
                 break;
             }
             case ToastTypes.WARNING : {
                 icon = ToastIcons.WARNING
-                className = 'bg-yellow-500 text-black';
+                className = 'bg-yellow-500';
                 break;
             }
             case ToastTypes.SUCCESS : {
                 icon = ToastIcons.SUCCESS
-                className = 'bg-green-500 text-black';
+                className = 'bg-green-500';
                 break;
             }
             case ToastTypes.INFO : {
                 icon = ToastIcons.INFO;
-                className = 'bg-blue-400 text-black';
+                className = 'bg-blue-400';
                 break;
             }
             default : {
                 icon = ToastIcons.INFO;
-                className = 'bg-blue-400 text-black';
+                className = 'bg-blue-400';
                 break;
             }
         }
@@ -108,13 +114,13 @@ export const ToastProvider = ({children}) => {
 
     return (
         <ToastContext.Provider value={contextValue}>
-            {toastState.visible && <Toast className={clsx('toast flex', toastState.className)}>
+            {toastState.visible && <Toast className={clsx('toast flex text-white', toastState.className)}>
                 {toastState.icon}
-                <div className={'flex flex-col gap-2 text-center text-sm'}>
+                <div className={'flex flex-col gap-2 text-center text-sm w-full'}>
                     {toastState.title}
-                    <div className="ml-3 font-normal text-base text-black text-left">{toastState.message}</div>
+                    <div className={`font-normal text-base text-white text-center`}>{toastState.message}</div>
                 </div>
-                <Toast.Toggle onDismiss={hideToast} className={toastState.className}/>
+                {/*<Toast.Toggle onDismiss={hideToast} className={'w-fit'}/>*/}
             </Toast>}
             {children}
         </ToastContext.Provider>

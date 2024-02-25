@@ -41,7 +41,6 @@ export function dispatchGroupDeletedEvent(eventData) {
 export function useGroupUpdatedEventListener(callback) {
     useEffect(() => {
         const eventListener = (event) => {
-            console.log(event.type)
             if (typeof callback === 'function' && event.type === EVENT_TYPES.GROUP_UPDATED) {
                 callback(event.detail);
             }

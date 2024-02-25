@@ -5,7 +5,6 @@ import {Author} from "@/Models/Author/Author.js";
 import GroupUsersSearch from "@/Components/Search/AdminSearch/GroupUsersSearch.jsx";
 import React, {useCallback, useMemo, useRef, useState} from "react";
 import {arrayOf, func, number, object, shape, string} from "prop-types";
-import {API} from "@/API/API.js";
 import PaginatedList from "@/Components/PaginatedList/PaginatedList.jsx";
 import {renderWorkItem} from "@/Models/Work/Utils.jsx";
 import {Work} from "@/Models/Work/Work.js";
@@ -16,22 +15,24 @@ import {useWindowSize} from "@uidotdev/usehooks";
 import OffCanvas from "@/Components/OffCanvas/OffCanvas.jsx";
 import {HiUserCircle} from "react-icons/hi";
 import {MdDashboard} from "react-icons/md";
+import useAPI from "@/Hooks/useAPI/useAPI.js";
 
 const styles = {
     groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white my-1',
     badge: 'text-lg cursor-pointer w-fit px-3 py-1 rounded-lg mb-2',
     selectedGroupDesc: 'font-normal text-gray-700 dark:text-gray-400 my-1',
     listTitle: 'md:text-lg 2xl:text-xl font-semibold text-yellow-800 w-fit flex',
-    button: 'hover:scale-110 transition-transform duration-300 cursor-pointer'
+    button: 'hover:scale-110 transition-transform duration-300 cursor-pointer',
+    container: 'flex flex-col h-full'
 }
 export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, setWorksPaginationInfo, setGroupToShow, selectedGroup}) => {
     const {width} = useWindowSize();
     const [canvasOpen, setCanvasOpen] = useState(false)
     const tabsRef = useRef(0);
     const [activeTab, setActiveTab] = useState(0);
-
+    const api = useAPI();
     const handleLinkClick = async (url) => {
-        API.instance.pagination.getPage(url).then(res => {
+        api.pagination.getPage(url).then(res => {
             setWorksPaginationInfo(res.data.works)
         });
     }
@@ -40,7 +41,7 @@ export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, set
     const renderAuthorItem = useCallback((item, index) => {
         return (
             <AuthorItem author={item} index={index} key={index}>
-                <UtilityModal acceptText={`Remove ${item.name}`} header={'Remove member'} onAccept={() => API.instance.groups.removeMember(group, item).then((res) => {
+                <UtilityModal acceptText={`Remove ${item.name}`} header={'Remove member'} onAccept={() => api.groups.removeMember(group, item).then((res) => {
                     setGroupToShow(res.data.group);
                 })} buttonClassName={styles.button}
                               message={`Are you sure you want to remove ${item.name} from ${group.name}?`} declineText={'Cancel'}>
@@ -72,9 +73,8 @@ export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, set
         setCanvasOpen(false)
     }
 
-    console.log(worksPaginationInfo)
     return <>
-        <div className={'flex flex-col h-full'}>
+        <div className={styles.container}>
             <h5 className={styles.groupName}>
                 {group.name}
             </h5>

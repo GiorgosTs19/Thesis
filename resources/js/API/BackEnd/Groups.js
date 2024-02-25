@@ -1,6 +1,7 @@
 import {AbstractAPI} from "@/API/AbstractAPI.js";
-import {dispatchGroupUpdatedEvent} from "@/Events/GroupEvent/GroupEvent.js";
+import {dispatchGroupDeletedEvent, dispatchGroupUpdatedEvent} from "@/Events/GroupEvent/GroupEvent.js";
 import {ToastTypes} from "@/Contexts/ToastContext.jsx";
+
 
 export class Groups extends AbstractAPI {
     async addMembers(group, authors) {
@@ -69,15 +70,27 @@ export class Groups extends AbstractAPI {
         });
     }
 
-    async deleteGroup(id) {
-        if (!id) {
+    async deleteGroup(group) {
+        if (!group.id) {
             throw new Error(
                 "id parameter is marked as required for createGroup()",
             );
         }
 
         return this.post(route("Group.Delete"), {
-            id,
+            id: group.id,
+        }).then(res => {
+            dispatchGroupDeletedEvent({
+                type: 'Group Deleted',
+                success: res.success,
+                error: res.error,
+                data: {
+                    action: `${group.name} has been deleted`,
+                    toastType: ToastTypes.WARNING,
+                    group,
+                    res: res.data
+                }
+            })
         });
     }
 
