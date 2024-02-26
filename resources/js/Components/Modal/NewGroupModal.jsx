@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {Badge, Button, Label, Modal, Select, Textarea, TextInput} from "flowbite-react";
 import {IoAdd} from "react-icons/io5";
-import {array, func} from "prop-types";
+import {array} from "prop-types";
 import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
 import useAPI from "@/Hooks/useAPI/useAPI.js";
 
@@ -17,7 +17,7 @@ import useAPI from "@/Hooks/useAPI/useAPI.js";
  * @param {Array} groups - An array of existing groups to select as the parent group (optional).
  * @returns The rendered NewGroupModal component.
  */
-const NewGroupModal = ({handleNewGroupCreated, groups}) => {
+const NewGroupModal = ({groups}) => {
     const [openModal, setOpenModal] = useState(false);
     const [groupName, setGroupName] = useState('');
     const [groupDesc, setGroupDesc] = useState('');
@@ -29,7 +29,7 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
         api.groups.createGroup(groupName, groupDesc, groupParent).then(response => {
             if (response.ok) {
                 showToast(`${groupName}`, ToastTypes.SUCCESS, response.success);
-                handleNewGroupCreated(response.data.groups, response.data.newGroup.id)
+                // handleNewGroupCreated(response.data.groups, response.data.newGroup)
                 setGroupDesc('')
                 setGroupName('')
                 setGroupParent(null)
@@ -99,14 +99,13 @@ const NewGroupModal = ({handleNewGroupCreated, groups}) => {
 }
 
 const styles = {
-    newGroupButton: 'px-6 py-2 rounded-full my-auto cursor-pointer hover:scale-110 transition-transform duration-300',
+    newGroupButton: 'px-6 py-3 rounded-lg my-auto cursor-pointer hover:scale-110 transition-transform duration-300',
     groupDesc: 'p-2 bg-white',
     error: 'bold text-red-400 px-1',
     section: 'max-w-full mb-4'
 }
 
 NewGroupModal.propTypes = {
-    handleNewGroupCreated: func.isRequired,
     groups: array,
 }
 

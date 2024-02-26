@@ -1,5 +1,5 @@
 import {AbstractAPI} from "@/API/AbstractAPI.js";
-import {dispatchGroupDeletedEvent, dispatchGroupUpdatedEvent} from "@/Events/GroupEvent/GroupEvent.js";
+import {dispatchGroupCreatedEvent, dispatchGroupDeletedEvent, dispatchGroupUpdatedEvent} from "@/Events/GroupEvent/GroupEvent.js";
 import {ToastTypes} from "@/Contexts/ToastContext.jsx";
 
 
@@ -13,7 +13,7 @@ export class Groups extends AbstractAPI {
 
         return this.post(route("Group.Add.Member"), {
             authors,
-            group: group.id,
+            group_id: group.id,
         }).then((res) => {
             dispatchGroupUpdatedEvent({
                 type: 'Members Added',
@@ -22,7 +22,6 @@ export class Groups extends AbstractAPI {
                 data: {
                     action: `Added ${authors.length} ${authors.length < 2 ? 'author' : 'authors'} to ${group.name}`,
                     toastType: ToastTypes.SUCCESS,
-                    group: group.name,
                     res: res.data
                 }
             })
@@ -38,8 +37,8 @@ export class Groups extends AbstractAPI {
         }
 
         return this.post(route("Group.Remove.Member"), {
-            author: author.id,
-            group: group.id,
+            author_id: author.id,
+            group_id: group.id,
         }).then((res) => {
             dispatchGroupUpdatedEvent({
                 type: 'Member Removed',
@@ -67,6 +66,19 @@ export class Groups extends AbstractAPI {
             name,
             description,
             parent
+        }).then((res) => {
+            dispatchGroupCreatedEvent({
+                type: 'Member Removed',
+                success: res.success,
+                error: res.error,
+                data: {
+                    action: `Group Created`,
+                    toastType: ToastTypes.SUCCESS,
+                    group: res.data.group,
+                    res: res.data
+                }
+            })
+            return res;
         });
     }
 

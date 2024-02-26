@@ -9,7 +9,7 @@ import useAPI from "@/Hooks/useAPI/useAPI.js";
 const styles = {
     badge: 'w-fit rounded-md my-auto hover:scale-110 transition-transform duration-300 cursor-pointer',
     color: 'gray',
-    name: 'my-auto px-2 text-lg',
+    name: 'my-auto px-2 text-lg text-nowrap',
     deleteButton: 'ml-auto p-2 rounded-full'
 }
 

@@ -75,7 +75,7 @@ class AuthorController extends Controller {
         }
 
         // Paginate the sorted works
-        $works = $worksQuery->paginate(9);
+        $works = $worksQuery->paginate(10);
 
         // Generate URLs for each sorting option and include them in the sortingOptions object
         $sortingOptions = $this->generateSortingOptions($id);

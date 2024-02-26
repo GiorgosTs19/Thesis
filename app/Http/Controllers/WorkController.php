@@ -10,6 +10,10 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class WorkController extends Controller {
+    /**
+     * @param $authorId
+     * @return array
+     */
     private function generateSortingOptions($authorId): array {
         $sortingOptions = [];
 

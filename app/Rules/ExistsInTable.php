@@ -12,15 +12,19 @@ class ExistsInTable implements ValidationRule {
     protected string $table;
     protected ?string $customFailMessage;
 
+    protected bool $negate;
+
     /**
      * Create a new rule instance.
      *
      * @param string $table - The table to be used for the rule validation
+     * @param bool $negate - Whether the condition should be negated ( check if the primary key doesn't exist in the specified table )
      * @param string|null $customFailMessage - An optional custom message to be used if the validation fails
      */
-    public function __construct(string $table, string $customFailMessage = null) {
+    public function __construct(string $table, string $customFailMessage = null, bool $negate = false) {
         $this->table = $table;
         $this->customFailMessage = $customFailMessage;
+        $this->negate = $negate;
     }
 
     /**
@@ -29,11 +33,12 @@ class ExistsInTable implements ValidationRule {
      * @param Closure(string): PotentiallyTranslatedString $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void {
-        if (!DB::table($this->table)->where('id', $value)->exists()) {
+        $query = DB::table($this->table)->where('id', $value);
+        if ($this->negate ? $query->exists() : !$query->exists()) {
             // Get the singular form of the table name provided and use it as the model identifier
             // to generate the error message
             $model_identifier = Str::singular($this->table);
-            $fail($this->customFailMessage ?? "A $model_identifier with this id does not exist.");
+            $fail($this->customFailMessage ?? "The $model_identifier with this id ( $value ) does not exist.");
         }
     }
 }

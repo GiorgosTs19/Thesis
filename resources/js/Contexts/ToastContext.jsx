@@ -115,7 +115,9 @@ export const ToastProvider = ({children}) => {
     return (
         <ToastContext.Provider value={contextValue}>
             {toastState.visible && <Toast className={clsx('toast flex text-white', toastState.className)}>
-                {toastState.icon}
+                <div className={'mr-3'}>
+                    {toastState.icon}
+                </div>
                 <div className={'flex flex-col gap-2 text-center text-sm w-full'}>
                     {toastState.title}
                     <div className={`font-normal text-base text-white text-center`}>{toastState.message}</div>

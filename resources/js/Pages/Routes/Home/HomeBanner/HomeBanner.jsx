@@ -55,11 +55,11 @@ const HomeBanner = ({mostCitationsUsers, mostWorksUsers, mostCitationsWorks}) =>
                 <div className={clsx('flex flex-col md:flex-row gap-5', styles.listWrapper)}>
                     <List data={mostWorksUsers} renderFn={renderProductivityAuthors} vertical
                           title={'Top Users by Productivity ( Works )'} parser={Author.parseResponseAuthor}
-                          wrapperClassName={styles.list}/>
+                          wrapperClassName={styles.list} rounded/>
 
                     <List data={mostCitationsUsers} renderFn={renderCitationsAuthors} vertical
                           title={'Top Users by Citations'} parser={Author.parseResponseAuthor}
-                          wrapperClassName={styles.list}/>
+                          wrapperClassName={styles.list} rounded/>
                 </div>
             </div>
             <div className={clsx(styles.wrapperDiv, 'order-3 xl:order-3')}>
@@ -78,7 +78,7 @@ const HomeBanner = ({mostCitationsUsers, mostWorksUsers, mostCitationsWorks}) =>
                 <div className={styles.listWrapper}>
                     <List data={mostCitationsWorks} renderFn={renderWork}
                           title={'Most Cited Works'} parser={Work.parseResponseWork}
-                          wrapperClassName={styles.list}/>
+                          wrapperClassName={styles.list} rounded/>
                 </div>
             </div>
         </div>

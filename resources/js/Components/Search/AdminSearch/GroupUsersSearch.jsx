@@ -4,7 +4,7 @@ import {SearchSVG} from "@/SVGS/SearchSVG.jsx";
 import {Badge, Modal, Spinner} from "flowbite-react";
 import SearchResultsList from "@/Components/Search/SearchResults/SearchResultsList.jsx";
 import {Author} from "@/Models/Author/Author.js";
-import {func, object} from "prop-types";
+import {object} from "prop-types";
 import useSearch from "@/Hooks/useSearch/useSearch.js";
 import {useClickAway} from "@uidotdev/usehooks";
 import {RiUserAddLine} from "react-icons/ri";
@@ -21,7 +21,7 @@ import useAPI from "@/Hooks/useAPI/useAPI.js";
  * @param {Function} setGroups - The function to update the list of groups after adding authors.
  * @returns The rendered GroupUsersSearch component.
  */
-const GroupUsersSearch = ({group, setGroup}) => {
+const GroupUsersSearch = ({group}) => {
     const [openModal, setOpenModal] = useState(false);
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const authorsToAdd = selectedAuthors.map((author) => author.id);
@@ -35,6 +35,7 @@ const GroupUsersSearch = ({group, setGroup}) => {
         }
         setOpenModal(false);
     });
+
     const [query, setQuery, {authors}, noResultsFound, loading] = useSearch({
         group: group.id,
         onlyUserAuthors: true,
@@ -140,7 +141,6 @@ const GroupUsersSearch = ({group, setGroup}) => {
                         {authorsToAdd.length > 0 && (
                             <button className={styles.deleteIcon}
                                     onClick={() => api.groups.addMembers(group, authorsToAdd).then((data) => {
-                                            setGroup(data.data.group);
                                             setOpenModal(false)
                                         }
                                     )
@@ -176,7 +176,6 @@ const styles = {
 
 GroupUsersSearch.propTypes = {
     group: object.isRequired,
-    setGroup: func.isRequired
 };
 
 export default GroupUsersSearch;

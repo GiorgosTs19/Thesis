@@ -48,8 +48,6 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
     const INITIAL_BIO_CHARS_VISIBLE = width > 640 ? 500 : 250;
     const [showWholeBio, setShowWholeBio] = useState(authorObject.biography && authorObject.biography.length < INITIAL_BIO_CHARS_VISIBLE);
     const authorStatistics = authorObject.statistics;
-    // const authorWorks = authorObject.works;
-
     const yearsArray = authorStatistics.map((statistic) => statistic.year);
 
     const CHART_DATA = {
@@ -124,7 +122,7 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                 {authorObject.biography && <div className={styles.biographyWrapper}
                                                 onClick={() => setShowWholeBio(prev => !prev)}>
                     <div className={styles.biographyTitle}>
-                        Biography
+                        Biography <span className={'text-left text-sm text-gray-400 opacity-80'}>( Source : OrcId )</span>
                     </div>
                     <div className={styles.biographyText}>
                         {bio}
@@ -135,17 +133,12 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                         <List data={topCoAuthors} renderFn={renderAuthorItem}
                               wrapperClassName={'xl:h-full'} title={'Top Co-Authors'}
                               header={`Top authors who have collaborated with ${authorObject.name} on various works`}
-                              footer={'( Based on the works list in this page )'}/>
+                              footer={'( Based on the works list in this page )'} collapsable={width <= 765}/>
                     </div>
                     <div className={styles.worksListContainer}>
-                        <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork}
-                                       sortingOptions={sortingOptions} currentSortOption={currentSortOption} useInertia>
-                            <div className={styles.listTitle}>
-                                Works
-                                <span
-                                    className={styles.listText}>{isUser ? '' : `(Only works co-authored with registered users appear in the list )`}</span>
-                            </div>
-                        </PaginatedList>
+                        <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork} collapsable={width <= 765}
+                                       sortingOptions={sortingOptions} currentSortOption={currentSortOption} useInertia
+                                       title={`Works`} header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}/>
                     </div>
                 </div>
             </div>

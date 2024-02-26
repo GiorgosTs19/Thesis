@@ -4,11 +4,11 @@ import {array, arrayOf, bool, func, number, shape, string} from "prop-types";
 import PaginationLink from "@/Components/Pagination/PaginationLink.jsx";
 
 const STYLES = {
-    BUTTON: 'text-white w-fit h-fit p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:shadow-outline-gray active:bg-gray-800 mx-1',
+    BUTTON: 'text-white w-fit h-fit p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:shadow-outline-gray active:bg-gray-800',
     CURRENT_BG: 'bg-gray-700',
     DEFAULT_BG: 'bg-gray-500',
     DISABLED: 'cursor-not-allowed opacity-50',
-    DOTS: 'text-black px-2 py-2 md:px-4 md:py-3 rounded-md mx-2 md:mx-4 bg-transparent'
+    DOTS: 'text-black px-2 py-2 rounded-md bg-transparent'
 }
 
 export function Pagination({response, className, useInertia = false, onLinkClick}) {
@@ -40,7 +40,7 @@ export function Pagination({response, className, useInertia = false, onLinkClick
     return (
         response.meta.links.length > 3 && (
             <nav aria-label="Page navigation" className={className}>
-                <div className={"flex"}>
+                <div className={"flex gap-4 m-auto justify-center"}>
                     {
                         paginationRange.map((link, index) => <PaginationLink key={link === '...' ? `dots${index}` : link} index={index} link={link} url={getUrl(link.toString())}
                                                                              className={[link === currentPage ? STYLES.CURRENT_BG : STYLES.DEFAULT_BG, (link === '...' ? `${STYLES.DISABLED} ${STYLES.DOTS}` : STYLES.BUTTON)].join(' ')} useInertia={useInertia}

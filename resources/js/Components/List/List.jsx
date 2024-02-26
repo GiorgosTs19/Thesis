@@ -1,7 +1,8 @@
-import React from 'react';
-import {array, arrayOf, bool, func, node, oneOfType, string} from "prop-types";
+import React, {useEffect, useState} from 'react';
+import {array, bool, func, string} from "prop-types";
 import clsx from "clsx";
 import {themeStyles} from "@/Theme/Theme.js";
+import {BsChevronDown, BsChevronRight} from "react-icons/bs";
 
 /**
  * PaginatedList Component.
@@ -20,6 +21,7 @@ import {themeStyles} from "@/Theme/Theme.js";
  * @param emptyListPlaceholder - An optional placeholder to show if the list of items to render is empty.
  * @param children - Children items passed to the list component
  * @param scrollable - Whether the list can should be scrollable when the content overflows
+ * @param rounded - Whether the list's borders should be rounded.
  * @returns The PaginatedList component.
  *
  * @example
@@ -36,34 +38,46 @@ import {themeStyles} from "@/Theme/Theme.js";
  */
 const List = ({
                   data, title, renderFn, parser, vertical = false, wrapperClassName = '', listClassName = '', header, footer,
-                  emptyListPlaceholder = 'The list is empty', children, scrollable = true
+                  emptyListPlaceholder = 'The list is empty', scrollable = true, rounded = false,
+                  collapsable = false, initiallyCollapsed = false
               }) => {
     const items = parser ? data.map(parser) : data;
+    const [listCollapsed, setListCollapsed] = useState(collapsable && initiallyCollapsed);
 
-    return <div className={clsx(wrapperClassName, styles.wrapper, scrollable ? (vertical ? 'overflow-y-auto' : 'overflow-x-auto') : '')}>
-        <div className={clsx(header ? 'mb-2' : 'mb-6', styles.title)}>
+    useEffect(() => {
+        if (!collapsable)
+            setListCollapsed(false);
+    }, [collapsable]);
+
+    return <div className={clsx(wrapperClassName, styles.wrapper, scrollable ? (vertical ? 'overflow-y-auto' : 'overflow-x-auto') : '', rounded ? 'rounded-lg' : '')}>
+        <div className={clsx(header ? 'mb-2' : 'mb-6', styles.title, collapsable ? 'cursor-pointer' : '')} onClick={() => collapsable && setListCollapsed(prev => !prev)}>
             {title}
-            {children}
+            {
+                collapsable && <span className={'ml-3 mt-1.5 flex'}>{listCollapsed ? <BsChevronRight/>
+                    : <BsChevronDown/>}</span>
+            }
         </div>
-        {header && <div className={styles.header}>
-            {header}
-        </div>}
-        {items.length ?
-            <ul
-                className={`list-disc pl-2 gap-8 ${listClassName} ${vertical ? styles.verticalList : styles.horizontalList}`}>
-                {items.map((item, index) =>
-                    renderFn(item, index)
-                )}
-            </ul>
-            : <h4 className={'text-xl m-auto'}>{emptyListPlaceholder}</h4>}
-        {footer && <div className={styles.footer}>
-            {footer}
-        </div>}
+        {!listCollapsed ? <>
+            {header && <div className={styles.header}>
+                {header}
+            </div>}
+            {items.length ?
+                <ul
+                    className={`overflow-hidden list-disc pl-2 gap-8 ${listClassName} ${vertical ? styles.verticalList : styles.horizontalList}`}>
+                    {items.map((item, index) =>
+                        renderFn(item, index)
+                    )}
+                </ul>
+                : <h4 className={'text-xl m-auto'}>{emptyListPlaceholder}</h4>}
+            {footer && <div className={styles.footer}>
+                {footer}
+            </div>}
+        </> : <span className={'text-base text-gray-500 opacity-85 m-auto'}>List Collapsed</span>}
     </div>
 }
 
 const styles = {
-    wrapper: 'rounded-lg p-4 flex flex-col ',
+    wrapper: `p-4 flex flex-col`,
     title: themeStyles.listTitle,
     header: 'text-gray-500 text-sm 2xl:text-base mb-3',
     verticalList: 'md:grid-cols-2 lg:grid-cols-3',
@@ -76,12 +90,14 @@ List.propTypes = {
     footer: string,
     renderFn: func.isRequired,
     parser: func,
+    rounded: bool,
+    collapsable: bool,
+    initiallyCollapsed: bool,
     data: array.isRequired,
     vertical: bool,
     scrollable: bool,
     wrapperClassName: string,
     listClassName: string,
     emptyListPlaceholder: string,
-    children: oneOfType([node, arrayOf(node)])
 }
 export default List;
