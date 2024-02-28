@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
-import {bool, func} from "prop-types";
+import {arrayOf, bool, func, node, oneOfType, string} from "prop-types";
 import clsx from "clsx";
 
 const OffCanvas = ({
@@ -42,6 +42,9 @@ const OffCanvas = ({
         onClose();
     }
 
+    if (!document.getElementById('off-canvas'))
+        return null;
+
     return ReactDOM.createPortal(
         <>
             {/*Toggle visibility button*/}
@@ -53,7 +56,7 @@ const OffCanvas = ({
                     onClick={handleClose} // Close off-canvas when backdrop is clicked
                 ></div>
             )}
-            <div className='pointer-events-none fixed top-0 left-0 z-10 -top- h-screen w-screen bg-gray-700/30 opacity-0 peer-checked:opacity-100 peer-checked:translate'></div>
+            <div className='pointer-events-none fixed top-0 left-0 z-10 h-screen w-screen bg-gray-700/30 opacity-0 peer-checked:opacity-100 peer-checked:translate'></div>
             {/*Off Canvas*/}
             <div className={clsx(`${getPositionClasses()} ${getHiddenClasses()}`, styles.offCanvas)}>
                 <div className={styles.closeButton} onClick={handleClose}/>
@@ -62,7 +65,10 @@ const OffCanvas = ({
                 </div>
             </div>
         </>
-        , document.getElementById('off-canvas'));
+        ,
+        document.getElementById('off-canvas')
+    )
+        ;
 };
 const styles = {
     backDrop: 'fixed top-0 left-0 z-20 w-full h-full bg-black opacity-50',
@@ -73,7 +79,9 @@ const styles = {
 }
 
 OffCanvas.propTypes = {
+    position: string.isRequired,
     onClose: func.isRequired,
-    isOpen: bool.isRequired
+    isOpen: bool.isRequired,
+    children: oneOfType([node, arrayOf(node)])
 }
 export default OffCanvas;

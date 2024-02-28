@@ -99,7 +99,7 @@ const NewGroupModal = ({groups}) => {
 }
 
 const styles = {
-    newGroupButton: 'px-6 py-3 rounded-lg my-auto cursor-pointer hover:scale-110 transition-transform duration-300',
+    newGroupButton: 'px-6 py-3 rounded-lg cursor-pointer hover:scale-110 transition-transform duration-300 w-5/12 md:w-full mx-auto',
     groupDesc: 'p-2 bg-white',
     error: 'bold text-red-400 px-1',
     section: 'max-w-full mb-4'

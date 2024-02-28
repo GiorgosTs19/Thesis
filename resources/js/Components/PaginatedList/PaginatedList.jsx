@@ -32,7 +32,7 @@ import {themeStyles} from "@/Theme/Theme.js";
  */
 const PaginatedList = ({
                            className, response, title, renderFn, parser, sortingOptions, currentSortOption, useInertia = false,
-                           header, onLinkClick = () => {
+                           header, rounded = false, onLinkClick = () => {
     }, emptyListPlaceholder = 'The list is empty', collapsable = false, initiallyCollapsed = false
                        }) => {
     const items = parser ? response.data.map(item => parser(item)) : response.data;
@@ -43,7 +43,7 @@ const PaginatedList = ({
             setListCollapsed(false);
     }, [collapsable]);
 
-    return <div className={clsx("rounded-lg p-4 flex flex-col h-full", className)}>
+    return <div className={clsx(`${rounded ? 'rounded-lg' : ''} p-4 flex flex-col h-full`, className)}>
         <div className={'flex mb-3 justify-between'}>
             <div className={clsx(` ${collapsable ? 'cursor-pointer' : ''}`, styles.title)} onClick={() => collapsable && setListCollapsed(prev => !prev)}>
                 {title}
@@ -94,6 +94,7 @@ PaginatedList.propTypes = {
     renderFn: func.isRequired,
     header: string,
     parser: func,
+    rounded: bool,
     sortingOptions: arrayOf(SortingOptionPropTypes),
     currentSortOption: number,
     useInertia: bool,

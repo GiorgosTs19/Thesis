@@ -24,7 +24,7 @@ const styles = {
     chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4',
     chart: 'md:px-4 mb-4 max-w-full',
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
-    listsContainer: 'flex flex-col gap-4',
+    listsContainer: 'flex flex-col xl:flex-row gap-4',
     authorsListContainer: 'w-full flex flex-col ',
     worksListContainer: 'w-full flex flex-col',
     listTitle: '2xl:text-xl font-semibold mb-4 text-yellow-800',
@@ -129,17 +129,13 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
                     </div>
                 </div>}
                 <div className={styles.listsContainer}>
-                    <div className={styles.authorsListContainer}>
-                        <List data={topCoAuthors} renderFn={renderAuthorItem}
-                              wrapperClassName={'xl:h-full'} title={'Top Co-Authors'}
-                              header={`Top authors who have collaborated with ${authorObject.name} on various works`}
-                              footer={'( Based on the works list in this page )'} collapsable={width <= 765}/>
-                    </div>
-                    <div className={styles.worksListContainer}>
-                        <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork} collapsable={width <= 765}
-                                       sortingOptions={sortingOptions} currentSortOption={currentSortOption} useInertia
-                                       title={`Works`} header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}/>
-                    </div>
+                    <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork} collapsable={width <= 765}
+                                   sortingOptions={sortingOptions} currentSortOption={currentSortOption} useInertia className={'w-full xl:border-r xl:border-r-gray-300 order-2 xl:order-none'}
+                                   title={`Works`} header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}/>
+                    <List data={topCoAuthors} renderFn={renderAuthorItem}
+                          wrapperClassName={'h-full xl:max-w-fit'} title={'Top Co-Authors'} vertical
+                          header={`Top authors who have collaborated with ${authorObject.name} on various works`}
+                          footer={'( Based on the works list in this page )'} collapsable={width <= 765}/>
                 </div>
             </div>
         </>

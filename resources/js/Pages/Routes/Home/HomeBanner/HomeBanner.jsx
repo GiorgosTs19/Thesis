@@ -76,7 +76,7 @@ const HomeBanner = ({mostCitationsUsers, mostWorksUsers, mostCitationsWorks}) =>
                     </div>
                 </div>
                 <div className={styles.listWrapper}>
-                    <List data={mostCitationsWorks} renderFn={renderWork}
+                    <List data={mostCitationsWorks} renderFn={renderWork} vertical
                           title={'Most Cited Works'} parser={Work.parseResponseWork}
                           wrapperClassName={styles.list} rounded/>
                 </div>

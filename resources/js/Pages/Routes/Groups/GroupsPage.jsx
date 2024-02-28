@@ -1,14 +1,14 @@
 import React, {useCallback, useRef, useState} from "react";
 import {Spinner} from "flowbite-react";
 import {arrayOf, object, oneOfType} from "prop-types";
-import NewGroupModal from "@/Components/Modal/NewGroupModal.jsx";
 import useAsync from "@/Hooks/useAsync/useAsync.js";
-import GroupBadge from "@/Components/Assets/GroupItem/GroupBadge.jsx";
 import {SelectedGroup} from "@/Pages/Routes/Groups/SelectedGroup.jsx";
 import {useScrollIntoView} from "@/Hooks/useScrollIntoView/useScrollIntoView.js";
 import {useGroupCreatedEventListener, useGroupDeletedEventListener, useGroupUpdatedEventListener} from "@/Events/GroupEvent/GroupEvent.js";
 import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
 import useAPI from "@/Hooks/useAPI/useAPI.js";
+import NewGroupModal from "@/Components/Modal/NewGroupModal.jsx";
+import GroupBadge from "@/Components/Assets/GroupItem/GroupBadge.jsx";
 
 /**
  * @component
@@ -25,7 +25,6 @@ const GroupsPage = ({groups}) => {
     const [groupToShow, setGroupToShow] = useState(null);
     const [groupsList, setGroupsList] = useState(groups);
     const [selectedGroup, setSelectedGroup] = useState(null);
-    console.log(selectedGroup)
     const [worksPaginationInfo, setWorksPaginationInfo] = useState(null);
     const [worksShouldRefresh, setWorksShouldRefresh] = useState(false);
     const activeGroupBadgeRef = useRef(null);
@@ -84,23 +83,20 @@ const GroupsPage = ({groups}) => {
     const showCurrentGroup = !loading && !!groupToShow && !!worksPaginationInfo;
 
     return (
-        <>
-            <div className={'flex flex-col gap-3 my-10'}>
-                <span className={'mx-auto text-2xl text-accent'}>Groups</span>
-                <div className={'flex gap-3 overflow-x-auto p-3 overflow-y-hidden border-b border-b-gray-200'}>
-                    <NewGroupModal groups={groupsList}/>
-                    {groupsList.map((group) => (
-                        <GroupBadge key={group.id} group={group}
-                                    onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id}/>
-                    ))}
-                </div>
+        <div className={'flex flex-col md:flex-row min-h-[calc(100vh-4rem)]'}>
+            <div className={'flex flex-wrap md:flex-col gap-4 md:gap-3 my-10 w-full md:w-64 md:border-r md:border-r-gray-300 pr-5'}>
+                <NewGroupModal groups={groupsList}/>
+                {groupsList.map((group) => (
+                    <GroupBadge key={group.id} group={group} className={'w-5/12 md:w-full mx-auto'}
+                                onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id}/>
+                ))}
             </div>
 
             {loading && <div className={'m-auto'}><Spinner size="xl"/></div>}
-            {!loading && !selectedGroup && <h4 className={'m-auto text-2xl'}>Select a group to see more details</h4>}
+            {!loading && !selectedGroup && <h4 className={'m-auto text-2xl  text-center'}>Select a group to see more details</h4>}
             {showCurrentGroup && <SelectedGroup group={groupToShow} setSelectedGroup={setSelectedGroup} setGroupsList={setGroupsList}
                                                 worksPaginationInfo={worksPaginationInfo} setWorksPaginationInfo={setWorksPaginationInfo}/>}
-        </>
+        </div>
     );
 };
 

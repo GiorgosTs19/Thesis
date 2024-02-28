@@ -71,7 +71,7 @@ export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, set
         setCanvasOpen(false)
     }
 
-    return <div className={'py-5 px-8'}>
+    return <div className={'py-5 px-8 w-full'}>
         <h5 className={styles.groupName}>
             {group.name}
         </h5>
@@ -99,7 +99,7 @@ export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, set
                             <span className={'mx-3'}> {`Works ( ${worksPaginationInfo.meta.total} )`}</span>
                         </Button>
                     </Button.Group>
-                    <OffCanvas isOpen={canvasOpen === true} position={'bottom'} onClose={handleOnClose}>
+                    <OffCanvas isOpen={canvasOpen} position={'bottom'} onClose={handleOnClose}>
                         <Tabs style={"fullWidth"} className={'w-full'} ref={tabsRef} onActiveTabChange={(tab) => setActiveTab(tab)}>
                             <Tabs.Item title="Members" icon={HiUserCircle} disabled={activeTab === 0}>
                                 <List data={group.members} renderFn={renderAuthorItem} wrapperClassName={"w-full"} vertical={width >= 1280}
@@ -129,10 +129,7 @@ export const SelectedGroup = ({group, setSelectedGroup, worksPaginationInfo, set
                     </Card>
                     <Card className={`w-full`}>
                         <PaginatedList response={worksPaginationInfo} renderFn={renderWorkItem} parser={Work.parseResponseWork} emptyListPlaceholder={"This group has no works"}
-                                       onLinkClick={handleLinkClick}>
-                            <div className={styles.listTitle}>
-                                {`Group Works ( ${worksPaginationInfo.meta.total} )`}
-                            </div>
+                                       onLinkClick={handleLinkClick} title={`Group Works ( ${worksPaginationInfo.meta.total} )`}>
                         </PaginatedList>
                     </Card>
                 </div>
