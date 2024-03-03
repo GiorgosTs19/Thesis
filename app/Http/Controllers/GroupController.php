@@ -62,7 +62,7 @@ class GroupController extends Controller {
 
         $uniqueWorkIds = $works->unique('id')->pluck('id');
 
-        $uniqueWorks = Work::with(['authors'])->whereIn('id', $uniqueWorkIds)->paginate(9);
+        $uniqueWorks = Work::with(['authors'])->whereIn('id', $uniqueWorkIds)->paginate(10);
         return $success ? response()->json(Requests::success('Group retrieved successfully', ['group' => new GroupResource($Group), 'works' => new WorkCollection($uniqueWorks)]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }

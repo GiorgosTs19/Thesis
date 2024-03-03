@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected array $PROFESSORS = [
+    protected array $professors = [
         ['email' => 'adamidis@ihu.gr', 'first' => 'Panagiotis', 'last' => 'Adamidis', 'id' => '0000-0003-4020-1328', 'found' => false],
         ['email' => 'amanatiadis@ihu.gr', 'first' => 'Dimitrios', 'last' => 'Amanatiadis', 'id' => 'A5048293553', 'found' => true],
         ['email' => 'zafiris', 'first' => 'Zafiris', 'last' => 'Ampatzis', 'id' => 'A5068848285', 'found' => true],
@@ -73,20 +73,20 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
             SystemManager::enableMaintenanceMode();
 
             DB::transaction(function () {
-                foreach ($this->PROFESSORS as $professor) User::createProfessorUser($professor);
+                foreach ($this->professors as $professor) User::createProfessorUser($professor);
 
                 // Retrieve all the authors that are also users.
-                $User_Authors = Author::user()->get();
+                $user_authors = Author::user()->get();
 
                 // Loop through all the authors, retrieve their works and parse them.
-                foreach ($User_Authors as $user_Author) {
-                    $user_Author->parseWorks();
-                    $user_Author->syncWithOrcId();
+                foreach ($user_authors as $user_author) {
+                    $user_author->parseWorks();
+                    $user_author->syncWithOrcId();
                 }
             });
 
-        } catch (Exception $err) {
-            ULog::error("Something went wrong while updating the database," . $err->getMessage(), ULog::META);
+        } catch (Exception $error) {
+            ULog::error("Something went wrong while updating the database," . $error->getMessage(), ULog::META);
         } finally {
             $ended_time = date("H:i:s");
             ULog::log("Database Initialization ended at $ended_time");

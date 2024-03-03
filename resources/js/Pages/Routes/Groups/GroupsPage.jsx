@@ -84,7 +84,7 @@ const GroupsPage = ({groups}) => {
 
     return (
         <div className={'flex flex-col md:flex-row min-h-[calc(100vh-4rem)]'}>
-            <div className={'flex flex-wrap md:flex-col gap-4 md:gap-3 my-10 w-full md:w-64 md:border-r md:border-r-gray-300 pr-5'}>
+            <div className={'flex flex-wrap md:flex-col gap-4 md:gap-3 my-10 w-full md:w-64 md:border-r md:border-r-gray-300 pr-5 pl-2'}>
                 <NewGroupModal groups={groupsList}/>
                 {groupsList.map((group) => (
                     <GroupBadge key={group.id} group={group} className={'w-5/12 md:w-full mx-auto'}

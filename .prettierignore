@@ -1,0 +1,13 @@
+# Ignore artifacts:
+coverage
+
+# Ignore all HTML files:
+**/.git
+**/.svn
+**/.hg
+**/node_modules
+
+# Exclude specific folders:
+tests/
+bootstrap/
+resources/views

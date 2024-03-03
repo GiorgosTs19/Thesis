@@ -119,7 +119,7 @@ class User extends Authenticatable {
         // Parse the ids of the author
         $orc_id = Ids::parseOrcIdFromObj($author);
         $scopus_id = Ids::parseScopusIdFromObj($author);
-        $open_alex_id = Ids::parseOpenAlexIdFromObj($author);
+        $open_alex_id = Ids::parseOAIdFromObj($author);
 
         // Add all the parsed ids in an array
         $ids = [Ids::SCOPUS_ID => $scopus_id, Ids::ORC_ID_ID => $orc_id, Ids::OPEN_ALEX_ID => $open_alex_id];
@@ -131,7 +131,7 @@ class User extends Authenticatable {
         // Else create a new user.
         self::newProfessorUser($professor, $ids);
 
-        Author::createAuthor($author, $ids, true);
+        Author::createOpenAlexAuthor($author, $ids, true);
     }
 
     /**

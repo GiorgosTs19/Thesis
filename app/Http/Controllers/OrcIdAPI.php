@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Utility\Ids;
 use App\Utility\Requests;
 use Illuminate\Support\Facades\Config;
 use stdClass;
@@ -20,22 +21,23 @@ class OrcIdAPI {
     }
 
     /**
-     * @param $orcId_id
-     * The OpenAlex id of the author
-     * @param int $page
-     * The number of the result's page
-     * @param bool $ignore_field_selection
-     * A boolean to indicate whether the fields ( specified in orcId.php config file ) should be ignored.
-     * !This will cause the query to return all the fields of the associated assets.
-     * @param array $additional_filters
-     * An associative array of extra filters to be added to the query e.g ['publication_year'=>2023]
+     * @param $orcId_id - The OrcId id of the author
      * @return stdClass|null
-     * The author's works assets ( if the id provided is valid and present in openAlex's database )
+     * The author's works assets ( if the id provided is valid and present in OrcId's database )
      */
-    public static function authorRequest($orcId_id, array $additional_filters = []): ?stdClass {
+    public static function authorRequest($orcId_id): ?stdClass {
         $url = self::$BASE_URL . $orcId_id;
         return self::extractFields(Requests::getResponseBody(Requests::get($url, ['Accept' => self::$ACCEPT_JSON])),
             self::AUTHOR_ASSET);
+    }
+
+    /**
+     * @param $path - The OrcId path to the work.
+     * @return mixed
+     * The work asset ( if the path provided is valid and present in OrcId's database )
+     */
+    public static function workRequest($path): mixed {
+        return Requests::getResponseBody(Requests::get(Ids::formOrcIdUrl($path), ['Accept' => self::$ACCEPT_JSON]));
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Utility;
 
+use Illuminate\Support\Facades\Config;
+
 class Ids {
     /**
      * ID type string for OrcId ids.
@@ -42,6 +44,16 @@ class Ids {
      * ID filter prefix for Scopus ids.
      */
     const SCOPUS_FILTER_PREFIX = 'scopus:';
+
+    private static string $doiBaseUrl;
+    private static string $orcIdBaseUrl;
+    private static string $dxBaseUrl;
+
+    public static function init(): void {
+        self::$doiBaseUrl = Config::get('DOI.base_url');
+        self::$dxBaseUrl = Config::get('DOI.dx_base_url');
+        self::$orcIdBaseUrl = Config::get('orcId.base_url');
+    }
 
     /**
      * @param string $id
@@ -172,7 +184,7 @@ class Ids {
      * @return string|null
      * The id extracted from the object ( if it is present ).
      */
-    public static function parseOpenAlexIdFromObj($author): ?string {
+    public static function parseOAIdFromObj($author): ?string {
         if (!$author) return null;
         return property_exists($author->ids, 'openalex') ?
             explode('/', parse_url($author->ids->openalex, PHP_URL_PATH))[1] :
@@ -180,15 +192,29 @@ class Ids {
     }
 
     public static function extractDoiFromUrl($url): array|string {
-        $prefix = 'https://doi.org/';
-        return str_replace($prefix, '', $url);
+        return str_replace(self::$doiBaseUrl, '', $url);
     }
 
     public static function toDxDoiUrl($url): array|string {
-        return str_replace('https://doi.org/', 'http://dx.doi.org/', $url);
+        return str_replace(self::$doiBaseUrl, self::$dxBaseUrl, $url);
     }
 
+    /**
+     * Generates a DOI url using the DOI id of a work.
+     * @param $doi - The DOI id to be used to generate the url.
+     * @return string - The generated DOI url.
+     */
     public static function formDoiUrl($doi): string {
-        return 'https://doi.org/' . $doi;
+        return self::$doiBaseUrl . $doi;
+    }
+
+    /**
+     * Generates an OrcId url using a path from an OrcId api response.
+     * @param string $path - The path from the OrcId api response to be used to create the url.
+     * @param bool $removeTrailingSlash - A boolean indicating whether the trailing slash from the base url should be trimmed or not. ( defaults to true )
+     * @return string - The generated OrcId url.
+     */
+    public static function formOrcIdUrl(string $path, bool $removeTrailingSlash = true): string {
+        return ($removeTrailingSlash ? rtrim(self:: $orcIdBaseUrl, '/') : self:: $orcIdBaseUrl) . $path;
     }
 }

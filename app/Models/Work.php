@@ -6,13 +6,15 @@ use App\Http\Controllers\DOIAPI;
 use App\Http\Controllers\OpenAlexAPI;
 use App\Utility\Ids;
 use App\Utility\ULog;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\BelongsToMany, Relations\MorphMany};
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /**
- * @property mixed $id
+ * @property integer $id
  * @property string doi
  * @property string type
  * @property string title
@@ -31,6 +33,9 @@ use Illuminate\Support\Facades\Auth;
  * @property string $event
  * @property string $abstract
  * @property int $is_referenced_by_count
+ * @property string $source
+ * @property int orc_id_put_code
+ * @property string orc_id_url
  *
  * @method static openAlex($id)
  * @method static mostCitations(int $int)
@@ -43,6 +48,9 @@ use Illuminate\Support\Facades\Auth;
 class Work extends Model {
     use HasFactory;
 
+    public static string $openAlexSource = 'OpenAlex';
+    public static string $orcIdSource = 'OrcId';
+
     public const SORTING_OPTIONS = [
         ['name' => 'Alphabetically (A to Z)', 'value' => 0, 'default' => true],
         ['name' => 'Alphabetically (Z to A)', 'value' => 1, 'default' => false],
@@ -53,7 +61,7 @@ class Work extends Model {
     ];
     const AUTHOR_WORKS_TABLE = 'author_work';
 
-    public static array $UPDATE_FIELDS = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
+    public static array $updateFields = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
 
     protected $fillable = ['doi', 'title', 'publication_date', 'publication_year', 'referenced_works_count', 'language', 'type',
         'is_oa', 'open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date'];
@@ -68,35 +76,80 @@ class Work extends Model {
      * @return void
      * The newly created work.
      */
-    public static function createNewWork($work): void {
+    public static function createNewOAWork($work): void {
         $work_open_access = $work->open_access;
         $work_url = $work->ids->doi ?? $work_open_access->oa_url;
-        $newWork = new Work;
+        $new_work = new Work;
         try {
-            $newWork->doi = $work_url;
-            $newWork->title = $work->title ?? '';
-            $newWork->publication_date = $work->publication_date;
-            $newWork->publication_year = $work->publication_year;
-            $newWork->referenced_works_count = $work->referenced_works_count;
-            $newWork->language = $work->language ?? 'Unknown';
-            $newWork->type = $work->type;
-            $newWork->is_oa = $work_open_access->is_oa;
-            $newWork->open_alex_id = Ids::parseOpenAlexId($work->ids->openalex);
-            $newWork->open_alex_url = $work->ids->openalex;
-            $newWork->cites_url = $work->cited_by_api_url;
-            $newWork->last_updated_date = $work->updated_date;
-            $newWork->created_date = $work->created_date;
-            $newWork->save();
+            $new_work->doi = $work_url;
+            $new_work->title = $work->title ?? '';
+            $new_work->publication_date = $work->publication_date;
+            $new_work->publication_year = $work->publication_year;
+            $new_work->referenced_works_count = $work->referenced_works_count;
+            $new_work->language = $work->language ?? 'Unknown';
+            $new_work->type = $work->type;
+            $new_work->is_oa = $work_open_access->is_oa;
+            $new_work->open_alex_id = Ids::parseOpenAlexId($work->ids->openalex);
+            $new_work->open_alex_url = $work->ids->openalex;
+            $new_work->cites_url = $work->cited_by_api_url;
+            $new_work->last_updated_date = $work->updated_date;
+            $new_work->created_date = $work->created_date;
+            $new_work->source = self::$openAlexSource;
+            $new_work->save();
 
             // Generate the counts_by_year statics for the work
-            Statistic::generateStatistics($newWork->id, $work->counts_by_year, self::class);
+            Statistic::generateStatistics($new_work->id, $work->counts_by_year, self::class);
 
             // Associate all authors from the array with the work being processed
-            $newWork->parseAuthors($work->authorships);
-            $newWork->generateConcepts($work->concepts);
-            ULog::memory();
+            $new_work->parseAuthors($work->authorships);
+            $new_work->generateConcepts($work->concepts);
         } catch (Exception $exception) {
             ULog::error($exception->getMessage(), ULog::META);
+        }
+    }
+
+    /**
+     * Creates a new work from an orc id api response.
+     *
+     * @param $work
+     * A work object straight from an OrcId API call response.
+     * @return ?Work
+     * The newly created work.
+     */
+    public static function createNewOIWork($work, $doi, $test_env = false): ?Work {
+        $new_work = new Work;
+        try {
+            $doi_work_object = DOIAPI::doiRequest($doi);
+
+            $new_work->doi = $test_env ? Str::random(10) : $doi;
+            $new_work->title = data_get($work, 'title.title.value') ?? '';
+            $new_work->publication_date = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y-m-d');
+            $new_work->publication_year = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y');
+            $new_work->referenced_works_count = data_get($doi_work_object, 'reference-count');
+            $new_work->source_title = data_get($work, 'journal-title.value');
+            $new_work->language = $doi_work_object->language ?? 'Unknown';
+            $new_work->type = $work->type;
+            $new_work->event = null;
+            $new_work->is_oa = $work->visibility === 'PUBLIC';
+            $new_work->open_alex_id = null;
+            $new_work->open_alex_url = null;
+            $new_work->orc_id_put_code = data_get($work, 'put-code');
+            $new_work->orc_id_url = $test_env ? 'https://pub.orcid.org/v3.0/' . $work->path : Ids::formOrcIdUrl($work->path);
+            $new_work->cites_url = null;
+            $new_work->is_referenced_by_count = data_get($doi_work_object, 'is-referenced-by-count');
+            $new_work->last_updated_date = null;
+            $new_work->subtype = $doi_work_object->type;
+            $new_work->created_date = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y-m-d H:i:s');
+            $new_work->source = self::$orcIdSource;
+            $new_work->save();
+
+            return $new_work;
+            // Associate all authors from the array with the work being processed
+//            $new_work->parseAuthors($work->authorships);
+        } catch (Exception $exception) {
+            ULog::error($exception->getMessage(), ULog::META);
+            dump($exception);
+            return null;
         }
     }
 
@@ -108,20 +161,20 @@ class Work extends Model {
      * Associates the given authors with the work. Creates AuthorWorks records.
      */
     public function parseAuthors($authorObjects): void {
-        foreach ($authorObjects as $index => $authorObject) {
-            $ids = Ids::extractIds($authorObject->author);
+        foreach ($authorObjects as $index => $author_object) {
+            $ids = Ids::extractIds($author_object->author);
 
             // Check if an author is a user.
             $author_is_user = User::authorIsUser($ids[Ids::OPEN_ALEX_ID])['exists'];
 
-            $newAuthor = null;
+            $new_author = null;
             // Check if an author exists by their Open Alex id or their OrcId
-            ['exists' => $db_author_exists, 'author' => $newAuthor] = Author::authorExists($ids[Ids::OPEN_ALEX_ID]);
+            ['exists' => $db_author_exists, 'author' => $new_author] = Author::authorExists($ids[Ids::OPEN_ALEX_ID]);
 
             if (!$author_is_user && !$db_author_exists)
-                $newAuthor = Author::createAuthor($authorObject->author, $ids);
+                $new_author = Author::createOpenAlexAuthor($author_object->author, $ids);
 
-            $newAuthor->associateAuthorToWork($this);
+            $new_author->associateAuthorToWork($this);
         }
     }
 
@@ -182,17 +235,17 @@ class Work extends Model {
      * @return void
      */
     public function updateSelf(): void {
-        $requestWork = OpenAlexAPI::workUpdateRequest($this->open_alex_id);
+        $request_work = OpenAlexAPI::workUpdateRequest($this->open_alex_id);
 
-        $shouldUpdate = $requestWork->updated_date !== $this->last_updated_date;
-        if (!$shouldUpdate)
+        $should_update = $request_work->updated_date !== $this->last_updated_date;
+        if (!$should_update)
             return;
         try {
-            $this->referenced_works_count = $requestWork->referenced_works_count;
+            $this->referenced_works_count = $request_work->referenced_works_count;
 
-            $this->is_oa = $requestWork->open_access->is_oa;
+            $this->is_oa = $request_work->open_access->is_oa;
 
-            $this->last_updated_date = $requestWork->updated_date;
+            $this->last_updated_date = $request_work->updated_date;
 
             $this->save();
         } catch (Exception $exception) {
@@ -202,26 +255,26 @@ class Work extends Model {
         $year_to_update = date('Y');
 
         // Check local db for the work's statistics for the current year
-        $databaseStatistic = $this->statistics()
+        $db_statistic = $this->statistics()
             ->where('year', $year_to_update)
             ->first();
 
         // If there's no local record for this year's statistics for the current work,
         // make the api call to ensure it doesn't exist on OpenAlex as well.
-        if (!$databaseStatistic) {
-            $requestStatistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $requestWork->counts_by_year);
+        if (!$db_statistic) {
+            $req_statistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $request_work->counts_by_year);
             // It seems like for some works there has not been any documented citations for the current year, or for years now,
             // so checking if the record we need exists in the first place
-            if (!$requestStatistic) {
+            if (!$req_statistic) {
                 ULog::log("No statistics were found for $this->open_alex_id for the year $year_to_update", ULog::META);
                 return;
             }
             // If there is, and for some reason it has not been parsed on a previous update, create the new statistic for the current year.
-            Statistic::generateStatistic($this->id, $requestStatistic, Auth::class);
+            Statistic::generateStatistic($this->id, $req_statistic, Auth::class);
             return;
         }
         // If there is a local record check for any changes and update accordingly.
-        $databaseStatistic->updateStatistic($this, $requestWork->counts_by_year);
+        $db_statistic->updateStatistic($this, $request_work->counts_by_year);
     }
 
     /**
@@ -249,8 +302,8 @@ class Work extends Model {
 
     public function scopeSearchDOI($query, $doi) {
         // Add "https://doi.org/" if not already present
-        $doiToSearch = str_starts_with($doi, 'https://doi.org/') ? $doi : 'https://doi.org/' . $doi;
-        return $query->orWhere('doi', $doiToSearch);
+        $doi_to_search = str_starts_with($doi, 'https://doi.org/') ? $doi : 'https://doi.org/' . $doi;
+        return $query->orWhere('doi', $doi_to_search);
     }
 
     public function scopeSearchOpenAlex($query, $open_alex_id) {
@@ -262,25 +315,29 @@ class Work extends Model {
             ->groupBy('type');
     }
 
-    public static function getDynamicTypesList(int $threshold = 3) {
+    public static function getDynamicTypes(int $threshold = 3) {
         $works_by_type = Work::countByType()->get();
 
-        $totalWorks = $works_by_type->sum('count');
+        $total_works = $works_by_type->sum('count');
 
         // Filter types based on the threshold percentage
-        $filteredTypes = $works_by_type->filter(function ($type) use ($totalWorks, $threshold) {
-            return ($type->count / $totalWorks) * 100 >= $threshold;
+        $filtered_types = $works_by_type->filter(function ($type) use ($total_works, $threshold) {
+            return ($type->count / $total_works) * 100 >= $threshold;
         });
 
         // Sum the count of types that do not pass the threshold
-        $otherCount = $works_by_type->whereNotIn('type', $filteredTypes->pluck('type')->toArray())->sum('count');
+        $other_count = $works_by_type->whereNotIn('type', $filtered_types->pluck('type')->toArray())->sum('count');
 
         // Create a new collection with the filtered types and 'Other'
-        $filteredTypes->push(['type' => 'Other', 'count' => $otherCount]);
+        $filtered_types->push(['type' => 'Other', 'count' => $other_count]);
 
-        return $filteredTypes;
+        return $filtered_types;
     }
 
+    /**
+     * @param $orc_id_work
+     * @return void
+     */
     public function syncWithOrcId($orc_id_work): void {
         $work_summary = data_get($orc_id_work, 'work-summary');
         if (!is_null($work_summary) && sizeof($work_summary) > 0) {
@@ -289,8 +346,11 @@ class Work extends Model {
         }
     }
 
+    /**
+     * @return void
+     */
     public function syncWithDOI(): void {
-        $doi_object = DOIAPI::DOIRequest($this->doi);
+        $doi_object = DOIAPI::doiRequest($this->doi);
         $this->subtype = $doi_object->type ?? null;
         $this->event = $doi_object->event ?? null;
         $this->abstract = isset($doi_object->abstract) ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;

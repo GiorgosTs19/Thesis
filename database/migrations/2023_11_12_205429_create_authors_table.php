@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->integer('works_count')->nullable();
             $table->dateTime('created_date')->nullable();
             $table->dateTime('last_updated_date')->nullable();
+            $table->enum('source', ['OrcId', 'OpenAlex']);
             $table->timestamps();
         });
     }

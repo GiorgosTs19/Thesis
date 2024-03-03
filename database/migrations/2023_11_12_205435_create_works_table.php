@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Work;
 use App\Utility\Ids;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -25,11 +26,14 @@ return new class extends Migration {
             $table->string('subtype')->nullable();
             $table->string('event')->nullable();
             $table->boolean('is_oa');
-            $table->string('open_alex_url')->unique();
-            $table->string(Ids::OPEN_ALEX_ID)->unique();
+            $table->string('open_alex_url')->nullable()->unique();
+            $table->string(Ids::OPEN_ALEX_ID)->nullable()->unique();
+            $table->string('orc_id_url')->nullable()->unique();
+            $table->string('orc_id_put_code')->nullable()->unique();
             $table->string('cites_url')->nullable();
-            $table->dateTime('last_updated_date');
-            $table->dateTime('created_date');
+            $table->dateTime('last_updated_date')->nullable();
+            $table->dateTime('created_date')->nullable();
+            $table->enum('source', [Work::$openAlexSource, Work::$orcIdSource]);
             $table->timestamps();
         });
     }
