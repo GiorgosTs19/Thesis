@@ -339,6 +339,7 @@ class Work extends Model {
      * @return void
      */
     public function syncWithOrcId($orc_id_work): void {
+        dump($orc_id_work);
         $work_summary = data_get($orc_id_work, 'work-summary');
         if (!is_null($work_summary) && sizeof($work_summary) > 0) {
             $this->source_title = data_get($work_summary[0], 'journal-title.value');

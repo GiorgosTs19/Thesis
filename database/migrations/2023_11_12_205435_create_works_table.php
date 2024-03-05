@@ -25,7 +25,7 @@ return new class extends Migration {
             $table->string('type');
             $table->string('subtype')->nullable();
             $table->string('event')->nullable();
-            $table->boolean('is_oa');
+            $table->boolean('is_oa')->default(false);
             $table->string('open_alex_url')->nullable()->unique();
             $table->string(Ids::OPEN_ALEX_ID)->nullable()->unique();
             $table->string('orc_id_url')->nullable()->unique();

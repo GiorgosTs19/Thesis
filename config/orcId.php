@@ -6,7 +6,7 @@ return [
     'author_fields' => [
         'biography' => 'person.biography.content',
         'emails' => 'person.emails.email',
-        'external_idertifiers' => 'person.external-identifiers.external-identifier',
+        'external-identifiers' => 'person.external-identifiers.external-identifier',
         'works' => 'activities-summary.works.group'
     ]
 ];
