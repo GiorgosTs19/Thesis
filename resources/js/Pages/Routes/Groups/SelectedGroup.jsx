@@ -156,7 +156,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
         setCanvasOpen(false);
     };
 
-    const charts = group.members.length && (
+    const charts = group.members.length !== 0 && (
         <>
             <div className={styles.chartsContainer}>
                 <Switch
