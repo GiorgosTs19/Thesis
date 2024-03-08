@@ -2,20 +2,20 @@
 
 namespace Database\Seeders;
 
-use Exception;
-use App\Utility\ULog;
-use Illuminate\Database\Seeder;
-use App\Jobs\UpdateDatabaseJob;
 use App\Jobs\InitializeDatabaseJob;
+use App\Jobs\UpdateDatabaseJob;
+use App\Utility\ULog;
+use Exception;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder {
 
     public function run(): void {
-//        self::InitializeDatabase();
-        self::UpdateDatabase();
+        self::InitializeDatabase();
+//        self::UpdateDatabase();
     }
 
-    private function InitializeDatabase (): void {
+    private function InitializeDatabase(): void {
         try {
             InitializeDatabaseJob::dispatchSync();
         } catch (Exception $exception) {
@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder {
         }
     }
 
-    private function UpdateDatabase (): void {
+    private function UpdateDatabase(): void {
         try {
             UpdateDatabaseJob::dispatchSync();
         } catch (Exception $exception) {
