@@ -124,7 +124,7 @@ const GroupUsersSearch = ({ group }) => {
                                 )}
                             </div>
                             <div className={styles.authorSearchTip}>Only showing registered authors who are not members of this group</div>
-                            <div className={'flex justify-center gap-5'}>
+                            <div className={'mb-5 flex justify-center gap-5'}>
                                 <Button disabled={selectedAuthors.length === authors.length} onClick={handleSelectAll} size={'xs'} color={'gray'}>
                                     Select All
                                 </Button>
@@ -132,6 +132,18 @@ const GroupUsersSearch = ({ group }) => {
                                     Clear Selections
                                 </Button>
                             </div>
+                            {authorsToAdd.length > 0 && (
+                                <button
+                                    className={styles.saveChangesIcon}
+                                    onClick={() =>
+                                        api.groups.addMembers(group, authorsToAdd).then(() => {
+                                            setOpenModal(false);
+                                        })
+                                    }
+                                >
+                                    Add {selectedAuthors.length} {selectedAuthors.length < 2 ? 'author' : 'authors'}
+                                </button>
+                            )}
                             {loading && (
                                 <span className={'m-auto text-center'}>
                                     <Spinner aria-label="Loading" />
@@ -152,20 +164,6 @@ const GroupUsersSearch = ({ group }) => {
                             {content}
                         </div>
                     </Modal.Body>
-                    <Modal.Footer className={authorsToAdd.length ? '' : 'border-0'}>
-                        {authorsToAdd.length > 0 && (
-                            <button
-                                className={styles.deleteIcon}
-                                onClick={() =>
-                                    api.groups.addMembers(group, authorsToAdd).then(() => {
-                                        setOpenModal(false);
-                                    })
-                                }
-                            >
-                                Add {selectedAuthors.length} {selectedAuthors.length < 2 ? 'author' : 'authors'}
-                            </button>
-                        )}
-                    </Modal.Footer>
                 </div>
             </Modal>
         </>
@@ -181,7 +179,9 @@ const styles = {
     content: 'space-y-3 flex flex-col',
     belowMinChars: 'mx-auto text-sm text-red-400 opacity-75 mt-2',
     deleteIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
-    addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer flex',
+    saveChangesIcon:
+        'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow  mx-auto cursor-pointer',
+    addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full ml-4 shadow cursor-pointer flex',
     modalBody: 'p-3 bg-white rounded-b-2xl',
     searchResultList: 'max-h-96 overflow-y-auto',
     selectedAuthorBadges: 'flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto',
