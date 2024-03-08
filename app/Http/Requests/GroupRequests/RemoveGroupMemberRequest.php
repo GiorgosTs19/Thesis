@@ -23,8 +23,8 @@ class RemoveGroupMemberRequest extends FormRequest {
      */
     public function rules(): array {
         return [
-            'group_id' => ['required', 'numeric', 'integer', new ExistsInTable('Groups')],
-            'author_id' => ['required', 'numeric', 'integer', new ExistsInTable('Authors')]
+            'group_id' => ['required', 'numeric', 'integer', new ExistsInTable('groups')],
+            'author_id' => ['required', 'numeric', 'integer', new ExistsInTable('authors')]
         ];
     }
 

@@ -134,7 +134,7 @@ class Work extends Model {
             $new_work->language = $doi_work_object->language ?? 'Unknown';
             $new_work->type = property_exists($work, 'type') ? $work->type : 'Unknown';
             $new_work->event = null;
-            $new_work->is_oa = $work->visibility === 'PUBLIC';
+            $new_work->is_oa = property_exists($work, 'visibility') && $work->visibility === 'PUBLIC';
             $new_work->open_alex_id = null;
             $new_work->open_alex_url = null;
             $new_work->orc_id_put_code = data_get($work, 'put-code');

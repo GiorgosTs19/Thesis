@@ -21,7 +21,7 @@ class DeleteGroupRequest extends FormRequest {
      */
     public function rules(): array {
         return [
-            'id' => ['required', new ExistsInTable('Groups')],
+            'id' => ['required', new ExistsInTable('groups')],
         ];
     }
 

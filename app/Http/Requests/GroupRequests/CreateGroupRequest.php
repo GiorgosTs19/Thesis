@@ -23,7 +23,7 @@ class CreateGroupRequest extends FormRequest {
         return [
             'name' => 'required|unique:groups|max:255',
             'description' => 'required|max:255',
-            'parent' => ['nullable', 'numeric', 'integer', new ExistsInTable('Groups')]
+            'parent' => ['nullable', 'numeric', 'integer', new ExistsInTable('groups')]
         ];
     }
 
