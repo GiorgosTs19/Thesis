@@ -307,7 +307,6 @@ class Author extends Model {
      * @return void
      */
     public function syncWithOrcId(): void {
-        ULog::log($this->orc_id);
         if (!$this->orc_id)
             return;
         $orc_id_response = OrcIdAPI::authorRequest($this->orc_id);

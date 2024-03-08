@@ -80,7 +80,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
             },
             { name: 'OpenAlex Works', value: group.uniqueWorksCount.OpenAlex },
             { name: 'Crossref Works', value: group.uniqueWorksCount.Crossref },
-            { name: 'ORCID Works', value: group.uniqueWorksCount.ORCID }
+            { name: 'ORCID Works', value: group.uniqueWorksCount.ORCID },
         ],
         [group, worksPaginationInfo],
     );
@@ -197,14 +197,14 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                 {width <= 640 ? (
                     <div className={'flex flex-col gap-5'}>
                         <Button.Group className={'w-full'}>
-                            <Button color="gray" onClick={() => handleOpenOffCanvas(0)} className={'flex-grow'} disabled={!group.members.length}>
+                            <Button color="gray" onClick={() => handleOpenOffCanvas(0)} className={'flex-grow text-nowrap'}>
                                 <HiUserCircle />
                                 <span className={'mx-3'}>{`Members ${group.members.length ? ` ( ${group.members.length} )` : `( 0 )`}`}</span>
                             </Button>
                             <Button
                                 color="gray"
                                 onClick={() => handleOpenOffCanvas(1)}
-                                className={'flex-grow'}
+                                className={'flex-grow text-nowrap'}
                                 disabled={!worksPaginationInfo.meta.total}
                             >
                                 <MdDashboard />
@@ -283,7 +283,7 @@ SelectedGroup.propTypes = {
         parent: object,
         description: string.isRequired,
         members: arrayOf(object),
-        uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref:number }),
+        uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref: number }),
     }),
     setSelectedGroup: func.isRequired,
     setGroupsList: func.isRequired,

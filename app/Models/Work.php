@@ -11,7 +11,6 @@ use Exception;
 use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\BelongsToMany, Relations\MorphMany};
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 /**
  * @property integer $id
@@ -133,7 +132,7 @@ class Work extends Model {
             $new_work->referenced_works_count = data_get($doi_work_object, 'reference-count');
             $new_work->source_title = data_get($work, 'journal-title.value');
             $new_work->language = $doi_work_object->language ?? 'Unknown';
-            $new_work->type = $work->type;
+            $new_work->type = property_exists($work, 'type') ? $work->type : 'Unknown';
             $new_work->event = null;
             $new_work->is_oa = $work->visibility === 'PUBLIC';
             $new_work->open_alex_id = null;
@@ -185,16 +184,16 @@ class Work extends Model {
     /**
      * @return array - An array of strings containing the sources from which the info for this work came from.
      */
-    public function sources(): array{
+    public function sources(): array {
         $sources = [];
-        if($this->crossref_source) {
-            $sources = [...$sources,Work::$crossRefSource];
+        if ($this->crossref_source) {
+            $sources = [...$sources, Work::$crossRefSource];
         }
-        if($this->open_alex_source) {
-            $sources = [...$sources,Work::$openAlexSource];
+        if ($this->open_alex_source) {
+            $sources = [...$sources, Work::$openAlexSource];
         }
-        if($this->orcid_source) {
-            $sources = [...$sources,Work::$orcIdSource];
+        if ($this->orcid_source) {
+            $sources = [...$sources, Work::$orcIdSource];
         }
         return $sources;
     }
