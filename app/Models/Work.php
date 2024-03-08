@@ -52,12 +52,12 @@ class Work extends Model {
     public static string $orcIdSource = 'OrcId';
 
     public const SORTING_OPTIONS = [
-        ['name' => 'Alphabetically (A to Z)', 'value' => 0, 'default' => true],
-        ['name' => 'Alphabetically (Z to A)', 'value' => 1, 'default' => false],
-        ['name' => 'Oldest', 'value' => 2, 'default' => false],
-        ['name' => 'Newest', 'value' => 3, 'default' => false],
-        ['name' => 'Citations ( Ascending )', 'value' => 4, 'default' => false],
-        ['name' => 'Citations ( Descending )', 'value' => 5, 'default' => false],
+        ['name' => 'Citations ( Ascending )', 'value' => 0, 'default' => false],
+        ['name' => 'Citations ( Descending )', 'value' => 1, 'default' => true],
+        ['name' => 'Alphabetically (A to Z)', 'value' => 2, 'default' => false],
+        ['name' => 'Alphabetically (Z to A)', 'value' => 3, 'default' => false],
+        ['name' => 'Oldest', 'value' => 4, 'default' => false],
+        ['name' => 'Newest', 'value' => 5, 'default' => false],
     ];
     const AUTHOR_WORKS_TABLE = 'author_work';
 
@@ -86,6 +86,7 @@ class Work extends Model {
             $new_work->publication_date = $work->publication_date;
             $new_work->publication_year = $work->publication_year;
             $new_work->referenced_works_count = $work->referenced_works_count;
+            $new_work->is_referenced_by_count = $work->cited_by_count;
             $new_work->language = $work->language ?? 'Unknown';
             $new_work->type = $work->type;
             $new_work->is_oa = $work_open_access->is_oa;
@@ -242,11 +243,9 @@ class Work extends Model {
             return;
         try {
             $this->referenced_works_count = $request_work->referenced_works_count;
-
+            $this->is_referenced_by_count = $request_work->cited_by_count;
             $this->is_oa = $request_work->open_access->is_oa;
-
             $this->last_updated_date = $request_work->updated_date;
-
             $this->save();
         } catch (Exception $exception) {
             ULog::error($exception->getMessage(), ULog::META);

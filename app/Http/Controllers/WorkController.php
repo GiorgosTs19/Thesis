@@ -57,7 +57,7 @@ class WorkController extends Controller {
     }
 
     public function showWorkPage(Request $request, $id): Response {
-        $work = Work::with(['authors', 'statistics'])->openAlex($id, 'id')->firstOrFail();
+        $work = Work::with(['authors', 'statistics'])->find($id);
 
         return Inertia::render('Routes/Work/WorkPage', [
             'work' => new WorkResource($work),

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
-import {array, arrayOf, number, oneOfType, string} from "prop-types";
+import { array, arrayOf, number, oneOfType, string } from 'prop-types';
+import clsx from 'clsx';
 
 /**
  * SimpleBarChart component displays a basic bar chart using Chart.js library.
@@ -19,20 +20,22 @@ import {array, arrayOf, number, oneOfType, string} from "prop-types";
  * />
  */
 
-const SimpleBarChart = ({labels, title, dataSet}) => {
+const SimpleBarChart = ({ labels, title, dataSet, className }) => {
     const chartRef = useRef(null);
 
     useEffect(() => {
         // Your data
         const data = {
             labels: labels,
-            datasets: [{
-                label: title,
-                data: dataSet,
-                backgroundColor: ['rgba(75, 192, 192, 0.2)'],
-                borderColor: ['rgba(75, 192, 192, 1)'],
-                borderWidth: 1
-            }]
+            datasets: [
+                {
+                    label: title,
+                    data: dataSet,
+                    backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+                    borderColor: ['rgba(75, 192, 192, 1)'],
+                    borderWidth: 1,
+                },
+            ],
         };
 
         // Chart configuration
@@ -42,13 +45,13 @@ const SimpleBarChart = ({labels, title, dataSet}) => {
             options: {
                 scales: {
                     y: {
-                        beginAtZero: true
-                    }
+                        beginAtZero: true,
+                    },
                 },
                 barThickness: 17,
                 responsive: true,
                 maintainAspectRatio: false,
-            }
+            },
         };
 
         const myChart = new Chart(chartRef.current, config);
@@ -58,13 +61,14 @@ const SimpleBarChart = ({labels, title, dataSet}) => {
         };
     }, [labels, title, dataSet]);
 
-    return <canvas ref={chartRef} className={'max-w-full'}></canvas>;
+    return <canvas ref={chartRef} className={clsx('max-w-full', className)}></canvas>;
 };
 
 SimpleBarChart.propTypes = {
-    labels:arrayOf(oneOfType([string,number])).isRequired,
-    title:string.isRequired,
-    dataSet:array.isRequired,
-    description:string
-}
+    labels: arrayOf(oneOfType([string, number])).isRequired,
+    title: string.isRequired,
+    dataSet: array.isRequired,
+    description: string,
+    className: string,
+};
 export default SimpleBarChart;

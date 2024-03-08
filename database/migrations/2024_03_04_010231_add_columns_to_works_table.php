@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Work;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +18,7 @@ class ModifyTablesForNextPatch extends Migration {
             // Add orc_id_url column to the works table
             $table->string('orc_id_url')->nullable();
             // Add source column to the works table
-            $table->string('source')->nullable();
+            $table->enum('source', [Work::$openAlexSource, Work::$orcIdSource])->nullable();
             // Change open_alex_url column to be nullable
             $table->string('open_alex_url')->nullable()->change();
             // Change open_alex_id column to be nullable

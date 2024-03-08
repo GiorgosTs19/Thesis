@@ -1,16 +1,18 @@
-import {Work} from "@/Models/Work/Work.js";
-import {Author} from "@/Models/Author/Author.js";
-import Switch from "@/Components/Switch/Switch.jsx";
-import React, {useCallback, useMemo, useState} from 'react';
-import {WorkItem} from "@/Components/Assets/WorkItem/WorkItem.jsx";
-import PaginatedList from "@/Components/PaginatedList/PaginatedList.jsx";
-import PropTypes, {arrayOf, bool, number, object, shape} from 'prop-types';
-import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
-import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisticsChart.jsx";
-import {getTopCoAuthors} from "@/Utility/Arrays/Utils.js";
-import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
-import List from "@/Components/List/List.jsx";
-import {useWindowSize} from "@uidotdev/usehooks";
+import { Work } from '@/Models/Work/Work.js';
+import { Author } from '@/Models/Author/Author.js';
+import Switch from '@/Components/Switch/Switch.jsx';
+import React, { useCallback, useMemo, useState } from 'react';
+import { WorkItem } from '@/Components/Assets/WorkItem/WorkItem.jsx';
+import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
+import PropTypes, { arrayOf, bool, number, object, shape, string } from 'prop-types';
+import RowOfProperties from '@/Components/RowOfProperties/RowOfProperties.jsx';
+import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart.jsx';
+import { getTopCoAuthors } from '@/Utility/Arrays/Utils.js';
+import { AuthorItem } from '@/Components/Assets/AuthorItem/AuthorItem.jsx';
+import List from '@/Components/List/List.jsx';
+import { useWindowSize } from '@uidotdev/usehooks';
+import clsx from 'clsx';
+import SimpleDoughnutChart from '@/Charts/DoughnutChart/SimpleDoughnutChart.jsx';
 
 const styles = {
     infoContainer: 'grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4',
@@ -29,24 +31,20 @@ const styles = {
     worksListContainer: 'w-full flex flex-col',
     listTitle: '2xl:text-xl font-semibold mb-4 text-yellow-800',
     listText: 'mx-2 text-xs sm:text-sm text-gray-600 opacity-50',
-    biographyWrapper: 'p-3 rounded-lg w-full mb-7',
+    biographyWrapper: 'rounded-lg w-full mb-7',
     biographyText: 'text-gray-500 flex-wrap whitespace-pre-wrap 2xl:text-lg cursor-pointer text-left',
     biographyTitle: 'my-3 text-yellow-800 2xl:text-lg',
-}
-const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
+    partialAbstract: 'line-clamp-6 leading-relaxed overflow-ellipsis',
+};
+const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWorksCounts }) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
-    const {
-        name,
-        isUser,
-        updatedAt,
-    } = authorObject;
+    const { name, isUser, updatedAt } = authorObject;
     const PROFILE_STATUS = {
         INCOMPLETE: `${name} is not a registered user, thus their list of works and information might be incomplete and not always up to date.`,
         REGISTERED: `${name} is a registered user, their info and works are regularly updated.`,
-    }
-    const {width} = useWindowSize();
-    const INITIAL_BIO_CHARS_VISIBLE = width > 640 ? 500 : 250;
-    const [showWholeBio, setShowWholeBio] = useState(authorObject.biography && authorObject.biography.length < INITIAL_BIO_CHARS_VISIBLE);
+    };
+    const { width } = useWindowSize();
+    const [showWholeBio, setShowWholeBio] = useState(false);
     const authorStatistics = authorObject.statistics;
     const yearsArray = authorStatistics.map((statistic) => statistic.year);
 
@@ -56,104 +54,152 @@ const AuthorPage = ({author, works, sortingOptions, currentSortOption}) => {
             title: 'Citations',
             labels: yearsArray,
             description: 'Citation trends per year.',
-            disclaimer: 'The data presented in this chart may not capture the complete set of citations for' +
+            disclaimer:
+                'The data presented in this chart may not capture the complete set of citations for' +
                 ' this author. The statistics gathered might not cover every year, potentially leading' +
-                ' to gaps in the information.'
+                ' to gaps in the information.',
         },
         WORKS: {
             dataSet: authorStatistics.map((statistic) => statistic.worksCount),
             title: 'Works',
             labels: yearsArray,
             description: 'Distribution of works authored per year.',
-            disclaimer: 'The data presented in this chart may not capture the complete set of works for' +
+            disclaimer:
+                'The data presented in this chart may not capture the complete set of works for' +
                 ' this author. The statistics gathered might not cover every year, potentially leading' +
-                ' to gaps in the information.'
-        }
-    }
-    const topCoAuthors = useMemo(() => getTopCoAuthors(authorObject.works, 5, authorObject), [authorObject.works],);
+                ' to gaps in the information.',
+        },
+    };
+
+    const DOUGHNUT_CHART_DATA = {
+        dataSet: [uniqueWorksCounts.OpenAlex, uniqueWorksCounts.OrcId],
+        title: 'Unique Works from Source',
+        labels: ['Open Alex Unique Works', 'OrcId Unique Works'],
+        description:
+            'Visualization of the distribution of unique works sourced from different platforms, including OpenAlex and OrcId. ' +
+            "It offers insights into the relative contribution of each platform to the overall collection of the author's unique works.",
+        disclaimer: '',
+    };
+    const topCoAuthors = useMemo(() => getTopCoAuthors(authorObject.works, 5, authorObject), [authorObject.works]);
 
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
 
-    const renderWorkItem = useCallback((work, index) => {
-        return <WorkItem work={work} key={work.id} index={index} authorToExclude={authorObject.id}/>
-    }, [works]);
+    const renderWorkItem = useCallback(
+        (work, index) => {
+            return <WorkItem work={work} key={work.id} index={index} authorToExclude={authorObject.id} />;
+        },
+        [works],
+    );
 
-    const renderAuthorItem = (item, index) => <AuthorItem key={item.value.id} author={item.value} index={index}
-                                                          extraProperties={[{
-                                                              name: 'Works Co-Authored',
-                                                              value: item.occurrences
-                                                          }]}/>
-    const bio = showWholeBio ? authorObject.biography : `${authorObject.biography?.slice(0, INITIAL_BIO_CHARS_VISIBLE)}...`
+    const renderAuthorItem = (item, index) => (
+        <AuthorItem
+            key={item.value.id}
+            author={item.value}
+            index={index}
+            extraProperties={[
+                {
+                    name: 'Works Co-Authored',
+                    value: item.occurrences,
+                },
+            ]}
+        />
+    );
+
+    const authorProperties = [
+        ...authorObject.getProperties(),
+        { name: 'OpenAlex Works', value: uniqueWorksCounts.OpenAlex },
+        { name: 'OrcId Works', value: uniqueWorksCounts.OrcId },
+    ];
+
     return (
-        <>
-            <div className={'xl:px-5 flex flex-col'}>
-                <div className={styles.infoContainer}>
-                    <div className={styles.info}>
-                        <RowOfProperties properties={authorObject.getProperties()}
-                                         title={authorObject.name}></RowOfProperties>
-                        <div className={styles.statusWrapper}>
-                            <h2 className={styles.statusHeader}>{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
-                            <div
-                                className={styles.status}>{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
-                            <div className={styles.lastUpdated}>Last
-                                updated: {updatedAt}</div>
-                        </div>
-                    </div>
-                    <div className={styles.chartsContainer}>
-                        <Switch
-                            checkedLabel={CHART_DATA.WORKS.title}
-                            uncheckedLabel={CHART_DATA.CITATIONS.title}
-                            checked={activeChart.title !== CHART_DATA.CITATIONS.title}
-                            className="mx-auto my-4"
-                            onChange={(checked) => setActiveChart(checked ? CHART_DATA.CITATIONS : CHART_DATA.WORKS)}
-                        />
-                        <div className={styles.chartContainer}>
-                            <div
-                                className={styles.chartDescription}>{activeChart.description}</div>
-                            <div className={styles.chart}>
-                                <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet}
-                                                       labels={activeChart.labels}/>
-                            </div>
-                            <div
-                                className={styles.chartDisclaimer}>{activeChart.disclaimer}</div>
-                        </div>
+        <div className={'flex flex-col py-2 xl:px-5'}>
+            <div className={styles.infoContainer}>
+                <div className={styles.info}>
+                    <RowOfProperties properties={authorProperties} title={authorObject.name}></RowOfProperties>
+                    <div className={styles.statusWrapper}>
+                        <h2 className={styles.statusHeader}>{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
+                        <div className={styles.status}>{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
+                        <div className={styles.lastUpdated}>Last updated: {updatedAt}</div>
                     </div>
                 </div>
-                {authorObject.biography && <div className={styles.biographyWrapper}
-                                                onClick={() => setShowWholeBio(prev => !prev)}>
-                    <div className={styles.biographyTitle}>
-                        Biography <span className={'text-left text-sm text-gray-400 opacity-80'}>( Source : OrcId )</span>
+                <div className={styles.chartsContainer}>
+                    <Switch
+                        checkedLabel={CHART_DATA.WORKS.title}
+                        uncheckedLabel={CHART_DATA.CITATIONS.title}
+                        checked={activeChart.title !== CHART_DATA.CITATIONS.title}
+                        className="mx-auto my-4"
+                        onChange={(checked) => setActiveChart(checked ? CHART_DATA.CITATIONS : CHART_DATA.WORKS)}
+                    />
+                    <div className={styles.chartContainer}>
+                        <div className={styles.chartDescription}>{activeChart.description}</div>
+                        <div className={styles.chart}>
+                            <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet} labels={activeChart.labels} />
+                        </div>
+                        <div className={styles.chartDisclaimer}>{activeChart.disclaimer}</div>
                     </div>
-                    <div className={styles.biographyText}>
-                        {bio}
-                    </div>
-                </div>}
-                <div className={styles.listsContainer}>
-                    <PaginatedList response={works} renderFn={renderWorkItem} parser={Work.parseResponseWork} collapsable={width <= 765}
-                                   sortingOptions={sortingOptions} currentSortOption={currentSortOption} useInertia className={'w-full xl:border-r xl:border-r-gray-300 order-2 xl:order-none'}
-                                   title={`Works`} header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}/>
-                    <List data={topCoAuthors} renderFn={renderAuthorItem}
-                          wrapperClassName={'h-full xl:max-w-fit'} title={'Top Co-Authors'} vertical
-                          header={`Top authors who have collaborated with ${authorObject.name} on various works`}
-                          footer={'( Based on the works list in this page )'} collapsable={width <= 765}/>
                 </div>
             </div>
-        </>
-    )
-}
+            <div className={'mb-5 mt-10 flex flex-col gap-10 border-y border-y-gray-300 pt-5 2xl:border-y-0 2xl:pt-0'}>
+                <SimpleDoughnutChart
+                    dataSet={DOUGHNUT_CHART_DATA.dataSet}
+                    labels={DOUGHNUT_CHART_DATA.labels}
+                    title={DOUGHNUT_CHART_DATA.title}
+                    className={'mx-auto max-h-52'}
+                />
+                <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
+            </div>
+            {authorObject.biography && (
+                <div
+                    className={clsx(styles.biographyWrapper, !showWholeBio ? styles.partialAbstract : '')}
+                    onClick={() => setShowWholeBio((prev) => !prev)}
+                >
+                    <div className={styles.biographyTitle}>
+                        Biography <span className={'text-left text-sm text-gray-400 opacity-80'}>( Source: OrcId )</span>
+                    </div>
+                    <div className={styles.biographyText}>{authorObject.biography}</div>
+                </div>
+            )}
+            <div className={styles.listsContainer}>
+                <PaginatedList
+                    response={works}
+                    renderFn={renderWorkItem}
+                    parser={Work.parseResponseWork}
+                    collapsable={width <= 765}
+                    sortingOptions={sortingOptions}
+                    currentSortOption={currentSortOption}
+                    useInertia
+                    className={'order-2 w-full xl:order-none xl:border-r xl:border-r-gray-300'}
+                    title={`Works`}
+                    header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}
+                />
+                <List
+                    data={topCoAuthors}
+                    renderFn={renderAuthorItem}
+                    wrapperClassName={'h-full xl:max-w-fit'}
+                    title={'Top Co-Authors'}
+                    vertical
+                    header={`Top authors who have collaborated with ${authorObject.name} on various works`}
+                    footer={'( Based on the works list in this page )'}
+                    collapsable={width <= 765}
+                />
+            </div>
+        </div>
+    );
+};
 
 const SortingOptionPropTypes = PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
-    url: PropTypes.string.isRequired,
-    default: bool.isRequired
+    name: string.isRequired,
+    value: number.isRequired,
+    url: string.isRequired,
+    default: bool.isRequired,
 });
 
 AuthorPage.propTypes = {
     author: object,
     works: shape({}),
+    uniqueWorksCounts: shape({ OrcId: number, OpenAlex: number }).isRequired,
     sortingOptions: arrayOf(SortingOptionPropTypes).isRequired,
-    currentSortOption: number.isRequired
+    currentSortOption: number.isRequired,
 };
 
 export default AuthorPage;

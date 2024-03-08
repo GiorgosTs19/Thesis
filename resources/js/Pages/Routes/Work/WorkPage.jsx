@@ -1,10 +1,9 @@
-import React from "react";
-import {object} from "prop-types";
-import {Work} from "@/Models/Work/Work.js";
-import RowOfProperties from "@/Components/RowOfProperties/RowOfProperties.jsx";
-import SimpleStatisticsChart from "@/Charts/SimpleStatisticsChart/SimpleStatisticsChart.jsx";
-import List from "@/Components/List/List.jsx";
-import {AuthorItem} from "@/Components/Assets/AuthorItem/AuthorItem.jsx";
+import React, { useState } from 'react';
+import { object } from 'prop-types';
+import { Work } from '@/Models/Work/Work.js';
+import RowOfProperties from '@/Components/RowOfProperties/RowOfProperties.jsx';
+import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart.jsx';
+import clsx from 'clsx';
 
 const styles = {
     propertiesContainer: 'flex flex-col',
@@ -12,74 +11,108 @@ const styles = {
     chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4',
     chart: 'md:px-4 mb-4 max-w-full',
     chartDisclaimer: 'text-gray-500 text-sm text-center opacity-75 italic mx-auto my-2',
-    abstractWrapper: 'p-3 rounded-lg w-full mb-10 xl:mb-0 xl:w-5/12 4xl:w-full mr-5 h-full 4xl:mb-10',
-    abstractText: 'text-gray-500 flex-wrap whitespace-pre-wrap 2xl:text-lg  4xl:text-xl',
+    abstractWrapper: 'rounded-lg w-full mb-10 xl:mb-0 w-full xl:max-w-5/12 mr-5 h-full 4xl:mb-10',
+    partialAbstract: 'line-clamp-6 leading-relaxed overflow-ellipsis',
+    abstractText: 'text-gray-500 2xl:text-lg  4xl:text-xl',
     abstractTitle: 'my-3 text-yellow-800 2xl:text-lg',
-    authorList: 'w-full '
-}
-const WorkPage = ({work}) => {
+    authorList: 'w-full ',
+    title: 'text-xl lg:text-3xl mb-2 p-1 text-center',
+    authorElement: 'hover:underline text-xs lg:text-sm',
+};
+const WorkPage = ({ work }) => {
     const workObject = Work.parseResponseWork(work);
-    const {title} = workObject;
-    const {statistics, authors} = workObject
+    const { title } = workObject;
+    const { statistics, authors } = workObject;
     const yearsArray = statistics.map((statistic) => statistic.year);
+    const abstractTooLong = workObject.abstract?.length > 550;
+    const [showPartialAbstract, setShowPartialAbstract] = useState(abstractTooLong);
 
     const REFERENCES_CHART = {
         dataSet: statistics.map((statistic) => statistic.citedCount),
         title: 'References',
         labels: yearsArray,
         description: 'References trends per year.',
-        disclaimer: 'The data presented in this chart may not capture the complete set of references for' +
+        disclaimer:
+            'The data presented in this chart may not capture the complete set of references for' +
             ' this work. The statistics gathered might not cover every year, potentially leading' +
-            ' to gaps in the information.'
-    }
+            ' to gaps in the information.',
+    };
 
-    const renderAuthorItem = (item, index) => {
-        return <AuthorItem author={item} index={index} key={index}/>
-    }
-
-    return <>
-        <div className={'lg:px-5'}>
-            <div className="mb-4">
-                <div className={styles.propertiesContainer}>
-                    <RowOfProperties properties={workObject.getProperties()}
-                                     title={title}></RowOfProperties>
-                </div>
-                <div className={'flex flex-col xl:flex-row 4xl:flex-col mb-5'}>
-                    {workObject.abstract && <div className={styles.abstractWrapper}>
-                        <div className={styles.abstractTitle}>
-                            Abstract
-                        </div>
-                        <div className={styles.abstractText}>
-                            {workObject.abstract}
-                        </div>
-                    </div>}
-                    <div className={styles.chartContainer}>
-                        {REFERENCES_CHART.dataSet.length ?
-                            <>
-                                <div className={styles.chartDescription}>{REFERENCES_CHART.description}</div>
-                                <div className={styles.chart}>
-                                    <SimpleStatisticsChart title={REFERENCES_CHART.title}
-                                                           dataSet={REFERENCES_CHART.dataSet}
-                                                           labels={REFERENCES_CHART.labels}/>
+    return (
+        <>
+            <div className={'mx-auto mt-10 lg:px-5 xl:w-10/12'}>
+                <div className="mb-4 flex flex-col gap-2">
+                    <h3 className={styles.title}>{title}</h3>
+                    <div className={'mx-auto text-center'}>
+                        {authors
+                            .sort((a, b) => {
+                                if (a.isUser === b.isUser) {
+                                    return 0;
+                                } else if (a.isUser) {
+                                    return -1;
+                                } else {
+                                    return 1;
+                                }
+                            })
+                            .map((author, index) => (
+                                <React.Fragment key={index}>
+                                    <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser ? 'font-bold' : '')}>
+                                        {author.name}
+                                    </a>
+                                    {index < authors.length - 1 && ', '}
+                                </React.Fragment>
+                            ))}
+                    </div>
+                    <div className={styles.propertiesContainer}>
+                        <RowOfProperties properties={workObject.getProperties()}></RowOfProperties>
+                    </div>
+                    <div className={'mb-5 flex w-full flex-col xl:flex-row'}>
+                        {workObject.abstract && (
+                            <div
+                                className={clsx(
+                                    styles.abstractWrapper,
+                                    showPartialAbstract ? styles.partialAbstract : '',
+                                    abstractTooLong ? 'cursor-pointer' : '',
+                                )}
+                                onClick={() => setShowPartialAbstract((prev) => !prev)}
+                            >
+                                <div className={styles.abstractTitle}>Abstract</div>
+                                <div
+                                    className={clsx(
+                                        showPartialAbstract ? styles.partialAbstract : '',
+                                        abstractTooLong ? 'cursor-pointer' : '',
+                                        styles.abstractText,
+                                    )}
+                                >
+                                    {workObject.abstract}
                                 </div>
-                                <div className={styles.chartDisclaimer}>
-                                    {REFERENCES_CHART.disclaimer}
-                                </div>
-                            </>
-                            :
-                            <div className={'text-2xl text-center m-auto p-3'}>References Metrics are not available
-                                for this work!</div>}
+                            </div>
+                        )}
+                        <div className={styles.chartContainer}>
+                            {REFERENCES_CHART.dataSet.length ? (
+                                <>
+                                    <div className={styles.chartDescription}>{REFERENCES_CHART.description}</div>
+                                    <div className={styles.chart}>
+                                        <SimpleStatisticsChart
+                                            title={REFERENCES_CHART.title}
+                                            dataSet={REFERENCES_CHART.dataSet}
+                                            labels={REFERENCES_CHART.labels}
+                                        />
+                                    </div>
+                                    <div className={styles.chartDisclaimer}>{REFERENCES_CHART.disclaimer}</div>
+                                </>
+                            ) : (
+                                <div className={'m-auto p-3 text-center text-2xl'}>References Metrics are not available for this work!</div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
-            <List data={authors} renderFn={renderAuthorItem}
-                  wrapperClassName={styles.authorList} title={'Authors'}/>
-        </div>
-    </>
-}
+        </>
+    );
+};
 
 WorkPage.propTypes = {
     work: object,
-}
+};
 export default WorkPage;
-

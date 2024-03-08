@@ -1,63 +1,60 @@
-import React from "react";
-import {arrayOf, bool, instanceOf, node, number, oneOfType, shape, string} from "prop-types";
-import {Author} from "@/Models/Author/Author.js";
-import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
-import clsx from "clsx";
+import React from 'react';
+import { arrayOf, bool, instanceOf, node, number, oneOfType, shape, string } from 'prop-types';
+import { Author } from '@/Models/Author/Author.js';
+import { numberToDotNotation } from '@/Utility/Numbers/Utils.js';
+import clsx from 'clsx';
 
-export const AuthorItem = ({author, index, extraProperties = [], children, highlightCitations = false, highlightWorks = false}) => {
-    const {
-        name,
-        citationCount,
-        worksCount,
-        isUser,
-        localUrl
-    } = author;
+export const AuthorItem = ({ author, index, extraProperties = [], children, highlightCitations = false, highlightWorks = false }) => {
+    const { name, citationCount, worksCount, isUser, localUrl } = author;
 
-    return <li className="mb-4 flex-grow list-none flex">
-        <div className={'flex'}>
-            <div className="top-0 left-0 text-black text-center mr-2 flex flex-col text-sm lg:text-base">
-                {index + 1}
-                {children}
-            </div>
-            <div className={'flex flex-col'}>
-                <div className={'flex flex-wrap border-l-2 border-l-blue-700'}>
-                    <div className="text-gray-600 pl-3 text-xs md:text-sm ">
-                        {isUser ? 'Registered User' : 'Guest User'}
-                    </div>
-                    <div className={clsx('text-gray-600 pl-3 text-xs md:text-sm ', highlightCitations ? 'font-bold' : '')}>
-                        Citations : {numberToDotNotation(citationCount)}
-                    </div>
-                    <div className={clsx('text-gray-600 pl-3 text-xs md:text-sm ', highlightWorks ? 'font-bold' : '')}>
-                        Works : {numberToDotNotation(worksCount)}
-                    </div>
-                    {
-                        extraProperties.map((property, index) =>
-                            <div key={index} className="text-gray-600 pl-3 text-xs md:text-sm ">
+    return (
+        <li className="mb-4 flex flex-grow list-none">
+            <div className={'flex'}>
+                <div className="left-0 top-0 mr-2 flex flex-col text-center text-sm text-black lg:text-base">
+                    {index + 1}
+                    {children}
+                </div>
+                <div className={'flex flex-col'}>
+                    <div className={'flex flex-wrap border-l-2 border-l-blue-700'}>
+                        <div className="pl-3 text-xs text-gray-600 md:text-sm ">{isUser ? 'Registered User' : 'Guest User'}</div>
+                        <div className={clsx('pl-3 text-xs text-gray-600 md:text-sm ', highlightCitations ? 'font-bold' : '')}>
+                            Citations: {numberToDotNotation(citationCount)}
+                        </div>
+                        <div className={clsx('pl-3 text-xs text-gray-600 md:text-sm ', highlightWorks ? 'font-bold' : '')}>
+                            Works: {numberToDotNotation(worksCount)}
+                        </div>
+                        {extraProperties.map((property, index) => (
+                            <div key={index} className="pl-3 text-xs text-gray-600 md:text-sm ">
                                 {property.name} : {property.value}
                             </div>
-                        )
-                    }
-                </div>
-                <div className={'pl-3 text-left'}>
-                    <a href={localUrl} className="text-text text-sm md:text-base
-                        font-bold truncate whitespace-pre-wrap hover:underline left-0">
-                        {name}
-                    </a>
+                        ))}
+                    </div>
+                    <div className={'pl-3 text-left'}>
+                        <a
+                            href={localUrl}
+                            className="left-0 truncate whitespace-pre-wrap
+                        text-sm font-bold text-text hover:underline md:text-base"
+                        >
+                            {name}
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </li>
-}
+        </li>
+    );
+};
 
 AuthorItem.propTypes = {
     author: instanceOf(Author),
     index: number.isRequired,
-    extraProperties: arrayOf(shape({
-        name: string,
-        value: oneOfType([number, string])
-    })),
+    extraProperties: arrayOf(
+        shape({
+            name: string,
+            value: oneOfType([number, string]),
+        }),
+    ),
     utilityColClassName: string,
     children: oneOfType([node, arrayOf(node)]),
     highlightCitations: bool,
-    highlightWorks: bool
-}
+    highlightWorks: bool,
+};

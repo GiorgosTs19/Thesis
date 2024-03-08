@@ -46,7 +46,7 @@ class GroupController extends Controller {
             return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
         }
 
-        $Group = Group::with('members.works', 'parent')->find($id);
+        $Group = Group::with('members.works', 'parent', 'members.statistics')->find($id);
 
         if (!$Group) {
             return response()->json(Requests::clientError('A group with this id does not exist', 200));
@@ -60,10 +60,21 @@ class GroupController extends Controller {
             $works = $works->merge($member->works);
         }
 
+        $orc_id_works = $works->where('source', '=', Work::$orcIdSource)->count();
+        $open_alex_works = $works->where('source', '=', Work::$openAlexSource)->count();
+
         $uniqueWorkIds = $works->unique('id')->pluck('id');
 
-        $uniqueWorks = Work::with(['authors'])->whereIn('id', $uniqueWorkIds)->paginate(10);
-        return $success ? response()->json(Requests::success('Group retrieved successfully', ['group' => new GroupResource($Group), 'works' => new WorkCollection($uniqueWorks)]))
+        $uniqueWorks = Work::with(['authors'])->whereIn('id', $uniqueWorkIds)->orderBy('referenced_works_count', 'desc')->paginate(10);
+
+        foreach ($Group->members as $member)
+            unset($member->works);
+
+        return $success ? response()->json(Requests::success('Group retrieved successfully',
+            ['group' => new GroupResource($Group, [
+                'orc_id_works' => $orc_id_works, // Pass the specific value you want
+                'open_alex_works' => $open_alex_works, // Pass the specific value you want
+            ]), 'works' => new WorkCollection($uniqueWorks)]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 

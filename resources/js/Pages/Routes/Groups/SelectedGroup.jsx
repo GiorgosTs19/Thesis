@@ -4,7 +4,7 @@ import List from '@/Components/List/List.jsx';
 import { Author } from '@/Models/Author/Author.js';
 import GroupUsersSearch from '@/Components/Search/AdminSearch/GroupUsersSearch.jsx';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { arrayOf, func, object, shape, string } from 'prop-types';
+import { arrayOf, func, number, object, shape, string } from 'prop-types';
 import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
 import { renderWorkItem } from '@/Models/Work/Utils.jsx';
 import { Work } from '@/Models/Work/Work.js';
@@ -16,6 +16,9 @@ import OffCanvas from '@/Components/OffCanvas/OffCanvas.jsx';
 import { HiUserCircle } from 'react-icons/hi';
 import { MdDashboard } from 'react-icons/md';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
+import SimpleDoughnutChart from '@/Charts/DoughnutChart/SimpleDoughnutChart.jsx';
+import Switch from '@/Components/Switch/Switch.jsx';
+import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart.jsx';
 
 const styles = {
     groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white my-1',
@@ -24,6 +27,10 @@ const styles = {
     listTitle: 'md:text-lg 2xl:text-xl font-semibold text-yellow-800 w-fit flex',
     button: 'hover:scale-110 cursor-pointer',
     container: 'flex flex-col py-5 px-8',
+    chartContainer: 'flex flex-col',
+    chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4',
+    chart: 'md:px-4 mb-4 max-w-full',
+    chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
 };
 export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, setWorksPaginationInfo }) => {
     const { width } = useWindowSize();
@@ -71,9 +78,72 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                     return accumulator + currentValue.citation_count;
                 }, 0),
             },
+            { name: 'OpenAlex Works', value: group.uniqueWorksCount.OpenAlex },
+            { name: 'OrcId Works', value: group.uniqueWorksCount.OrcId },
         ],
         [group, worksPaginationInfo],
     );
+
+    const DOUGHNUT_CHART_DATA = {
+        dataSet: [group.uniqueWorksCount.OpenAlex, group.uniqueWorksCount.OrcId],
+        title: 'Unique Works from Source',
+        labels: ['Open Alex Unique Works', 'OrcId Unique Works'],
+        description:
+            'Visualization of the distribution of unique works sourced from different platforms, including OpenAlex and OrcId. ' +
+            "It offers insights into the relative contribution of each platform to the overall collection of group's unique works.",
+        disclaimer: '',
+    };
+    const statistics = useMemo(() => group.members?.map((member) => member.statistics), [group]);
+
+    const yearlyCounts = useMemo(
+        () =>
+            group.members.length
+                ? statistics.reduce((accumulator, array) => {
+                      // Iterate over each object in the array
+                      array.forEach((item) => {
+                          const { year, cited_count, works_count } = item;
+                          // Check if the year exists in the accumulator object
+                          if (!accumulator[year]) {
+                              // If not, initialize counts for that year
+                              accumulator[year] = { cited_count: 0, works_count: 0 };
+                          }
+                          // Add up counts for the current year
+                          accumulator[year].cited_count += cited_count;
+                          accumulator[year].works_count += works_count;
+                      });
+                      return accumulator;
+                  }, {})
+                : {},
+        [statistics],
+    );
+
+    const CHART_DATA = useMemo(
+        () => ({
+            CITATIONS: {
+                dataSet: Object.values(yearlyCounts).map((statistic) => statistic?.cited_count),
+                title: 'Citations',
+                labels: Object.keys(yearlyCounts),
+                description: 'Citation trends per year.',
+                disclaimer:
+                    'The data presented in this chart may not capture the complete set of citations for' +
+                    ' this group. The statistics gathered might not cover every year, potentially leading' +
+                    ' to gaps in the information.',
+            },
+            WORKS: {
+                dataSet: Object.values(yearlyCounts).map((statistic) => statistic?.works_count),
+                title: 'Works',
+                labels: Object.keys(yearlyCounts),
+                description: 'Distribution of works authored per year.',
+                disclaimer:
+                    'The data presented in this chart may not capture the complete set of works for' +
+                    ' this group. The statistics gathered might not cover every year, potentially leading' +
+                    ' to gaps in the information.',
+            },
+        }),
+        [],
+    );
+
+    const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
 
     const handleOpenOffCanvas = (tab) => {
         setCanvasOpen(true);
@@ -85,13 +155,43 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
         setCanvasOpen(false);
     };
 
+    const charts = group.members.length && (
+        <>
+            <div className={styles.chartsContainer}>
+                <Switch
+                    checkedLabel={CHART_DATA.WORKS.title}
+                    uncheckedLabel={CHART_DATA.CITATIONS.title}
+                    checked={activeChart.title !== CHART_DATA.CITATIONS.title}
+                    className={'mx-auto my-4 w-fit'}
+                    onChange={(checked) => setActiveChart(checked ? CHART_DATA.CITATIONS : CHART_DATA.WORKS)}
+                />
+                <div className={styles.chartContainer}>
+                    <div className={styles.chartDescription}>{activeChart.description}</div>
+                    <div className={styles.chart}>
+                        <SimpleStatisticsChart title={activeChart.title} dataSet={activeChart.dataSet} labels={activeChart.labels} />
+                    </div>
+                    <div className={styles.chartDisclaimer}>{activeChart.disclaimer}</div>
+                </div>
+            </div>
+            <div className={'mb-5 mt-10 flex flex-col gap-10 border-t border-t-gray-300 pt-5'}>
+                <SimpleDoughnutChart
+                    dataSet={DOUGHNUT_CHART_DATA.dataSet}
+                    labels={DOUGHNUT_CHART_DATA.labels}
+                    title={DOUGHNUT_CHART_DATA.title}
+                    className={'mx-auto max-h-60'}
+                />
+                <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
+            </div>
+        </>
+    );
+
     return (
         <div className={'w-full px-8 py-5'}>
             <h5 className={styles.groupName}>{group.name}</h5>
             <p className={styles.groupDescription}>{group.description}</p>
             <>
                 <div>
-                    <RowOfProperties properties={properties} title={'Group Properties'} />
+                    <RowOfProperties properties={properties} />
                 </div>
                 {width <= 640 ? (
                     <div className={'flex flex-col gap-5'}>
@@ -110,6 +210,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                                 <span className={'mx-3'}> {`Works ( ${worksPaginationInfo.meta.total} )`}</span>
                             </Button>
                         </Button.Group>
+                        {charts}
                         <OffCanvas isOpen={canvasOpen} position={'bottom'} onClose={handleOnClose}>
                             <Tabs style={'fullWidth'} className={'w-full'} ref={tabsRef} onActiveTabChange={(tab) => setActiveTab(tab)}>
                                 <Tabs.Item title="Members" icon={HiUserCircle} disabled={activeTab === 0}>
@@ -141,31 +242,34 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                         </OffCanvas>
                     </div>
                 ) : (
-                    <div className={'flex min-h-96 flex-col gap-10 lg:flex-row'}>
-                        <Card className={'w-full lg:max-w-fit '}>
-                            <List
-                                data={group.members}
-                                renderFn={renderAuthorItem}
-                                wrapperClassName={`mb-auto`}
-                                vertical
-                                title={`Group Members ${group.members.length ? ` ( ${group.members.length} )` : ''}`}
-                                parser={Author.parseResponseAuthor}
-                                emptyListPlaceholder={'This group has no members'}
-                            >
-                                <GroupUsersSearch group={group} />
-                            </List>
-                        </Card>
-                        <Card className={`w-full`}>
-                            <PaginatedList
-                                response={worksPaginationInfo}
-                                renderFn={renderWorkItem}
-                                parser={Work.parseResponseWork}
-                                emptyListPlaceholder={'This group has no works'}
-                                onLinkClick={handleLinkClick}
-                                title={`Group Works ( ${worksPaginationInfo.meta.total} )`}
-                            ></PaginatedList>
-                        </Card>
-                    </div>
+                    <>
+                        {charts}
+                        <div className={'flex min-h-96 flex-col gap-10 lg:flex-row'}>
+                            <Card className={'w-full lg:max-w-fit '}>
+                                <List
+                                    data={group.members}
+                                    renderFn={renderAuthorItem}
+                                    wrapperClassName={`mb-auto`}
+                                    vertical
+                                    title={`Group Members ${group.members.length ? ` ( ${group.members.length} )` : ''}`}
+                                    parser={Author.parseResponseAuthor}
+                                    emptyListPlaceholder={'This group has no members'}
+                                >
+                                    <GroupUsersSearch group={group} />
+                                </List>
+                            </Card>
+                            <Card className={`w-full`}>
+                                <PaginatedList
+                                    response={worksPaginationInfo}
+                                    renderFn={renderWorkItem}
+                                    parser={Work.parseResponseWork}
+                                    emptyListPlaceholder={'This group has no works'}
+                                    onLinkClick={handleLinkClick}
+                                    title={`Group Works ( ${worksPaginationInfo.meta.total} )`}
+                                ></PaginatedList>
+                            </Card>
+                        </div>
+                    </>
                 )}
             </>
         </div>
@@ -178,6 +282,7 @@ SelectedGroup.propTypes = {
         parent: object,
         description: string.isRequired,
         members: arrayOf(object),
+        uniqueWorksCount: shape({ OpenAlex: number, OrcId: number }),
     }),
     setSelectedGroup: func.isRequired,
     setGroupsList: func.isRequired,
