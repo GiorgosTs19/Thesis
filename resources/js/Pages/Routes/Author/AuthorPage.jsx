@@ -23,7 +23,7 @@ const styles = {
     lastUpdated: 'mt-2 text-gray-500 opacity-80 text-xs lg:text-sm',
     chartsContainer: '2xl:col-span-3 flex flex-col h-full',
     chartContainer: 'flex flex-col h-full',
-    chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4',
+    chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4 max-w-3xl overflow-visible text-center',
     chart: 'md:px-4 mb-4 max-w-full',
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     listsContainer: 'flex flex-col xl:flex-row gap-4',
@@ -72,12 +72,12 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
     };
 
     const DOUGHNUT_CHART_DATA = {
-        dataSet: [uniqueWorksCounts.OpenAlex, uniqueWorksCounts.OrcId],
-        title: 'Unique Works from Source',
-        labels: ['Open Alex Unique Works', 'OrcId Unique Works'],
+        dataSet: [uniqueWorksCounts.OpenAlex, uniqueWorksCounts.ORCID, uniqueWorksCounts.Crossref],
+        title: 'Works from Source',
+        labels: ['Open Alex ', 'ORCID', 'Crossref'],
         description:
-            'Visualization of the distribution of unique works sourced from different platforms, including OpenAlex and OrcId. ' +
-            "It offers insights into the relative contribution of each platform to the overall collection of the author's unique works.",
+            'Visualization of the distribution of works sourced from different platforms, including OpenAlex, ORCID and Crossref. ' +
+            "It offers insights into the relative contribution of each platform to the overall collection of the author's works.",
         disclaimer: '',
     };
     const topCoAuthors = useMemo(() => getTopCoAuthors(authorObject.works, 5, authorObject), [authorObject.works]);
@@ -108,7 +108,8 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
     const authorProperties = [
         ...authorObject.getProperties(),
         { name: 'OpenAlex Works', value: uniqueWorksCounts.OpenAlex },
-        { name: 'OrcId Works', value: uniqueWorksCounts.OrcId },
+        { name: 'Crossref Works', value: uniqueWorksCounts.Crossref },
+        { name: 'OrcId Works', value: uniqueWorksCounts.ORCID }
     ];
 
     return (
@@ -139,7 +140,8 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
                     </div>
                 </div>
             </div>
-            <div className={'mb-5 mt-10 flex flex-col gap-10 border-y border-y-gray-300 pt-5 2xl:border-y-0 2xl:pt-0'}>
+            <div className={'mb-5 mt-10 flex flex-col gap-5 border-b border-b-gray-300 pt-5'}>
+                <h4 className={styles.chartDescription}>Work Source Distribution</h4>
                 <SimpleDoughnutChart
                     dataSet={DOUGHNUT_CHART_DATA.dataSet}
                     labels={DOUGHNUT_CHART_DATA.labels}
@@ -197,7 +199,7 @@ const SortingOptionPropTypes = PropTypes.shape({
 AuthorPage.propTypes = {
     author: object,
     works: shape({}),
-    uniqueWorksCounts: shape({ OrcId: number, OpenAlex: number }).isRequired,
+    uniqueWorksCounts: shape({ ORCID: number, OpenAlex: number, Crossref:number }).isRequired,
     sortingOptions: arrayOf(SortingOptionPropTypes).isRequired,
     currentSortOption: number.isRequired,
 };

@@ -19,7 +19,6 @@ class Citations {
         $referenceInfo = [];
 
         $response = json_decode(Requests::get(Ids::toDxDoiUrl($doi))->body());
-        dump(Requests::get(Ids::toDxDoiUrl($doi)));
         foreach (self::JOURNAL_ARTICLE_FIELDS as $field) {
             if (isset($response[$field])) {
                 $referenceInfo[$field] = $response[$field];
@@ -27,7 +26,6 @@ class Citations {
                 $referenceInfo[$field] = null; // Handle cases where the field is not present in the response
             }
         }
-//        dump($referenceInfo);
         return $referenceInfo;
     }
 

@@ -3,7 +3,7 @@ import { arrayOf, bool, func, number, oneOfType, shape, string } from 'prop-type
 import { Link } from '@inertiajs/inertia-react';
 import { useClickAway } from '@uidotdev/usehooks';
 
-const DropdownMenu = ({ options, onSelect, className, label, defaultOption = null, renderLinks = false }) => {
+const DropdownMenu = ({ options, onSelect=(value)=>{}, className, label, defaultOption = null, renderLinks = false }) => {
     const [selectedOption, setSelectedOption] = useState(defaultOption);
     const [menuOpen, setMenuOpen] = useState(false);
     const ref = useClickAway(() => {
@@ -12,7 +12,7 @@ const DropdownMenu = ({ options, onSelect, className, label, defaultOption = nul
     const handleOptionClick = (option) => {
         setSelectedOption(option);
         setMenuOpen(false);
-        onSelect(option.value);
+        onSelect && onSelect(option.value);
     };
     const renderDropDownItem = (option, index) => {
         return renderLinks ? (
@@ -23,8 +23,8 @@ const DropdownMenu = ({ options, onSelect, className, label, defaultOption = nul
                 onClick={() => handleOptionClick(option)}
                 className="mx-auto block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 role="menuitem"
-                preserveState
-                preserveScroll
+                preserveState={true}
+                preserveScroll={true}
             >
                 {option.name}
             </Link>

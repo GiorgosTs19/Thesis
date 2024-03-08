@@ -9,7 +9,6 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property mixed publication_year
- * @property mixed publication_date
  * @property mixed title
  * @property mixed doi
  * @property mixed referenced_works_count
@@ -27,6 +26,7 @@ use Illuminate\Support\Carbon;
  * @property mixed $is_referenced_by_count
  * @property mixed $abstract
  * @property string $source
+ * @method sources()
  */
 class WorkResource extends JsonResource {
     /**
@@ -45,7 +45,6 @@ class WorkResource extends JsonResource {
             'source_title' => $this->source_title,
             'referenced_by_count' => $this->is_referenced_by_count,
             'abstract' => $this->abstract,
-            'published_at' => Carbon::parse($this->publication_date)->format('d-m-Y'),
             'published_at_year' => $this->publication_year,
             'referenced_works_count' => $this->referenced_works_count,
             'language' => $this->language,
@@ -58,7 +57,7 @@ class WorkResource extends JsonResource {
             'open_alex_id' => $this->open_alex_id,
             'local_url' => route('Work.Page', ['id' => $this->id]),
             'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
-            'source' => $this->source
+            'sources' => $this->sources()
         ];
     }
 }

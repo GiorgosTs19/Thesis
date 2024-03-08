@@ -25,7 +25,6 @@ use Illuminate\Support\Str;
  * @property int publication_year
  * @property string $open_alex_id
  * @property string open_alex_url
- * @property mixed publication_date
  * @property string last_updated_date
  * @property int referenced_works_count
  * @property string $source_title
@@ -33,9 +32,11 @@ use Illuminate\Support\Str;
  * @property string $event
  * @property string $abstract
  * @property int $is_referenced_by_count
- * @property string $source
  * @property int orc_id_put_code
  * @property string orc_id_url
+ * @property boolean orcid_source
+ * @property boolean open_alex_source
+ * @property boolean crossref_source
  *
  * @method static openAlex($id)
  * @method static mostCitations(int $int)
@@ -48,8 +49,13 @@ use Illuminate\Support\Str;
 class Work extends Model {
     use HasFactory;
 
+    public static string $OPEN_ALEX_SOURCE_FIELD = 'open_alex_source';
+    public static string $ORCID_SOURCE_FIELD = 'orcid_source';
+    public static string $CROSSREF_SOURCE_FIELD = 'crossref_source';
+
     public static string $openAlexSource = 'OpenAlex';
-    public static string $orcIdSource = 'OrcId';
+    public static string $orcIdSource = 'ORCID';
+    public static string $crossRefSource = 'Crossref';
 
     public const SORTING_OPTIONS = [
         ['name' => 'Citations ( Ascending )', 'value' => 0, 'default' => false],
@@ -63,8 +69,8 @@ class Work extends Model {
 
     public static array $updateFields = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'referenced_works_count'];
 
-    protected $fillable = ['doi', 'title', 'publication_date', 'publication_year', 'referenced_works_count', 'language', 'type',
-        'is_oa', 'open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date'];
+    protected $fillable = ['doi', 'title', 'publication_year', 'referenced_works_count', 'language', 'type',
+        'is_oa', 'open_alex_url', 'open_alex_id', 'cites_url', 'last_updated_date', 'created_date', 'orcid_source', 'open_alex_source', 'crossref_source'];
 
     protected $hidden = ['last_updated_date', 'created_date', 'created_at'];
 
@@ -83,7 +89,6 @@ class Work extends Model {
         try {
             $new_work->doi = $work_url;
             $new_work->title = $work->title ?? '';
-            $new_work->publication_date = $work->publication_date;
             $new_work->publication_year = $work->publication_year;
             $new_work->referenced_works_count = $work->referenced_works_count;
             $new_work->is_referenced_by_count = $work->cited_by_count;
@@ -95,7 +100,7 @@ class Work extends Model {
             $new_work->cites_url = $work->cited_by_api_url;
             $new_work->last_updated_date = $work->updated_date;
             $new_work->created_date = $work->created_date;
-            $new_work->source = self::$openAlexSource;
+            $new_work->open_alex_source = true;
             $new_work->save();
 
             // Generate the counts_by_year statics for the work
@@ -117,14 +122,13 @@ class Work extends Model {
      * @return ?Work
      * The newly created work.
      */
-    public static function createNewOIWork($work, $doi, $test_env = false): ?Work {
+    public static function createNewOIWork($work, $doi): ?Work {
         $new_work = new Work;
         try {
             $doi_work_object = DOIAPI::doiRequest($doi);
 
-            $new_work->doi = $test_env ? Str::random(10) : $doi;
+            $new_work->doi = $doi;
             $new_work->title = data_get($work, 'title.title.value') ?? '';
-            $new_work->publication_date = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y-m-d');
             $new_work->publication_year = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y');
             $new_work->referenced_works_count = data_get($doi_work_object, 'reference-count');
             $new_work->source_title = data_get($work, 'journal-title.value');
@@ -135,13 +139,13 @@ class Work extends Model {
             $new_work->open_alex_id = null;
             $new_work->open_alex_url = null;
             $new_work->orc_id_put_code = data_get($work, 'put-code');
-            $new_work->orc_id_url = $test_env ? 'https://pub.orcid.org/v3.0/' . $work->path : Ids::formOrcIdUrl($work->path);
+            $new_work->orc_id_url = Ids::formOrcIdUrl($work->path);
             $new_work->cites_url = null;
             $new_work->is_referenced_by_count = data_get($doi_work_object, 'is-referenced-by-count');
             $new_work->last_updated_date = null;
             $new_work->subtype = $doi_work_object->type;
             $new_work->created_date = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y-m-d H:i:s');
-            $new_work->source = self::$orcIdSource;
+            $new_work->orcid_source = true;
             $new_work->save();
 
             return $new_work;
@@ -149,7 +153,6 @@ class Work extends Model {
 //            $new_work->parseAuthors($work->authorships);
         } catch (Exception $exception) {
             ULog::error($exception->getMessage(), ULog::META);
-            dump($exception);
             return null;
         }
     }
@@ -177,6 +180,23 @@ class Work extends Model {
 
             $new_author->associateAuthorToWork($this);
         }
+    }
+
+    /**
+     * @return array - An array of strings containing the sources from which the info for this work came from.
+     */
+    public function sources(): array{
+        $sources = [];
+        if($this->crossref_source) {
+            $sources = [...$sources,Work::$crossRefSource];
+        }
+        if($this->open_alex_source) {
+            $sources = [...$sources,Work::$openAlexSource];
+        }
+        if($this->orcid_source) {
+            $sources = [...$sources,Work::$orcIdSource];
+        }
+        return $sources;
     }
 
     /**
@@ -265,7 +285,7 @@ class Work extends Model {
             // It seems like for some works there has not been any documented citations for the current year, or for years now,
             // so checking if the record we need exists in the first place
             if (!$req_statistic) {
-                ULog::log("No statistics were found for $this->open_alex_id for the year $year_to_update", ULog::META);
+                ULog::log("No statistics were found for $this->open_alex_id for the year $year_to_update ", ULog::META);
                 return;
             }
             // If there is, and for some reason it has not been parsed on a previous update, create the new statistic for the current year.
@@ -338,10 +358,12 @@ class Work extends Model {
      * @return void
      */
     public function syncWithOrcId($orc_id_work): void {
-        dump($orc_id_work);
         $work_summary = data_get($orc_id_work, 'work-summary');
         if (!is_null($work_summary) && sizeof($work_summary) > 0) {
             $this->source_title = data_get($work_summary[0], 'journal-title.value');
+            $this->orcid_source = true;
+            $this->orc_id_put_code = data_get($work_summary[0], 'put-code');
+            $this->orc_id_url = Ids::formOrcIdUrl($work_summary[0]->path);
             $this->save();
         }
     }
@@ -355,6 +377,7 @@ class Work extends Model {
         $this->event = $doi_object->event ?? null;
         $this->abstract = isset($doi_object->abstract) ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
         $this->is_referenced_by_count = data_get($doi_object, 'is-referenced-by-count') ?? null;
+        $this->crossref_source = true;
         $this->save();
     }
 

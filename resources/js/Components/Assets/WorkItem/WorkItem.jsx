@@ -29,7 +29,7 @@ export const WorkItem = ({
     hideLanguage = false,
     highlightUserAuthors = true,
 }) => {
-    const { doi, title, authors, type, isOA, publishedAt, referencedWorksCount, language, localUrl, source } = work;
+    const { doi, title, authors, type, isOA, publicationYear, referencedWorksCount, language, localUrl, sources } = work;
 
     const [showAllAuthors, setShowAllAuthors] = useState(false);
     const visibleAuthors = showAllAuthors
@@ -81,10 +81,10 @@ export const WorkItem = ({
                 <div className={styles.innerInfoContainer}>
                     {!hideType && <div className={styles.infoProperty}>{capitalizeFirstLetter(type)}</div>}
                     {!hideOA && <div className={styles.infoProperty}>{isOA ? 'Open Access Available' : 'Open Access Unavailable'}</div>}
-                    {!hidePublicationDate && <div className={styles.infoProperty}>Published: {publishedAt}</div>}
+                    {!hidePublicationDate && <div className={styles.infoProperty}>Published: {publicationYear}</div>}
                     {!hideCitations && <div className={styles.infoProperty}>Citations: {referencedWorksCount}</div>}
                     {!hideLanguage && <div className={styles.infoProperty}>Language: {language}</div>}
-                    <div className={styles.infoProperty}>Source: {source}</div>
+                    <div className={styles.infoProperty}>Sources: {sources.join(', ')}</div>
                 </div>
                 <div className={'pl-3'}>
                     <a href={localUrl} className={styles.title}>

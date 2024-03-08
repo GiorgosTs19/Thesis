@@ -6,7 +6,7 @@ const PaginationLink = ({useInertia = false, link, onClick, className, url}) => 
     return useInertia ? <Link
         className={className}
         href={url}
-        preserveState preserveScroll>
+        preserveState={true} preserveScroll={true}>
         {link}
     </Link> : <button onClick={() => onClick(url)} className={className}>
         {link}

@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->string('doi')->nullable()->unique();
             $table->text('title');
             $table->text('abstract')->nullable();
-            $table->date('publication_date');
             $table->string('source_title')->nullable();
             $table->unsignedSmallInteger('publication_year');
             $table->integer('referenced_works_count');
@@ -33,7 +32,9 @@ return new class extends Migration {
             $table->string('cites_url')->nullable();
             $table->dateTime('last_updated_date')->nullable();
             $table->dateTime('created_date')->nullable();
-            $table->enum('source', [Work::$openAlexSource, Work::$orcIdSource]);
+            $table->boolean(Work::$CROSSREF_SOURCE_FIELD)->default(false);
+            $table->boolean(Work::$ORCID_SOURCE_FIELD)->default(false);
+            $table->boolean(Work::$OPEN_ALEX_SOURCE_FIELD)->default(false);
             $table->timestamps();
         });
     }

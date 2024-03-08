@@ -79,18 +79,19 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                 }, 0),
             },
             { name: 'OpenAlex Works', value: group.uniqueWorksCount.OpenAlex },
-            { name: 'OrcId Works', value: group.uniqueWorksCount.OrcId },
+            { name: 'Crossref Works', value: group.uniqueWorksCount.Crossref },
+            { name: 'ORCID Works', value: group.uniqueWorksCount.ORCID }
         ],
         [group, worksPaginationInfo],
     );
 
     const DOUGHNUT_CHART_DATA = {
-        dataSet: [group.uniqueWorksCount.OpenAlex, group.uniqueWorksCount.OrcId],
-        title: 'Unique Works from Source',
-        labels: ['Open Alex Unique Works', 'OrcId Unique Works'],
+        dataSet: [group.uniqueWorksCount.OpenAlex, group.uniqueWorksCount.ORCID, group.uniqueWorksCount.Crossref],
+        title: 'Works from Source',
+        labels: ['Open Alex', 'ORCID', 'Crossref'],
         description:
-            'Visualization of the distribution of unique works sourced from different platforms, including OpenAlex and OrcId. ' +
-            "It offers insights into the relative contribution of each platform to the overall collection of group's unique works.",
+            'Visualization of the distribution of works sourced from different platforms, including OpenAlex, ORCID and Crossref. ' +
+            "It offers insights into the relative contribution of each platform to the overall collection of group's works.",
         disclaimer: '',
     };
     const statistics = useMemo(() => group.members?.map((member) => member.statistics), [group]);
@@ -282,7 +283,7 @@ SelectedGroup.propTypes = {
         parent: object,
         description: string.isRequired,
         members: arrayOf(object),
-        uniqueWorksCount: shape({ OpenAlex: number, OrcId: number }),
+        uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref:number }),
     }),
     setSelectedGroup: func.isRequired,
     setGroupsList: func.isRequired,

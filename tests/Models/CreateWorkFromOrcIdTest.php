@@ -26,7 +26,6 @@ class CreateWorkFromOrcIdTest extends TestCase {
         $this->assertIsString($work->publication_year);
         $this->assertNull($work->open_alex_id);
         $this->assertNull($work->open_alex_url);
-        $this->assertIsString($work->publication_date);
         $this->assertNull($work->last_updated_date);
         $this->assertIsInt($work->referenced_works_count);
         $this->assertIsString($work->source_title);
@@ -34,7 +33,6 @@ class CreateWorkFromOrcIdTest extends TestCase {
         $this->assertNull($work->event);
         $this->assertNull($work->abstract);
         $this->assertIsInt($work->is_referenced_by_count);
-        $this->assertIsString($work->source);
         $this->assertIsInt($work->orc_id_put_code);
         $this->assertIsString($work->orc_id_url);
         $work->delete();

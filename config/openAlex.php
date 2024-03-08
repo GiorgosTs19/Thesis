@@ -33,7 +33,6 @@ return [
         'updated_date',
         'created_date',
         'counts_by_year',
-        'publication_date',
         'publication_year',
         'cited_by_api_url',
         'referenced_works_count',

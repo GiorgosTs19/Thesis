@@ -24,7 +24,7 @@ export class Work {
      * @param {string} citesUrl - The url of works that have cited this work.
      * @param {string} openAlexUrl - The work's Open Alex url.
      * @param {string} language - The language in which the work is written.
-     * @param {string} source - The source from which the work's information where retrieved.
+     * @param {Array<String>} sources - The source from which the work's information where retrieved.
      * @param openAlexId
      * @param statistics
      * @param localUrl
@@ -39,7 +39,6 @@ export class Work {
         title,
         authors,
         isOA,
-        publishedAt,
         publicationYear,
         referencedWorksCount,
         language,
@@ -55,7 +54,7 @@ export class Work {
         subtype,
         abstract,
         referencedByCount,
-        source,
+        sources,
     }) {
         this.title = title;
         this.id = id;
@@ -63,7 +62,6 @@ export class Work {
         this.type = type;
         this.authors = authors;
         this.isOA = isOA;
-        this.publishedAt = publishedAt;
         this.publicationYear = publicationYear;
         this.referencedWorksCount = referencedWorksCount;
         this.citesUrl = citesUrl;
@@ -78,14 +76,13 @@ export class Work {
         this.subtype = subtype;
         this.abstract = abstract;
         this.referencedByCount = referencedByCount;
-        this.source = source;
+        this.sources = sources;
     }
 
     static parseResponseWork({
         id,
         doi,
         title,
-        published_at,
         published_at_year,
         referenced_works_count,
         language,
@@ -103,14 +100,13 @@ export class Work {
         abstract,
         source_title,
         referenced_by_count,
-        source,
+        sources,
     }) {
         return new Work({
             id,
             doi,
             title: title !== '' ? title : 'Title not available',
             type,
-            publishedAt: published_at,
             publicationYear: published_at_year,
             referencedWorksCount: referenced_works_count,
             language,
@@ -130,7 +126,7 @@ export class Work {
             sourceTitle: source_title,
             subtype,
             referencedByCount: referenced_by_count,
-            source,
+            sources,
         });
     }
 
@@ -138,10 +134,10 @@ export class Work {
         const properties = [
             { name: 'Type', value: capitalizeFirstLetter(this.type) },
             { name: 'References', value: this.referencedWorksCount },
-            { name: 'Published', value: this.publishedAt },
+            { name: 'Published', value: this.publicationYear },
             { name: 'Open Alex', value: this.openAlexId },
             { name: 'Open Access', value: this.isOA ? 'Available' : 'Unavailable' },
-            { name: 'Source', value: this.source },
+            { name: 'Sources', value: this.sources.join(', ')},
         ];
         if (this.sourceTitle) properties.push({ name: 'Published on', value: this.sourceTitle });
         if (this.event) properties.push({ name: 'Published At', value: this.event });

@@ -33,7 +33,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
 
             DB::transaction(function () {
                 $this->updateAuthors();
-                $this->updateWorks();
+//                $this->updateWorks();
             });
 
             $ended_time = date("H:i:s");

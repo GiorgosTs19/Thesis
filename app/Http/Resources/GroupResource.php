@@ -32,8 +32,9 @@ class GroupResource extends JsonResource {
             'members' => AuthorResource::collection($this->whenLoaded('members')),
             'parent' => new GroupResource($this->whenLoaded('parent')),
             'works' => new WorkCollection($this->whenLoaded('works')),
-            'uniqueWorksCount' => $this->when(isset($this->additionalParameters['open_alex_works']) && isset($this->additionalParameters['orc_id_works']),
-                [Work::$openAlexSource => data_get($this->additionalParameters, 'open_alex_works', 0), Work::$orcIdSource => data_get($this->additionalParameters, 'orc_id_works', 0)])
+            'uniqueWorksCount' => $this->when(isset($this->additionalParameters['open_alex_works']) && isset($this->additionalParameters['orcid_works']) && isset($this->additionalParameters['crossref_works']),
+                [Work::$openAlexSource => data_get($this->additionalParameters, 'open_alex_works', 0), Work::$orcIdSource => data_get($this->additionalParameters, 'orcid_works', 0),
+                    Work::$crossRefSource => data_get($this->additionalParameters, 'crossref_works', 0)])
         ];
     }
 }

@@ -4,7 +4,6 @@ import {range} from "lodash";
 export const usePagination = ({totalCount, pageSize, siblingCount, currentPage}) => {
     return useMemo(() => {
         const totalPageCount = Math.ceil(totalCount / pageSize);
-        // console.log(totalPageCount)
         // Pages count is determined as siblingCount + firstPage + lastPage + currentPage + 2*DOTS
         const totalPageNumbers = siblingCount + 5;
 

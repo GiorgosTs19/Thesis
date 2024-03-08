@@ -60,8 +60,9 @@ class GroupController extends Controller {
             $works = $works->merge($member->works);
         }
 
-        $orc_id_works = $works->where('source', '=', Work::$orcIdSource)->count();
-        $open_alex_works = $works->where('source', '=', Work::$openAlexSource)->count();
+        $orc_id_works = $works->where(Work::$ORCID_SOURCE_FIELD, '=', true)->count();
+        $open_alex_works = $works->where(Work::$OPEN_ALEX_SOURCE_FIELD, '=', true)->count();
+        $crossref_works = $works->where(Work::$CROSSREF_SOURCE_FIELD, '=', true)->count();
 
         $uniqueWorkIds = $works->unique('id')->pluck('id');
 
@@ -72,8 +73,9 @@ class GroupController extends Controller {
 
         return $success ? response()->json(Requests::success('Group retrieved successfully',
             ['group' => new GroupResource($Group, [
-                'orc_id_works' => $orc_id_works, // Pass the specific value you want
-                'open_alex_works' => $open_alex_works, // Pass the specific value you want
+                'orcid_works' => $orc_id_works,
+                'open_alex_works' => $open_alex_works,
+                'crossref_works' => $crossref_works
             ]), 'works' => new WorkCollection($uniqueWorks)]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }

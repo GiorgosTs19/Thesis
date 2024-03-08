@@ -11,7 +11,6 @@ const useSaveRecentSearchQueries = (query) => {
         if (debouncedSearchQuery.trim() === '' || recentQueries.find(query => query.toLowerCase() === debouncedSearchQuery.toLowerCase()) || debouncedSearchQuery.length < 3)
             return;
         const updatedQueries = [debouncedSearchQuery, ...recentQueries.slice(0, 2)];
-        console.log(updatedQueries)
         saveRecentQueries(updatedQueries);
     }, [debouncedSearchQuery]);
 

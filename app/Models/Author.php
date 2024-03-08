@@ -47,7 +47,8 @@ class Author extends Model {
         'open_alex_id',
         'last_updated_date',
         'cited_by_count',
-        'works_count'
+        'works_count',
+        'orc_id'
     ];
     /**
      * @var array|bool|mixed|string|null
@@ -230,6 +231,8 @@ class Author extends Model {
             $this->parseWorks(0, 1, true);
         }
 
+        $this->syncWithOrcId();
+
         if ($request_author->updated_date === $this->last_updated_date)
             return;
 
@@ -243,6 +246,7 @@ class Author extends Model {
             ULog::error($exception->getMessage(), ULog::META);
         }
 
+
         $year_to_update = date('Y');
         $databaseStatistic = $this->statistics()
             ->where('year', $year_to_update)
@@ -255,7 +259,6 @@ class Author extends Model {
             Statistic::generateStatistic($this->id, $request_statistic, Auth::class);
             return;
         }
-
         $databaseStatistic->updateStatistic($this, $request_author->counts_by_year);
     }
 
@@ -304,6 +307,7 @@ class Author extends Model {
      * @return void
      */
     public function syncWithOrcId(): void {
+        ULog::log($this->orc_id);
         if (!$this->orc_id)
             return;
         $orc_id_response = OrcIdAPI::authorRequest($this->orc_id);
