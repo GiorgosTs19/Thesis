@@ -118,12 +118,24 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
         [statistics],
     );
 
+    const yearsArray = Object.keys(yearlyCounts)
+        .map((year) => parseInt(year))
+        .sort((a, b) => {
+            if (a === b) {
+                return 0; // Leave them unchanged relative to each other
+            } else if (a < b) {
+                return -1; // a comes before b
+            } else {
+                return 1; // b comes before a
+            }
+        });
+
     const CHART_DATA = useMemo(
         () => ({
             CITATIONS: {
                 dataSet: Object.values(yearlyCounts).map((statistic) => statistic?.cited_count),
                 title: 'Citations',
-                labels: Object.keys(yearlyCounts),
+                labels: yearsArray,
                 description: 'Citation trends per year.',
                 disclaimer:
                     'The data presented in this chart may not capture the complete set of citations for' +
@@ -133,7 +145,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
             WORKS: {
                 dataSet: Object.values(yearlyCounts).map((statistic) => statistic?.works_count),
                 title: 'Works',
-                labels: Object.keys(yearlyCounts),
+                labels: yearsArray,
                 description: 'Distribution of works authored per year.',
                 disclaimer:
                     'The data presented in this chart may not capture the complete set of works for' +

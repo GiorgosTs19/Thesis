@@ -23,7 +23,17 @@ const WorkPage = ({ work }) => {
     const workObject = Work.parseResponseWork(work);
     const { title } = workObject;
     const { statistics, authors } = workObject;
-    const yearsArray = statistics.map((statistic) => statistic.year);
+    const yearsArray = statistics
+        .map((statistic) => parseInt(statistic.year))
+        .sort((a, b) => {
+            if (a === b) {
+                return 0; // Leave them unchanged relative to each other
+            } else if (a < b) {
+                return -1; // a comes before b
+            } else {
+                return 1; // b comes before a
+            }
+        });
     const abstractTooLong = workObject.abstract?.length > 550;
     const [showPartialAbstract, setShowPartialAbstract] = useState(abstractTooLong);
 
@@ -44,24 +54,14 @@ const WorkPage = ({ work }) => {
                 <div className="mb-4 flex flex-col gap-2">
                     <h3 className={styles.title}>{title}</h3>
                     <div className={'mx-auto text-center'}>
-                        {authors
-                            .sort((a, b) => {
-                                if (a.isUser === b.isUser) {
-                                    return 0;
-                                } else if (a.isUser) {
-                                    return -1;
-                                } else {
-                                    return 1;
-                                }
-                            })
-                            .map((author, index) => (
-                                <React.Fragment key={index}>
-                                    <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser ? 'font-bold' : '')}>
-                                        {author.name}
-                                    </a>
-                                    {index < authors.length - 1 && ', '}
-                                </React.Fragment>
-                            ))}
+                        {authors.map((author, index) => (
+                            <React.Fragment key={index}>
+                                <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser ? 'font-bold' : '')}>
+                                    {author.name}
+                                </a>
+                                {index < authors.length - 1 && ', '}
+                            </React.Fragment>
+                        ))}
                     </div>
                     <div className={styles.propertiesContainer}>
                         <RowOfProperties properties={workObject.getProperties()}></RowOfProperties>

@@ -46,7 +46,17 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
     const { width } = useWindowSize();
     const [showWholeBio, setShowWholeBio] = useState(false);
     const authorStatistics = authorObject.statistics;
-    const yearsArray = authorStatistics.map((statistic) => statistic.year);
+    const yearsArray = authorStatistics
+        .map((statistic) => parseInt(statistic.year))
+        .sort((a, b) => {
+            if (a === b) {
+                return 0; // Leave them unchanged relative to each other
+            } else if (a < b) {
+                return -1; // a comes before b
+            } else {
+                return 1; // b comes before a
+            }
+        });
 
     const CHART_DATA = {
         CITATIONS: {
@@ -86,7 +96,7 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
 
     const renderWorkItem = useCallback(
         (work, index) => {
-            return <WorkItem work={work} key={work.id} index={index} authorToExclude={authorObject.id} />;
+            return <WorkItem work={work} key={work.id} index={index} />;
         },
         [works],
     );
@@ -109,7 +119,7 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
         ...authorObject.getProperties(),
         { name: 'OpenAlex Works', value: uniqueWorksCounts.OpenAlex },
         { name: 'Crossref Works', value: uniqueWorksCounts.Crossref },
-        { name: 'OrcId Works', value: uniqueWorksCounts.ORCID }
+        { name: 'OrcId Works', value: uniqueWorksCounts.ORCID },
     ];
 
     return (
@@ -199,7 +209,7 @@ const SortingOptionPropTypes = PropTypes.shape({
 AuthorPage.propTypes = {
     author: object,
     works: shape({}),
-    uniqueWorksCounts: shape({ ORCID: number, OpenAlex: number, Crossref:number }).isRequired,
+    uniqueWorksCounts: shape({ ORCID: number, OpenAlex: number, Crossref: number }).isRequired,
     sortingOptions: arrayOf(SortingOptionPropTypes).isRequired,
     currentSortOption: number.isRequired,
 };

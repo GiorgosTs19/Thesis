@@ -32,27 +32,7 @@ export const WorkItem = ({
     const { doi, title, authors, type, isOA, publicationYear, referencedWorksCount, language, localUrl, sources } = work;
 
     const [showAllAuthors, setShowAllAuthors] = useState(false);
-    const visibleAuthors = showAllAuthors
-        ? authors.sort((a, b) => {
-              if (a.isUser === b.isUser) {
-                  return 0; // Leave them unchanged relative to each other
-              } else if (a.isUser) {
-                  return -1; // a comes before b
-              } else {
-                  return 1; // b comes before a
-              }
-          })
-        : authors
-              .sort((a, b) => {
-                  if (a.isUser === b.isUser) {
-                      return 0; // Leave them unchanged relative to each other
-                  } else if (a.isUser) {
-                      return -1; // a comes before b
-                  } else {
-                      return 1; // b comes before a
-                  }
-              })
-              .slice(0, MAX_VISIBLE_AUTHORS);
+    const visibleAuthors = showAllAuthors ? authors : authors.slice(0, MAX_VISIBLE_AUTHORS);
 
     const filteredAuthors = authorToExclude ? visibleAuthors.filter((author) => author.id !== authorToExclude) : visibleAuthors;
 
