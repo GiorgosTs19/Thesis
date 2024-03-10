@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\GroupRequests;
 
+use App\Models\Author;
 use App\Models\AuthorGroup;
+use App\Models\Group;
 use App\Rules\ExistsInTable;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -23,8 +25,8 @@ class RemoveGroupMemberRequest extends FormRequest {
      */
     public function rules(): array {
         return [
-            'group_id' => ['required', 'numeric', 'integer', new ExistsInTable('groups')],
-            'author_id' => ['required', 'numeric', 'integer', new ExistsInTable('authors')]
+            'group_id' => ['required', 'numeric', 'integer', new ExistsInTable((new Group())->getTable())],
+            'author_id' => ['required', 'numeric', 'integer', new ExistsInTable((new Author())->getTable())]
         ];
     }
 

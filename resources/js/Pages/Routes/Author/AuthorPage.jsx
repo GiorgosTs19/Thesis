@@ -183,6 +183,7 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
                     className={'order-2 w-full xl:order-none xl:border-r xl:border-r-gray-300'}
                     title={`Works`}
                     header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}
+                    gap={7}
                 />
                 <List
                     data={topCoAuthors}

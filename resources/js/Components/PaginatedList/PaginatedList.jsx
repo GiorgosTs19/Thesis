@@ -13,9 +13,16 @@ import { themeStyles } from '@/Theme/Theme.js';
  * @component
  * @param response - The paginated data response object.
  * @param children - Optional children to be rendered above the list.
- * @param renderFunc - A function to render each item in the list.
+ * @param renderFn - A function to render each item in the list.
  * @param parser - Optional function to parse each item in the response data.
  * @param sortingOptions - Options for sorting the list of items.
+ * @param title - An optional title for the list.
+ * @param className - Optional classname for the wrapper of the list.
+ * @param rounded - Whether the list's wrapper should be rounded or not.
+ * @param header - An optional header for the list.
+ * @param emptyListPlaceholder - An placeholder to show if the list is empty ( defaults to 'This list is empty' ).
+ * @param collapsable - A boolean to indicate whether the list should be collapsable or not.
+ * @param initiallyCollapsed - A boolean to indicate whether the list ( if collapsable is set to true ) should be initially rendered collapsed.
  * @returns The PaginatedList component.
  *
  * @example
@@ -42,9 +49,10 @@ const PaginatedList = ({
     header,
     rounded = false,
     onLinkClick = () => {},
-    emptyListPlaceholder = 'The list is empty',
+    emptyListPlaceholder = 'This list is empty',
     collapsable = false,
     initiallyCollapsed = false,
+    gap = 6,
 }) => {
     const items = parser ? response.data.map((item) => parser(item)) : response.data;
     const [listCollapsed, setListCollapsed] = useState(collapsable && initiallyCollapsed);
@@ -78,7 +86,7 @@ const PaginatedList = ({
                 <>
                     {header && <div className={styles.header}>{header}</div>}
                     {items.length ? (
-                        <ul className={`flex h-full list-disc flex-col gap-10`}>
+                        <ul className={`flex h-full list-disc flex-col gap-${gap}`}>
                             {items.length ? (
                                 items.map((item, index) => renderFn(item, index + (response.meta.from ?? 0)))
                             ) : (
@@ -149,5 +157,17 @@ PaginatedList.propTypes = {
         }),
     }).isRequired,
     emptyListPlaceholder: string,
+    gap: function (props, propName, componentName) {
+        if (props.gap < 0 || props.gap > 10) {
+            return new Error(
+                'Invalid prop `' +
+                    propName +
+                    '` supplied to' +
+                    ' `' +
+                    componentName +
+                    '`. Validation failed. gap has to be a number between 0 and 10',
+            );
+        }
+    },
 };
 export default PaginatedList;

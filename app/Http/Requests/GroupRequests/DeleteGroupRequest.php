@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\GroupRequests;
 
+use App\Models\Group;
 use App\Rules\ExistsInTable;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -21,7 +22,7 @@ class DeleteGroupRequest extends FormRequest {
      */
     public function rules(): array {
         return [
-            'id' => ['required', new ExistsInTable('groups')],
+            'id' => ['required', new ExistsInTable((new Group())->getTable())],
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\GroupRequests;
 
+use App\Models\Group;
 use App\Rules\ExistsInTable;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -23,7 +24,7 @@ class CreateGroupRequest extends FormRequest {
         return [
             'name' => 'required|unique:groups|max:255',
             'description' => 'required|max:255',
-            'parent' => ['nullable', 'numeric', 'integer', new ExistsInTable('groups')]
+            'parent' => ['nullable', 'numeric', 'integer', new ExistsInTable((new Group())->getTable())]
         ];
     }
 

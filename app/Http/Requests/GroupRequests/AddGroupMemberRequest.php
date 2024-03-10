@@ -27,7 +27,7 @@ class AddGroupMemberRequest extends FormRequest {
         return [
             'group_id' => ['required', 'numeric', 'integer', new ExistsInTable('groups')],
             'authors' => 'required|array',
-            'authors.*' => ['numeric', 'integer', new ExistsInTable('authors')]
+            'authors.*' => ['numeric', 'integer', new ExistsInTable((new Author())->getTable())]
         ];
     }
 

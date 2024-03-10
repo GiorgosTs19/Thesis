@@ -8,8 +8,8 @@ import clsx from 'clsx';
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
     authorElement: 'hover:underline text-xs lg:text-sm',
-    li: 'flex-grow list-none flex',
-    index: 'top-0 left-0 pr-2 text-black text-sm lg:text-base 2xl:text-lg flex flex-col gap-4 text-center',
+    li: 'flex-grow list-none flex h-fit',
+    index: 'top-0 left-0 pr-2 text-black text-sm lg:text-base 2xl:text-lg flex flex-col gap-4 text-center h-fit',
     infoContainer: 'flex flex-col',
     innerInfoContainer: 'flex flex-wrap border-l-2 border-l-blue-700',
     infoProperty: 'text-gray-600 pl-3 text-xs md:text-sm',

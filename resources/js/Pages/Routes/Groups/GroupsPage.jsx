@@ -1,14 +1,14 @@
-import React, {useCallback, useRef, useState} from "react";
-import {Spinner} from "flowbite-react";
-import {arrayOf, object, oneOfType} from "prop-types";
-import useAsync from "@/Hooks/useAsync/useAsync.js";
-import {SelectedGroup} from "@/Pages/Routes/Groups/SelectedGroup.jsx";
-import {useScrollIntoView} from "@/Hooks/useScrollIntoView/useScrollIntoView.js";
-import {useGroupCreatedEventListener, useGroupDeletedEventListener, useGroupUpdatedEventListener} from "@/Events/GroupEvent/GroupEvent.js";
-import {ToastTypes, useToast} from "@/Contexts/ToastContext.jsx";
-import useAPI from "@/Hooks/useAPI/useAPI.js";
-import NewGroupModal from "@/Components/Modal/NewGroupModal.jsx";
-import GroupBadge from "@/Components/Assets/GroupItem/GroupBadge.jsx";
+import React, { useCallback, useRef, useState } from 'react';
+import { Spinner } from 'flowbite-react';
+import { arrayOf, object, oneOfType } from 'prop-types';
+import useAsync from '@/Hooks/useAsync/useAsync.js';
+import { SelectedGroup } from '@/Pages/Routes/Groups/SelectedGroup.jsx';
+import { useScrollIntoView } from '@/Hooks/useScrollIntoView/useScrollIntoView.js';
+import { useGroupCreatedEventListener, useGroupDeletedEventListener, useGroupUpdatedEventListener } from '@/Events/GroupEvent/GroupEvent.js';
+import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
+import useAPI from '@/Hooks/useAPI/useAPI.js';
+import NewGroupModal from '@/Components/Modal/NewGroupModal.jsx';
+import GroupBadge from '@/Components/Assets/GroupItem/GroupBadge.jsx';
 
 /**
  * @component
@@ -21,7 +21,7 @@ import GroupBadge from "@/Components/Assets/GroupItem/GroupBadge.jsx";
  * @param {Array} groups - An array of group objects to be displayed and managed.
  * @returns The rendered GroupsPage component.
  */
-const GroupsPage = ({groups}) => {
+const GroupsPage = ({ groups }) => {
     const [groupToShow, setGroupToShow] = useState(null);
     const [groupsList, setGroupsList] = useState(groups);
     const [selectedGroup, setSelectedGroup] = useState(null);
@@ -29,7 +29,7 @@ const GroupsPage = ({groups}) => {
     const [worksShouldRefresh, setWorksShouldRefresh] = useState(false);
     const activeGroupBadgeRef = useRef(null);
     const api = useAPI();
-    const {showToast} = useToast();
+    const { showToast } = useToast();
     useScrollIntoView(activeGroupBadgeRef);
 
     // Listen for Group Updated Events
@@ -39,16 +39,16 @@ const GroupsPage = ({groups}) => {
         } else if (e.error) {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
         }
-        setWorksShouldRefresh(prev => !prev)
+        setWorksShouldRefresh((prev) => !prev);
     });
 
     // Listen for Group Created Events
     useGroupCreatedEventListener((e) => {
         if (e.success) {
             showToast(e.data.action, e.data.toastType, e.success);
-            setWorksShouldRefresh(prev => !prev)
+            setWorksShouldRefresh((prev) => !prev);
             // * Add the new group to the list of groups.
-            setGroupsList(prev => [...prev, e.data.group]);
+            setGroupsList((prev) => [...prev, e.data.group]);
             setSelectedGroup(e.data.group.id);
         } else if (e.error) {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
@@ -59,10 +59,10 @@ const GroupsPage = ({groups}) => {
     useGroupDeletedEventListener((e) => {
         if (e.success) {
             showToast(e.data.action, e.data.toastType, e.success);
-            setWorksShouldRefresh(prev => !prev)
+            setWorksShouldRefresh((prev) => !prev);
             // * Remove the group from the list of groups.
-            setGroupsList(prev => prev.filter(group => group.id !== e.data.group.id))
-            setGroupToShow(null)
+            setGroupsList((prev) => prev.filter((group) => group.id !== e.data.group.id));
+            setGroupToShow(null);
         } else if (e.error) {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
         }
@@ -70,32 +70,48 @@ const GroupsPage = ({groups}) => {
 
     // Callback to fetch the group's data when a new group is selected.
     const handleFetchGroup = useCallback(() => {
-        if (!selectedGroup)
-            return;
-        return api.groups.getGroup(selectedGroup).then(data => {
-            setGroupToShow(data.data.group)
-            setWorksPaginationInfo(data.data.works)
-        })
+        if (!selectedGroup) return;
+        return api.groups.getGroup(selectedGroup).then((data) => {
+            setGroupToShow(data.data.group);
+            setWorksPaginationInfo(data.data.works);
+        });
     }, [selectedGroup]);
 
-    const {loading} = useAsync(handleFetchGroup, !!selectedGroup, [worksShouldRefresh]);
+    const { loading } = useAsync(handleFetchGroup, !!selectedGroup, [worksShouldRefresh]);
 
     const showCurrentGroup = !loading && !!groupToShow && !!worksPaginationInfo;
+    console.log('🚀 ~ GroupsPage.jsx 84', showCurrentGroup);
 
     return (
-        <div className={'flex flex-col md:flex-row min-h-[calc(100vh-4rem)]'}>
-            <div className={'flex flex-wrap md:flex-col gap-4 md:gap-3 my-10 w-full md:w-64 md:border-r md:border-r-gray-300 pr-5 pl-2'}>
-                <NewGroupModal groups={groupsList}/>
+        <div className={'flex min-h-[calc(100vh-4rem)] flex-col md:flex-row'}>
+            <div className={'my-10 flex w-full flex-wrap gap-4 pl-2 pr-5 md:w-64 md:flex-col md:gap-3 md:border-r md:border-r-gray-300'}>
+                <NewGroupModal groups={groupsList} />
                 {groupsList.map((group) => (
-                    <GroupBadge key={group.id} group={group} className={'w-5/12 md:w-full mx-auto'}
-                                onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id}/>
+                    <GroupBadge
+                        key={group.id}
+                        group={group}
+                        className={'mx-auto w-5/12 md:w-full'}
+                        onClick={() => setSelectedGroup(group.id)}
+                        isSelected={selectedGroup === group.id}
+                    />
                 ))}
             </div>
 
-            {loading && <div className={'m-auto'}><Spinner size="xl"/></div>}
-            {!loading && !selectedGroup && <h4 className={'m-auto text-2xl  text-center'}>Select a group to see more details</h4>}
-            {showCurrentGroup && <SelectedGroup group={groupToShow} setSelectedGroup={setSelectedGroup} setGroupsList={setGroupsList}
-                                                worksPaginationInfo={worksPaginationInfo} setWorksPaginationInfo={setWorksPaginationInfo}/>}
+            {loading && (
+                <div className={'m-auto'}>
+                    <Spinner size="xl" />
+                </div>
+            )}
+            {!loading && !groupToShow && <h4 className={'m-auto text-center  text-2xl'}>Select a group to see more details</h4>}
+            {showCurrentGroup && (
+                <SelectedGroup
+                    group={groupToShow}
+                    setSelectedGroup={setSelectedGroup}
+                    setGroupsList={setGroupsList}
+                    worksPaginationInfo={worksPaginationInfo}
+                    setWorksPaginationInfo={setWorksPaginationInfo}
+                />
+            )}
         </div>
     );
 };

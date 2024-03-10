@@ -19,6 +19,7 @@ import useAPI from '@/Hooks/useAPI/useAPI.js';
 import SimpleDoughnutChart from '@/Charts/DoughnutChart/SimpleDoughnutChart.jsx';
 import Switch from '@/Components/Switch/Switch.jsx';
 import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart.jsx';
+import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 
 const styles = {
     groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white my-1',
@@ -31,6 +32,7 @@ const styles = {
     chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4',
     chart: 'md:px-4 mb-4 max-w-full',
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
+    deleteButton: 'p-2 rounded-full w-fit',
 };
 export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, setWorksPaginationInfo }) => {
     const { width } = useWindowSize();
@@ -43,6 +45,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
             setWorksPaginationInfo(res.data.works);
         });
     };
+    const deleteModalRef = useRef(null);
 
     // * Renders the authors as list items for the selected group.
     const renderAuthorItem = useCallback(
@@ -198,9 +201,25 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
         </>
     );
 
+    const handleDelete = async () => api.groups.deleteGroup(group);
+
+    const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
+
     return (
         <div className={'w-full px-8 py-5'}>
-            <h5 className={styles.groupName}>{group.name}</h5>
+            <UtilityModal
+                ref={deleteModalRef}
+                acceptText={'Delete'}
+                header={`Delete ${group.name}`}
+                message={`Are you sure you want to permanently delete ${group.name}?`}
+                declineText={'Cancel'}
+                buttonClassName={'cursor-pointer'}
+                onAccept={handleDelete}
+            ></UtilityModal>
+            <div className={'flex w-full justify-between gap-5'}>
+                <h5 className={styles.groupName}>{group.name}</h5>
+                <DropDownMenu dotsButton options={dropDownOptions} />
+            </div>
             <p className={styles.groupDescription}>{group.description}</p>
             <>
                 <div>
@@ -279,6 +298,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                                     emptyListPlaceholder={'This group has no works'}
                                     onLinkClick={handleLinkClick}
                                     title={`Group Works ( ${worksPaginationInfo.meta.total} )`}
+                                    gap={6}
                                 ></PaginatedList>
                             </Card>
                         </div>
