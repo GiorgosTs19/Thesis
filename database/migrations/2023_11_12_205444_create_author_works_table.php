@@ -13,6 +13,8 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('author_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('work_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->boolean('visibility')->default(true);
+            $table->unsignedTinyInteger('position');
             $table->timestamps();
         });
     }

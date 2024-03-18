@@ -42,6 +42,7 @@ const PaginatedList = ({
     response,
     title,
     renderFn,
+    filterFn,
     parser,
     sortingOptions,
     currentSortOption,
@@ -54,7 +55,7 @@ const PaginatedList = ({
     initiallyCollapsed = false,
     gap = 6,
 }) => {
-    const items = parser ? response.data.map((item) => parser(item)) : response.data;
+    const items = (parser ? response.data.map((item) => parser(item)) : response.data).filter(filterFn ? (item) => filterFn(item) : () => true);
     const [listCollapsed, setListCollapsed] = useState(collapsable && initiallyCollapsed);
 
     useEffect(() => {
@@ -122,6 +123,7 @@ PaginatedList.propTypes = {
     title: string,
     className: string,
     renderFn: func.isRequired,
+    filterFn: func,
     header: string,
     parser: func,
     rounded: bool,

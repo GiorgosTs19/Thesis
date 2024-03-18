@@ -39,8 +39,8 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
             $ended_time = date("H:i:s");
             ULog::log("Database Update ended at $ended_time");
 
-        } catch (Exception $err) {
-            ULog::log("Something went wrong while updating the database," . $err->getMessage(), ULog::META);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         } finally {
             SystemManager::disableMaintenanceMode();
         }

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Exception;
 use App\Utility\ULog;
+use Exception;
+use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\BelongsTo};
 use Illuminate\Support\Arr;
-use Illuminate\Database\Eloquent\{Model, Relations\BelongsTo, Factories\HasFactory};
 
 /**
  * @property mixed year
@@ -18,12 +18,13 @@ use Illuminate\Database\Eloquent\{Model, Relations\BelongsTo, Factories\HasFacto
  */
 class Statistic extends Model {
     use HasFactory;
+
     protected $fillable = [
         'year',
         'works_count',
         'cited_count',
         'asset_type'
-        ];
+    ];
 
     /**
      * Parses all the statistics contained in the API response
@@ -61,8 +62,8 @@ class Statistic extends Model {
             $newYearlyCitations->cited_count = $statistic->cited_by_count;
             $newYearlyCitations->asset_type = $asset_type;
             $newYearlyCitations->save();
-        } catch (Exception $exception) {
-            ULog::error($exception->getMessage(), ULog::META);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
     }
 
@@ -91,9 +92,10 @@ class Statistic extends Model {
      * The array of statistics for the asset.
      * @return void
      */
-    public function updateStatistic($asset, $statistics_array) : void {
+    public function updateStatistic($asset, $statistics_array): void {
         switch ($this->asset_type) {
-            case Author::class : {
+            case Author::class :
+            {
                 $requestStatistic = self::getCurrentYearsOpenAlexStatistic(Author::class, $statistics_array);
 
                 $works_count_differ = $requestStatistic->works_count !== $this->works_count;
@@ -114,12 +116,13 @@ class Statistic extends Model {
                     }
 
                     $this->save();
-                } catch (Exception $exception) {
-                    ULog::error($exception->getMessage(), ULog::META);
+                } catch (Exception $error) {
+                    ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
                 }
                 break;
             }
-            case Work::class : {
+            case Work::class :
+            {
                 $requestStatistic = self::getCurrentYearsOpenAlexStatistic(Work::class, $statistics_array);
                 $citation_count_differ = $requestStatistic->cited_by_count !== $this->cited_count;
 
@@ -130,8 +133,8 @@ class Statistic extends Model {
                     $this->cited_count = $requestStatistic->cited_by_count;
                     $this->save();
                     ULog::log("Citation count has been updated for Work $asset->open_alex_id ");
-                } catch (Exception $exception) {
-                    ULog::error($exception->getMessage(), ULog::META);
+                } catch (Exception $error) {
+                    ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
                 }
                 break;
             }
@@ -146,8 +149,8 @@ class Statistic extends Model {
      * @return mixed
      * The asset's statistic for the current year ( if it exists ).
      */
-    public static function getCurrentYearsOpenAlexStatistic($asset_type, $statistics_array) : mixed {
-        $year_to_update =  date('Y');
+    public static function getCurrentYearsOpenAlexStatistic($asset_type, $statistics_array): mixed {
+        $year_to_update = date('Y');
         return match ($asset_type) {
             Author::class => Arr::first($statistics_array,
                 function ($value) use ($year_to_update) {

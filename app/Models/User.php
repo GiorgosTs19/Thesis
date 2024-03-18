@@ -152,8 +152,8 @@ class User extends Authenticatable {
             $newUser->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
             $newUser->save();
             ULog::log("User $newUser->last_name $newUser->first_name has been created");
-        } catch (Exception $exception) {
-            ULog::error($exception->getMessage(), ULog::META);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
         return $newUser;
     }

@@ -4,7 +4,18 @@ import { Link } from '@inertiajs/inertia-react';
 import { TbDots } from 'react-icons/tb';
 import { useClickAway } from '@uidotdev/usehooks';
 
-const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption = null, renderLinks = false, dotsButton = false }) => {
+const DropdownMenu = ({
+    options = [],
+    onSelect,
+    className,
+    label,
+    defaultOption = null,
+    renderLinks = false,
+    dotsButton = false,
+    smallDots = false,
+    verticalDots = false,
+    position = 'left',
+}) => {
     const [selectedOption, setSelectedOption] = useState(defaultOption);
     const [menuOpen, setMenuOpen] = useState(false);
     const ref = useClickAway(() => {
@@ -19,13 +30,14 @@ const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption 
 
     const renderDropDownItem = (option, index) => {
         if (!option) return null;
+
         return renderLinks ? (
             <Link
                 key={option.value}
                 href={option.url}
                 name={`MenuItem${index}`}
                 onClick={() => handleOptionClick(option)}
-                className="mx-auto block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className={`mx-auto block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${selectedOption?.value === option.value ? 'bg-gray-100' : ''}`}
                 role="menuitem"
                 preserveState={true}
                 preserveScroll={true}
@@ -37,7 +49,7 @@ const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption 
                 key={option.value}
                 name={`MenuItem${index}`}
                 onClick={() => handleOptionClick(option)}
-                className="mx-auto block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className={`mx-auto block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900`}
                 role="menuitem"
             >
                 {option.name}
@@ -52,8 +64,8 @@ const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption 
                 {dotsButton ? (
                     <div className={'pt-2'}>
                         <TbDots
-                            className={`cursor-pointer rounded-full hover:bg-gray-300`}
-                            size={30}
+                            className={`${verticalDots ? 'rotate-90' : ''} cursor-pointer rounded-full hover:bg-gray-300`}
+                            size={smallDots ? 15 : 30}
                             onClick={() => {
                                 setMenuOpen((prev) => !prev);
                             }}
@@ -63,7 +75,7 @@ const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption 
                     <button
                         type="button"
                         onClick={() => setMenuOpen((prev) => !prev)}
-                        className="inline-flex w-full justify-between rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75"
+                        className="inline-flex w-full justify-between rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
                         id="options-menu"
                         aria-haspopup="true"
                         aria-expanded="true"
@@ -86,7 +98,9 @@ const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption 
             </div>
 
             {menuOpen && (
-                <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+                <div
+                    className={`absolute ${position === 'left' ? 'left-0' : 'right-0'} mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5`}
+                >
                     <div className="flex flex-col py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                         {options.map((option, index) => renderDropDownItem(option, index))}
                     </div>
@@ -107,6 +121,9 @@ DropdownMenu.propTypes = {
         }),
     ),
     dotsButton: bool,
+    smallDots: bool,
+    verticalDots: bool,
+    position: string,
     renderLinks: bool,
     onSelect: func,
     className: string,

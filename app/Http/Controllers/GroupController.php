@@ -46,37 +46,35 @@ class GroupController extends Controller {
             return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
         }
 
-        $Group = Group::with('members.works', 'parent', 'members.statistics')->find($id);
+        $group = Group::with('members.works', 'parent', 'members.statistics')->find($id);
 
-        if (!$Group) {
+        if (!$group) {
             return response()->json(Requests::clientError('A group with this id does not exist', 200));
         }
 
-        $success = !!$Group;
+        $success = !!$group;
 
         $works = collect();
 
-        foreach ($Group->members as $member) {
+        foreach ($group->members as $member) {
             $works = $works->merge($member->works);
+            unset($member->works);
         }
 
-        $orc_id_works = $works->where(Work::$ORCID_SOURCE_FIELD, '=', true)->count();
-        $open_alex_works = $works->where(Work::$OPEN_ALEX_SOURCE_FIELD, '=', true)->count();
-        $crossref_works = $works->where(Work::$CROSSREF_SOURCE_FIELD, '=', true)->count();
+        $orc_id_works = $works->where('source', '=', Work::$orcIdSource)->count();
+        $open_alex_works = $works->where('source', '=', Work::$openAlexSource)->count();
+        $crossref_works = $works->where('source', '=', Work::$crossRefSource)->count();
 
-        $uniqueWorkIds = $works->unique('id')->pluck('id');
+        $unique_work_ids = $works->where('source', '=', Work::$openAlexSource)->unique('id')->pluck('id');
 
-        $uniqueWorks = Work::with(['authors'])->whereIn('id', $uniqueWorkIds)->orderBy('referenced_works_count', 'desc')->paginate(10);
-
-        foreach ($Group->members as $member)
-            unset($member->works);
+        $unique_works = Work::with(['authors'])->whereIn('id', $unique_work_ids)->orderBy('is_referenced_by_count', 'desc')->paginate(10);
 
         return $success ? response()->json(Requests::success('Group retrieved successfully',
-            ['group' => new GroupResource($Group, [
+            ['group' => new GroupResource($group, [
                 'orcid_works' => $orc_id_works,
                 'open_alex_works' => $open_alex_works,
                 'crossref_works' => $crossref_works
-            ]), 'works' => new WorkCollection($uniqueWorks)]))
+            ]), 'works' => new WorkCollection($unique_works)]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 

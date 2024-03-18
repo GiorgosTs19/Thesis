@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\WorkResource;
 use App\Models\Work;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -23,7 +24,7 @@ class Controller extends BaseController {
 //            $work->source = $work->orc_id_put_code !== null ? Work::$orcIdSource : Work::$openAlexSource;
 //            $work->save();
 //        }
-        return Work::where('source', Work::$orcIdSource)->get();
+        return new WorkResource(Work::find(3));
     }
 
 

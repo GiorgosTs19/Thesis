@@ -18,16 +18,16 @@ class DatabaseSeeder extends Seeder {
     private function InitializeDatabase(): void {
         try {
             InitializeDatabaseJob::dispatchSync();
-        } catch (Exception $exception) {
-            ULog::error($exception->getMessage(), ULog::META);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
     }
 
     private function UpdateDatabase(): void {
         try {
             UpdateDatabaseJob::dispatchSync();
-        } catch (Exception $exception) {
-            ULog::error($exception->getMessage(), ULog::META);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
     }
 }

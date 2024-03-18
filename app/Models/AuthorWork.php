@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property mixed $author_id
  * @property mixed $work_id
+ * @property mixed $position
  *
  * @method static where(string $string, $author_id)
  */
@@ -16,7 +17,9 @@ class AuthorWork extends Model {
 
     protected $table = 'author_work';
     protected $fillable = [
-        'Author_Id',
-        'Work_Id',
+        'author_id',
+        'work_id',
+        'position',
+        'visibility'
     ];
 }

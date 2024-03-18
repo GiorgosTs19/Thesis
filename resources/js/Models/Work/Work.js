@@ -20,12 +20,10 @@ export class Work {
      * @param {boolean} isOA - Indicates whether the work is open access (true) or not (false).
      * @param {Date} publishedAt - The date when the work was published.
      * @param {number} publicationYear - The year the work was published.
-     * @param {number} referencedWorksCount - The count of works that reference this work.
-     * @param {string} citesUrl - The url of works that have cited this work.
-     * @param {string} openAlexUrl - The work's Open Alex url.
+     * @param {string} sourceUrl - The work's external source url.
+     * @param {string} externalId - The work's external ID.
      * @param {string} language - The language in which the work is written.
-     * @param {Array<String>} sources - The source from which the work's information where retrieved.
-     * @param openAlexId
+     * @param {Array<Work>} versions - The source from which the work's information where retrieved.
      * @param statistics
      * @param localUrl
      * @param event - The event where the work was first presented.
@@ -40,13 +38,11 @@ export class Work {
         authors,
         isOA,
         publicationYear,
-        referencedWorksCount,
         language,
         doi,
-        citesUrl,
-        openAlexUrl,
+        sourceUrl,
         type,
-        openAlexId,
+        externalId,
         statistics,
         localUrl,
         event,
@@ -54,7 +50,8 @@ export class Work {
         subtype,
         abstract,
         referencedByCount,
-        sources,
+        versions,
+        source,
     }) {
         this.title = title;
         this.id = id;
@@ -63,12 +60,10 @@ export class Work {
         this.authors = authors;
         this.isOA = isOA;
         this.publicationYear = publicationYear;
-        this.referencedWorksCount = referencedWorksCount;
-        this.citesUrl = citesUrl;
-        this.openAlexUrl = openAlexUrl;
+        this.sourceUrl = sourceUrl;
         this.language = language;
         this.className = 'Work';
-        this.openAlexId = openAlexId;
+        this.externalId = externalId;
         this.statistics = statistics;
         this.localUrl = localUrl;
         this.event = event;
@@ -76,7 +71,8 @@ export class Work {
         this.subtype = subtype;
         this.abstract = abstract;
         this.referencedByCount = referencedByCount;
-        this.sources = sources;
+        this.versions = versions;
+        this.source = source;
     }
 
     static parseResponseWork({
@@ -84,15 +80,13 @@ export class Work {
         doi,
         title,
         published_at_year,
-        referenced_works_count,
         language,
         is_oa,
-        open_alex_url,
+        source_url,
         updated_at,
-        cites_url,
         authors,
         type,
-        open_alex_id,
+        external_id,
         statistics,
         local_url,
         event,
@@ -100,7 +94,8 @@ export class Work {
         abstract,
         source_title,
         referenced_by_count,
-        sources,
+        source,
+        versions,
     }) {
         return new Work({
             id,
@@ -108,14 +103,12 @@ export class Work {
             title: title !== '' ? title : 'Title not available',
             type,
             publicationYear: published_at_year,
-            referencedWorksCount: referenced_works_count,
             language,
             isOA: is_oa,
-            openAlexUrl: open_alex_url,
+            sourceUrl: source_url,
             updatedAt: updated_at,
-            citesUrl: cites_url,
             authors: authors ? authors.map((author) => Author.parseResponseAuthor(author)) : [],
-            openAlexId: open_alex_id,
+            externalId: external_id,
             statistics:
                 statistics?.map((statistic) =>
                     Statistic.parseResponseStatistic({ assetType: className, citedCount: statistic.cited_count, assetId: id, year: statistic.year }),
@@ -126,23 +119,24 @@ export class Work {
             sourceTitle: source_title,
             subtype,
             referencedByCount: referenced_by_count,
-            sources,
+            versions: versions ? versions.map((work) => Work.parseResponseWork(work)) : [],
+            source,
         });
     }
 
     getProperties() {
         const properties = [
+            { name: 'Doi', value: this.doi },
             { name: 'Type', value: capitalizeFirstLetter(this.type) },
-            { name: 'References', value: this.referencedWorksCount },
             { name: 'Published', value: this.publicationYear },
-            { name: 'Open Alex', value: this.openAlexId },
             { name: 'Open Access', value: this.isOA ? 'Available' : 'Unavailable' },
-            { name: 'Sources', value: this.sources.join(', ')},
+            { name: 'Versions', value: this.versions.length + 1 },
+            { name: 'Source', value: this.source },
         ];
-        if (this.sourceTitle) properties.push({ name: 'Published on', value: this.sourceTitle });
-        if (this.event) properties.push({ name: 'Published At', value: this.event });
         if (this.subtype && this.subtype !== this.type) properties.push({ name: 'Subtype', value: this.subtype });
         if (this.referencedByCount) properties.push({ name: 'Referenced By', value: this.referencedByCount });
+        if (this.sourceTitle) properties.push({ name: 'Published on', value: this.sourceTitle });
+        if (this.event) properties.push({ name: 'Published At', value: this.event });
         return properties;
     }
 }

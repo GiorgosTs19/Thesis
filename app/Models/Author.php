@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\OpenAlexAPI;
 use App\Http\Controllers\OrcIdAPI;
-use App\Utility\{Ids, OrcId, SystemManager, ULog};
+use App\Utility\{Ids, OrcId, ULog};
 use Exception;
 use Illuminate\Database\{Eloquent\Factories\HasFactory,
     Eloquent\Model,
@@ -147,7 +147,7 @@ class Author extends Model {
 
             Statistic::generateStatistics($new_author->id, $author->counts_by_year, self::class);
         } catch (Exception $error) {
-            ULog::error($error->getMessage(), SystemManager::LOG_META);
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
         return $new_author;
     }
@@ -187,20 +187,23 @@ class Author extends Model {
     /**
      * @param $work
      * The work to be associated with the author.
-     * @return void
+     * @return Author The author associated, to allow for chaining methods.
      * Creates a row in the AuthorWorks table, associating the given work with an author.
      */
-    public function associateAuthorToWork($work): void {
+    public function associateToWork($work, $position): Author {
         if (!$this->associationExists($work->id)) {
             try {
                 $new_author_work = new AuthorWork;
                 $new_author_work->author_id = $this->id;
                 $new_author_work->work_id = $work->id;
+                $new_author_work->position = $position;
                 $new_author_work->save();
             } catch (Exception $error) {
-                ULog::error($error->getMessage(), ULog::META);
+                ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+                return $this;
             }
         }
+        return $this;
     }
 
     /**
@@ -242,8 +245,8 @@ class Author extends Model {
             $this->last_updated_date = $request_author->updated_date;
 
             $this->save();
-        } catch (Exception $exception) {
-            ULog::error($exception->getMessage(), ULog::META);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
 
 
@@ -323,17 +326,14 @@ class Author extends Model {
         foreach ($works as $work) {
             $work_doi = OrcId::extractWorkDoi($work);
 
-            if (!$work_doi)
+            $database_work = Work::doi($work_doi)->first();
+
+            $path = OrcIdAPI::extractWorkPath($work);
+
+            if (!$work_doi || !$database_work || !$path)
                 continue;
 
-            $database_work = Work::where('doi', $work_doi)->first();
-
-            if ($database_work) {
-                $database_work->syncWithOrcId($work);
-                $database_work->syncWithDOI();
-            } else {
-                Work::createNewOIWork($work, $work_doi);
-            }
+            Work::createNewOIWork($path, $work_doi, $database_work);
         }
     }
 

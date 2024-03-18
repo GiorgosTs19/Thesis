@@ -34,20 +34,18 @@ return [
         'created_date',
         'counts_by_year',
         'publication_year',
-        'cited_by_api_url',
-        'referenced_works_count',
         'concepts',
         'cited_by_count'
     ],
 
-    'required_work_update_fields' => ['id',
+    'required_work_update_fields' => [
+        'id',
         'title',
         'open_access',
         'authorships',
         'updated_date',
         'counts_by_year',
         'cited_by_count',
-        'referenced_works_count',
     ],
 
     'required_author_fields' => ['id',

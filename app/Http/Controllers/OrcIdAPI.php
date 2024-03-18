@@ -66,5 +66,9 @@ class OrcIdAPI {
         }
         return $newObject;
     }
+
+    public static function extractWorkPath($work_object) {
+        return data_get($work_object, 'work-summary')[0]->path;
+    }
 }
 

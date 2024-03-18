@@ -13,12 +13,12 @@ class AuthorController extends Controller {
     private function generateSortingOptions($authorId): array {
         $sorting_options = [];
 
-        foreach (Work::SORTING_OPTIONS as $optionKey => $option) {
+        foreach (Work::SORTING_OPTIONS as $option_key => $option) {
             // Generating URL for each sorting option
             $url = URL::route('Author.Page', ['id' => $authorId, 'sort' => $option['value']]);
 
             // Including the URL in the sortingOptions object
-            $sorting_options[$optionKey] = [
+            $sorting_options[$option_key] = [
                 'name' => $option['name'],
                 'value' => $option['value'],
                 'url' => $url,
@@ -32,10 +32,10 @@ class AuthorController extends Controller {
     private function applySorting($worksQuery, $sortingCriteria): void {
         switch ($sortingCriteria) {
             case 0:
-                $worksQuery->orderBy('referenced_works_count');
+                $worksQuery->orderBy('is_referenced_by_count');
                 break;
             case 1:
-                $worksQuery->orderByDesc('referenced_works_count');
+                $worksQuery->orderByDesc('is_referenced_by_count');
                 break;
             case 2:
                 $worksQuery->orderBy('title');
@@ -57,11 +57,11 @@ class AuthorController extends Controller {
         $author = Author::with(['works.authors', 'statistics'])->openAlex($id)->firstOrFail();
 
         // Retrieve works with authors
-        $works_query = $author->works()->with('authors');
+        $works_query = $author->works()->with(['authors']);
 
-        $orc_id_works = $author->works()->where(Work::$ORCID_SOURCE_FIELD, '=', true)->count();
-        $open_alex_works = $author->works()->where(Work::$OPEN_ALEX_SOURCE_FIELD, '=', true)->count();
-        $crossref_works = $author->works()->where(Work::$CROSSREF_SOURCE_FIELD, '=', true)->count();
+        $orc_id_works = $author->works()->where('source', '=', Work::$orcIdSource)->count();
+        $open_alex_works = $author->works()->where('source', '=', Work::$openAlexSource)->count();
+        $crossref_works = $author->works()->where('source', '=', Work::$crossRefSource)->count();
 
         // Check if sorting is specified in the request
         if ($request->has('sort')) {
@@ -73,13 +73,13 @@ class AuthorController extends Controller {
             $this->applySorting($works_query, $sort_field);
         } else {
             // If no sorting is specified, use the default sorting option
-            $default_sorting = collect(Work::SORTING_OPTIONS)->firstWhere('default','=', true);
+            $default_sorting = collect(Work::SORTING_OPTIONS)->firstWhere('default', '=', true);
             $this->applySorting($works_query, $default_sorting['value']);
             $current_sorting_method = $default_sorting['value'];
         }
 
         // Paginate the sorted works
-        $works = $works_query->paginate(10);
+        $works = $works_query->where('source', Work::$openAlexSource)->paginate(10);
 
         // Generate URLs for each sorting option and include them in the sortingOptions object
         $sorting_options = $this->generateSortingOptions($id);

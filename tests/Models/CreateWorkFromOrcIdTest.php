@@ -2,8 +2,6 @@
 
 namespace Tests\Models;
 
-use App\Models\Work;
-use App\Utility\OrcId;
 use App\Utility\Requests;
 use Tests\TestCase;
 
@@ -14,7 +12,7 @@ class CreateWorkFromOrcIdTest extends TestCase {
 
     public function testCreateNewOIWork() {
         $request_work = Requests::getResponseBody(Requests::get('https://pub.orcid.org/v3.0/0000-0003-2366-1365/work/145119252', ['Accept' => 'application/vnd.orcid+json']));
-        $work = Work::createNewOIWork($request_work, OrcId::extractWorkDoi($request_work), true);
+//        $work = Work::createNewOIWork($request_work, OrcId::extractWorkDoi($request_work), true);
         $this->assertIsInt($work->id);
         $this->assertIsString($work->doi);
         $this->assertIsString($work->type);

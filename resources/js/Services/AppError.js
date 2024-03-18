@@ -1,7 +1,6 @@
 import { dispatchAuthorizationErrorEvent } from '@/Events/ErrorEvent/ErrorEvent.js';
 
 export const handleAPIError = (res) => {
-    console.log('🚀 ~ AppError.js 4', res);
     switch (res.status) {
         case 403: {
             dispatchAuthorizationErrorEvent({

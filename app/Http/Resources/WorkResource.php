@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 
+use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
@@ -11,22 +12,20 @@ use Illuminate\Support\Carbon;
  * @property mixed publication_year
  * @property mixed title
  * @property mixed doi
- * @property mixed referenced_works_count
  * @property mixed language
  * @property mixed is_oa
- * @property mixed open_alex_url
  * @property mixed updated_at
- * @property mixed cites_url
  * @property mixed $id
  * @property mixed $type
- * @property mixed $open_alex_id
  * @property mixed $event
  * @property mixed $source_title
  * @property mixed $subtype
  * @property mixed $is_referenced_by_count
  * @property mixed $abstract
  * @property string $source
- * @method sources()
+ * @property string $source_url
+ * @property string external_id
+ * @method versions()
  */
 class WorkResource extends JsonResource {
     /**
@@ -46,18 +45,17 @@ class WorkResource extends JsonResource {
             'referenced_by_count' => $this->is_referenced_by_count,
             'abstract' => $this->abstract,
             'published_at_year' => $this->publication_year,
-            'referenced_works_count' => $this->referenced_works_count,
             'language' => $this->language,
             'is_oa' => !!$this->is_oa,
-            'open_alex_url' => $this->open_alex_url,
+            'source_url' => $this->source_url,
             'updated_at' => Carbon::parse($this->updated_at)->format('d-m-Y'),
-            'cites_url' => $this->cites_url,
             'authors' => AuthorResource::collection($this->whenLoaded('authors')),
             'statistics' => StatisticResource::collection($this->whenLoaded('statistics')),
-            'open_alex_id' => $this->open_alex_id,
+            'external_id' => $this->external_id,
             'local_url' => route('Work.Page', ['id' => $this->id]),
             'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
-            'sources' => $this->sources()
+            'source' => $this->source,
+            'versions' => $this->when($this->source === Work::$openAlexSource, WorkResource::collection($this->versions()), [])
         ];
     }
 }

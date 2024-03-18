@@ -1,5 +1,5 @@
 import React from 'react';
-import { arrayOf, func, number, oneOfType, shape, string } from 'prop-types';
+import { arrayOf, bool, func, number, oneOfType, shape, string } from 'prop-types';
 import { OpenAlexSVG } from '@/SVGS/OpenAlexSVG.jsx';
 import { OrcidSVG } from '@/SVGS/OrcidSVG.jsx.jsx';
 import { ScopusSVG } from '@/SVGS/ScopusSVG.jsx';
@@ -12,7 +12,7 @@ const styles = {
     propertyValue: 'text-black border-l-2 border-l-blue-600 pl-3 font-bold text-sm',
     propertyName: 'text-gray-600 border-l-2 border-l-blue-600 pl-3 text-xs',
 };
-const RowOfProperties = ({ properties, title }) => {
+const RowOfProperties = ({ properties, title, vertical = false }) => {
     const filterProperties = properties.filter((prop) => !!prop);
     const getIcon = (propertyName) => {
         switch (propertyName) {
@@ -29,7 +29,7 @@ const RowOfProperties = ({ properties, title }) => {
 
     return (
         <div>
-            {title && <div className={styles.title}>{title}</div>}
+            {title && <div className={clsx(styles.title, `${vertical ? 'flex-col' : ''}`)}>{title}</div>}
             <div className={styles.propertiesWrapper}>
                 {filterProperties.map((property) => {
                     if (!property) return null;
@@ -63,5 +63,6 @@ RowOfProperties.propTypes = {
         }),
     ),
     title: string,
+    vertical: bool,
 };
 export default RowOfProperties;
