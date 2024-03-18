@@ -11,7 +11,7 @@ import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
     authorElement: 'hover:underline text-xs lg:text-sm',
-    li: 'flex-grow list-none flex h-fit mb-5',
+    li: 'flex justify-between',
     index: 'top-0 left-0 pr-2 text-black text-sm lg:text-base 2xl:text-lg flex flex-col gap-2 text-center h-fit',
     infoContainer: 'flex flex-col',
     innerInfoContainer: 'flex flex-wrap border-l-2 border-l-blue-700',
@@ -81,43 +81,48 @@ export const WorkItem = ({
                     </div>
                 </Modal.Body>
             </Modal>
-            <div className={styles.index}>
-                {index}
-                <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />
-            </div>
-            <div className={styles.infoContainer}>
-                <div className={styles.innerInfoContainer}>
-                    {!hideType && <div className={styles.infoProperty}>{capitalizeFirstLetter(type)}</div>}
-                    {!hideOA && <div className={styles.infoProperty}>{isOA ? 'Open Access Available' : 'Open Access Unavailable'}</div>}
-                    {!hidePublicationDate && <div className={styles.infoProperty}>Published: {publicationYear}</div>}
-                    {!hideCitations && <div className={styles.infoProperty}>Citations: {referencedByCount}</div>}
-                    {!hideLanguage && <div className={styles.infoProperty}>Language: {language}</div>}
-                    <div className={styles.infoProperty}>Source: {source}</div>
-                    {!hideVersions && versions.length > 0 && (
-                        <div className={'cursor-pointer pl-3 text-xs text-blue-500 hover:underline md:text-sm'} onClick={handleOpenVersions}>
-                            ( + {versions.length} {versions.length < 2 ? 'version' : 'versions'} )
+            <div className={'mb-5 flex h-fit flex-grow list-none '}>
+                <div className={styles.index}>
+                    {index}
+                    <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />
+                </div>
+                <div className={styles.infoContainer}>
+                    <div className={styles.innerInfoContainer}>
+                        {!hideType && <div className={styles.infoProperty}>{capitalizeFirstLetter(type)}</div>}
+                        {!hideOA && <div className={styles.infoProperty}>{isOA ? 'Open Access Available' : 'Open Access Unavailable'}</div>}
+                        {!hidePublicationDate && <div className={styles.infoProperty}>Published: {publicationYear}</div>}
+                        {!hideCitations && <div className={styles.infoProperty}>Citations: {referencedByCount}</div>}
+                        {!hideLanguage && <div className={styles.infoProperty}>Language: {language}</div>}
+                        <div className={styles.infoProperty}>Source: {source}</div>
+                        {!hideVersions && versions.length > 0 && (
+                            <div className={'cursor-pointer pl-3 text-xs text-blue-500 hover:underline md:text-sm'} onClick={handleOpenVersions}>
+                                ( + {versions.length} {versions.length < 2 ? 'version' : 'versions'} )
+                            </div>
+                        )}
+                    </div>
+                    <div className={'pl-3'}>
+                        <a href={localUrl} className={styles.title}>
+                            {title ?? 'Title Unavailable'}
+                        </a>
+                    </div>
+                    {!hideAuthors && (
+                        <div className={styles.authorsList}>
+                            {authorElements}
+                            {remainingAuthors > 0 && !showAllAuthors ? (
+                                <span
+                                    className={styles.showMoreLessAuthors}
+                                    onClick={() => setShowAllAuthors(true)}
+                                >{`+${remainingAuthors} more`}</span>
+                            ) : (
+                                remainingAuthors > 0 && (
+                                    <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(false)}>{`show less`}</span>
+                                )
+                            )}
                         </div>
                     )}
                 </div>
-                <div className={'pl-3'}>
-                    <a href={localUrl} className={styles.title}>
-                        {title ?? 'Title Unavailable'}
-                    </a>
-                </div>
-                {!hideAuthors && (
-                    <div className={styles.authorsList}>
-                        {authorElements}
-                        {remainingAuthors > 0 && !showAllAuthors ? (
-                            <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(true)}>{`+${remainingAuthors} more`}</span>
-                        ) : (
-                            remainingAuthors > 0 && (
-                                <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(false)}>{`show less`}</span>
-                            )
-                        )}
-                    </div>
-                )}
             </div>
-            <a href={doi} title={'Go to source'} className={'my-auto  ml-2'}>
+            <a href={doi} title={'Go to source'} className={'mt-2'}>
                 <ExternalSVG width={26} height={26} />
             </a>
         </li>

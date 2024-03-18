@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\{Factories\HasFactory,
  * @property int $id
  * @method static find(int $id)
  * @method static name(mixed $name)
+ * @method static noParent()
  */
 class Group extends Model {
     use HasFactory;
@@ -35,9 +36,12 @@ class Group extends Model {
     }
 
     public function childrenRecursive(): HasMany {
-        return $this->children()->with('childrenRecursive', 'members')->with('parent');
+        return $this->children()->with(['childrenRecursive', 'members']);
     }
 
+    public function scopeNoParent($query) {
+        return $query->whereNull('parent_id');
+    }
     //    public function membersRecursive(): BelongsToMany {
     //        return $this->members()->with('membersRecursive');
     //    }

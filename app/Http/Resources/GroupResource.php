@@ -11,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property string $name
  * @property string $description
  * @property array|mixed $additionalParameters
+ * @property mixed $childrenRecursive
  */
 class GroupResource extends JsonResource {
     public function __construct($resource, $additionalParameters = []) {
@@ -32,6 +33,7 @@ class GroupResource extends JsonResource {
             'members' => AuthorResource::collection($this->whenLoaded('members')),
             'parent' => new GroupResource($this->whenLoaded('parent')),
             'works' => new WorkCollection($this->whenLoaded('works')),
+            'children' => $this->whenLoaded('childrenRecursive', GroupResource::collection($this->childrenRecursive)),
             'uniqueWorksCount' => $this->when(isset($this->additionalParameters['open_alex_works']) && isset($this->additionalParameters['orcid_works']) && isset($this->additionalParameters['crossref_works']),
                 [Work::$openAlexSource => data_get($this->additionalParameters, 'open_alex_works', 0), Work::$orcIdSource => data_get($this->additionalParameters, 'orcid_works', 0),
                     Work::$crossRefSource => data_get($this->additionalParameters, 'crossref_works', 0)])

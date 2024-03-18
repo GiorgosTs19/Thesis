@@ -8,7 +8,7 @@ import { useGroupCreatedEventListener, useGroupDeletedEventListener, useGroupUpd
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
 import NewGroupModal from '@/Components/Modal/NewGroupModal.jsx';
-import GroupBadge from '@/Components/Assets/GroupItem/GroupBadge.jsx';
+import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
 
 /**
  * @component
@@ -22,6 +22,7 @@ import GroupBadge from '@/Components/Assets/GroupItem/GroupBadge.jsx';
  * @returns The rendered GroupsPage component.
  */
 const GroupsPage = ({ groups }) => {
+    console.log('🚀 ~ GroupsPage.jsx 25', groups);
     const [groupToShow, setGroupToShow] = useState(null);
     const [groupsList, setGroupsList] = useState(groups);
     const [selectedGroup, setSelectedGroup] = useState(null);
@@ -80,14 +81,13 @@ const GroupsPage = ({ groups }) => {
     const { loading } = useAsync(handleFetchGroup, !!selectedGroup, [worksShouldRefresh]);
 
     const showCurrentGroup = !loading && !!groupToShow && !!worksPaginationInfo;
-    console.log('🚀 ~ GroupsPage.jsx 84', showCurrentGroup);
 
     return (
         <div className={'flex min-h-[calc(100vh-4rem)] flex-col md:flex-row'}>
             <div className={'my-10 flex w-full flex-wrap gap-4 pl-2 pr-5 md:w-64 md:flex-col md:gap-3 md:border-r md:border-r-gray-300'}>
                 <NewGroupModal groups={groupsList} />
                 {groupsList.map((group) => (
-                    <GroupBadge
+                    <GroupItem
                         key={group.id}
                         group={group}
                         className={'mx-auto w-5/12 md:w-full'}

@@ -1,10 +1,9 @@
-import { Badge } from 'flowbite-react';
 import { bool, func, object, string } from 'prop-types';
 import React, { forwardRef } from 'react';
 import clsx from 'clsx';
 
 const styles = {
-    badge: 'rounded-md hover:scale-110 transition-transform duration-300 cursor-pointer',
+    badge: 'rounded-md hover:scale-110 transition-transform duration-200 cursor-pointer',
     color: 'gray',
     name: 'my-auto px-2 text-lg',
 };
@@ -23,24 +22,24 @@ const styles = {
  * @param {Function} setGroups - The function to update the list of groups after a delete operation.
  * @returns The rendered Group component.
  */
-const GroupBadge = forwardRef(({ group, onClick, isSelected, className }, ref) => {
+const GroupItem = forwardRef(({ group, onClick, isSelected, className }, ref) => {
     return (
         <>
-            <Badge key={group.id} onClick={onClick} className={clsx(styles.badge, className ?? 'w-full')} color={styles.color}>
+            <div key={group.id} onClick={onClick} className={clsx(styles.badge, className ?? 'w-full')}>
                 <div className={'flex'} ref={isSelected ? ref : null}>
                     <div className={clsx(styles.name, isSelected ? 'text-sky-400' : 'text-accent')}>{group.name}</div>
                 </div>
-            </Badge>
+            </div>
         </>
     );
 });
 
-GroupBadge.propTypes = {
+GroupItem.propTypes = {
     group: object,
     onClick: func,
     isSelected: bool,
     className: string,
 };
 
-GroupBadge.displayName = 'GroupBadge';
-export default GroupBadge;
+GroupItem.displayName = 'GroupBadge';
+export default GroupItem;

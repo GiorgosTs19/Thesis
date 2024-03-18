@@ -29,7 +29,7 @@ class GroupController extends Controller {
      * @return Response - Renders the groups page.
      */
     public function show(): Response {
-        $groups = self::getAllGroups();
+        $groups = GroupResource::collection(Group::noParent()->with(['childrenRecursive'])->get());
         return Inertia::render('Routes/Groups/GroupsPage', ['groups' => GroupResource::collection($groups)]);
     }
 
