@@ -326,14 +326,12 @@ class Author extends Model {
         foreach ($works as $work) {
             $work_doi = OrcId::extractWorkDoi($work);
 
-            $database_work = Work::doi($work_doi)->first();
-
             $path = OrcIdAPI::extractWorkPath($work);
 
-            if (!$work_doi || !$database_work || !$path)
+            if (!$work_doi || !$path)
                 continue;
 
-            Work::createNewOIWork($path, $work_doi, $database_work);
+            Work::createNewOIWork($path, $work_doi);
         }
     }
 

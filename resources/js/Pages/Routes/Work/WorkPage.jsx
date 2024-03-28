@@ -53,82 +53,77 @@ const WorkPage = ({ work, workVersions }) => {
     };
 
     return (
-        <>
-            <div className={'mx-auto mt-10 lg:px-5'}>
-                <div className="mb-4 flex flex-col gap-2">
-                    <h3 className={styles.title}>{title}</h3>
-                    <div className={'mx-auto text-center'}>
-                        {authors.map((author, index) => (
-                            <React.Fragment key={index}>
-                                <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser ? 'font-bold' : '')}>
-                                    {author.name}
-                                </a>
-                                {index < authors.length - 1 && ', '}
-                            </React.Fragment>
-                        ))}
-                    </div>
-                    <div className={'flex flex-col xl:flex-row'}>
-                        <div>
-                            <RowOfProperties properties={workObject.getProperties()} vertical />
-                            {versions.length > 0 && (
-                                <div className={'my-3 flex flex-col'}>
-                                    <div className={'mb-5 text-center text-lg text-gray-400 opacity-85'}>
-                                        {versions.length} more {versions.length < 2 ? 'version' : 'versions'} of this work
-                                    </div>
-                                    <ul className={'mx-auto'}>
-                                        {versions.map((item, index) => (
-                                            <WorkItem key={index} work={item} index={index + 1} hideVersions />
-                                        ))}
-                                    </ul>
-                                </div>
+        <div className={'mx-auto mt-10 w-full lg:px-5 3xl:w-8/12'}>
+            <div className="mb-4 flex flex-col gap-2">
+                <h3 className={styles.title}>{title}</h3>
+                <div className={'mx-auto text-center'}>
+                    {authors.map((author, index) => (
+                        <React.Fragment key={index}>
+                            <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser ? 'font-bold' : '')}>
+                                {author.name}
+                            </a>
+                            {index < authors.length - 1 && ', '}
+                        </React.Fragment>
+                    ))}
+                </div>
+                <div className={'flex flex-col'}>
+                    <RowOfProperties properties={workObject.getProperties()} className={'my-auto'} />
+                    {workObject.abstract && (
+                        <div
+                            className={clsx(
+                                styles.abstractWrapper,
+                                showPartialAbstract ? styles.partialAbstract : '',
+                                abstractTooLong ? 'cursor-pointer' : '',
                             )}
+                            onClick={() => setShowPartialAbstract((prev) => !prev)}
+                        >
+                            <div className={styles.abstractTitle}>Abstract</div>
+                            <div
+                                className={clsx(
+                                    showPartialAbstract ? styles.partialAbstract : '',
+                                    abstractTooLong ? 'cursor-pointer' : '',
+                                    styles.abstractText,
+                                )}
+                            >
+                                {workObject.abstract}
+                            </div>
                         </div>
-
-                        <div className={`${abstractPresent ? 'mb-5' : 'my-auto'} flex w-full flex-col`}>
-                            {REFERENCES_CHART.dataSet.length ? (
-                                <div className={styles.chartContainer}>
-                                    <>
-                                        <div className={styles.chartDescription}>{REFERENCES_CHART.description}</div>
-                                        <div className={styles.chartDescription}>Source : {REFERENCES_CHART.source}</div>
-                                        <div className={styles.chart}>
-                                            <SimpleStatisticsChart
-                                                title={REFERENCES_CHART.title}
-                                                dataSet={REFERENCES_CHART.dataSet}
-                                                labels={REFERENCES_CHART.labels}
-                                            />
-                                        </div>
-                                        <div className={styles.chartDisclaimer}>{REFERENCES_CHART.disclaimer}</div>
-                                    </>
-                                </div>
-                            ) : (
-                                <div className={'mx-auto p-3 text-center text-2xl'}>References Metrics are not available for this work!</div>
-                            )}
-                            {workObject.abstract && (
-                                <div
-                                    className={clsx(
-                                        styles.abstractWrapper,
-                                        showPartialAbstract ? styles.partialAbstract : '',
-                                        abstractTooLong ? 'cursor-pointer' : '',
-                                    )}
-                                    onClick={() => setShowPartialAbstract((prev) => !prev)}
-                                >
-                                    <div className={styles.abstractTitle}>Abstract</div>
-                                    <div
-                                        className={clsx(
-                                            showPartialAbstract ? styles.partialAbstract : '',
-                                            abstractTooLong ? 'cursor-pointer' : '',
-                                            styles.abstractText,
-                                        )}
-                                    >
-                                        {workObject.abstract}
+                    )}
+                    <div className={`${abstractPresent ? 'mt-5' : 'my-auto'} flex w-full flex-col`}>
+                        {REFERENCES_CHART.dataSet.length ? (
+                            <div className={styles.chartContainer}>
+                                <>
+                                    <div className={styles.chartDescription}>{REFERENCES_CHART.description}</div>
+                                    <div className={styles.chartDescription}>Source : {REFERENCES_CHART.source}</div>
+                                    <div className={styles.chart}>
+                                        <SimpleStatisticsChart
+                                            title={REFERENCES_CHART.title}
+                                            dataSet={REFERENCES_CHART.dataSet}
+                                            labels={REFERENCES_CHART.labels}
+                                        />
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                    <div className={styles.chartDisclaimer}>{REFERENCES_CHART.disclaimer}</div>
+                                </>
+                            </div>
+                        ) : (
+                            <div className={'mx-auto p-3 text-center text-2xl'}>References Metrics are not available for this work!</div>
+                        )}
                     </div>
+                    {versions.length > 0 && (
+                        <div className={'my-3 flex flex-col'}>
+                            <div className={'mb-5 text-center text-lg text-gray-400 opacity-85'}>
+                                {versions.length} more {versions.length < 2 ? 'version' : 'versions'} of this work
+                            </div>
+                            <ul className={'mx-auto text-left'}>
+                                {versions.map((item, index) => (
+                                    <WorkItem key={index} work={item} index={index + 1} hideVersions />
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

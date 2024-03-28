@@ -38,7 +38,7 @@ export function Navigation() {
         <Disclosure as="nav" className={styles.disclosure}>
             {({ open }) => (
                 <>
-                    <div className="border-b border-b-gray-300 px-4 sm:px-6 lg:px-8">
+                    <div className="border-b border-b-gray-300 bg-gray-50 px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 items-center justify-between">
                             <div className="flex items-center">
                                 <div className="hidden md:block">

@@ -11,6 +11,7 @@ export default {
                 border: '#e9e9ec',
             },
             screens: {
+                xxl: '1300px',
                 '3xl': '1600px',
                 '4xl': '2000px',
                 '5xl': '2200px',

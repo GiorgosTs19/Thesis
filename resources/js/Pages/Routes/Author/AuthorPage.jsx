@@ -15,14 +15,13 @@ import clsx from 'clsx';
 import SimpleDoughnutChart from '@/Charts/DoughnutChart/SimpleDoughnutChart.jsx';
 
 const styles = {
-    infoContainer: 'grid grid-cols-1 2xl:grid-cols-5 gap-4 mb-4',
-    info: '2xl:col-span-2 flex flex-col',
-    statusWrapper: 'rounded-lg p-3',
+    infoContainer: 'flex flex-col lg:flex-row pb-4 w-full',
+    properties: 'w-full lg:w-5/12 flex flex-col',
+    statusWrapper: 'rounded-lg p-3 my-auto',
     statusHeader: 'font-semibold mb-2 text-sm lg:text-lg',
     status: 'text-gray-700 italic text-xs lg:text-base',
-    biographyMissing: 'text-gray-700 opacity-75 italic m-auto text-center pb-5 sm:pb-0 text-lg xl:text-2xl border-b border-b-gray-400 sm:border-b-0',
     lastUpdated: 'mt-2 text-gray-500 opacity-80 text-xs lg:text-sm',
-    chartsContainer: '2xl:col-span-3 flex flex-col h-full',
+    chartsContainer: 'w-full lg:7/12 flex flex-col h-full my-auto',
     chartContainer: 'flex flex-col h-full',
     chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-3 max-w-3xl overflow-visible text-center text-sm',
     chartTitle: 'text-black mx-auto mb-2 text-center',
@@ -34,10 +33,11 @@ const styles = {
     worksListContainer: 'w-full flex flex-col',
     listTitle: '2xl:text-xl font-semibold mb-4 text-yellow-800',
     listText: 'mx-2 text-xs sm:text-sm text-gray-600 opacity-50',
-    biographyWrapper: 'w-full xl:max-w-4xl mb-7 pr-7 xl:border-r xl:border-r-gray-300',
+    biographyMissing: 'text-gray-700 opacity-75 italic m-auto text-center pb-5 sm:pb-0 text-lg xl:text-2xl border-b border-b-gray-400 sm:border-b-0',
+    biographyWrapper: 'w-full mb-7 pr-7 xl:border-r xl:border-r-gray-300',
     biographyText: 'text-gray-500 flex-wrap whitespace-pre-wrap 2xl:text-lg cursor-pointer text-left',
     biographyTitle: 'my-3 text-yellow-800 2xl:text-lg',
-    partialAbstract: 'line-clamp-6 xl:line-clamp-10 leading-relaxed overflow-ellipsis',
+    partialAbstract: 'line-clamp-6 xl:line-clamp-13 leading-relaxed overflow-ellipsis',
 };
 const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWorksCounts }) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
@@ -120,11 +120,11 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
         />
     );
 
-    const authorProperties = [
-        ...authorObject.getProperties(),
-        { name: 'Open Alex Sourced Works', value: uniqueWorksCounts.OpenAlex },
-        { name: 'Crossref Sourced Works', value: uniqueWorksCounts.Crossref },
-        { name: 'OrcId Sourced Works', value: uniqueWorksCounts.ORCID },
+    const authorGeneralProperties = [...authorObject.getProperties()];
+    const workSources = [
+        { name: 'Open Alex Sourced Works ', value: uniqueWorksCounts.OpenAlex },
+        { name: 'OrcId Sourced Works ', value: uniqueWorksCounts.ORCID },
+        { name: 'Crossref Sourced Works ', value: uniqueWorksCounts.Crossref },
     ];
 
     const biographyPresent = !!authorObject.biography;
@@ -132,8 +132,13 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
     return (
         <div className={'flex flex-col py-2 xl:px-5'}>
             <div className={styles.infoContainer}>
-                <div className={styles.info}>
-                    <RowOfProperties properties={authorProperties} title={authorObject.name}></RowOfProperties>
+                <div className={styles.properties}>
+                    <RowOfProperties properties={authorGeneralProperties} title={authorObject.name} className={'my-auto'} />
+                    <div className={clsx(styles.statusWrapper, !biographyPresent ? 'my-auto' : '')}>
+                        <h2 className={styles.statusHeader}>{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
+                        <div className={styles.status}>{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
+                        <div className={styles.lastUpdated}>Last updated: {updatedAt}</div>
+                    </div>
                 </div>
                 <div className={styles.chartsContainer}>
                     <Switch
@@ -154,12 +159,7 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
                 </div>
             </div>
             <div className={'line mb-4 flex flex-col border-y border-y-gray-200 py-3 xl:flex-row'}>
-                <div className={`flex flex-col ${!biographyPresent ? 'w-full xl:max-w-xl' : ''}`}>
-                    <div className={clsx(styles.statusWrapper, !biographyPresent ? 'my-auto' : '')}>
-                        <h2 className={styles.statusHeader}>{isUser ? 'Registered User' : 'Incomplete Profile'}</h2>
-                        <div className={styles.status}>{isUser ? PROFILE_STATUS.REGISTERED : PROFILE_STATUS.INCOMPLETE}</div>
-                        <div className={styles.lastUpdated}>Last updated: {updatedAt}</div>
-                    </div>
+                <div className={`my-auto flex flex-col ${biographyPresent ? 'w-full xl:w-6/12' : ''}`}>
                     {biographyPresent ? (
                         <div
                             className={clsx(styles.biographyWrapper, !showWholeBio ? styles.partialAbstract : '')}
@@ -174,16 +174,22 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
                         <div className={styles.biographyMissing}>Biography for this author is not available</div>
                     )}
                 </div>
-                <div className={`my-5 flex ${biographyPresent ? 'max-w-4xl' : 'w-full'} flex-col gap-3 px-5`}>
+                <div className={`my-auto flex w-full flex-col gap-3 px-5 xl:w-6/12`}>
                     <h4 className={styles.chartTitle}>Work Source Distribution</h4>
-                    <SimpleDoughnutChart
-                        dataSet={DOUGHNUT_CHART_DATA.dataSet}
-                        labels={DOUGHNUT_CHART_DATA.labels}
-                        title={DOUGHNUT_CHART_DATA.title}
-                        className={'mx-auto max-h-52'}
-                    />
-                    <div className={styles.chartDisclaimer}>{DOUGHNUT_CHART_DATA.disclaimer}</div>
-                    <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
+                    {width < 800 && <RowOfProperties properties={workSources} />}
+                    <div className={'flex'}>
+                        <div className={'w-full'}>
+                            <SimpleDoughnutChart
+                                dataSet={DOUGHNUT_CHART_DATA.dataSet}
+                                labels={DOUGHNUT_CHART_DATA.labels}
+                                title={DOUGHNUT_CHART_DATA.title}
+                                className={'mx-auto max-h-52'}
+                            />
+                            <div className={styles.chartDisclaimer}>{DOUGHNUT_CHART_DATA.disclaimer}</div>
+                            <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
+                        </div>
+                        {width >= 800 && <RowOfProperties properties={workSources} vertical className={'w-fit'} />}
+                    </div>
                 </div>
             </div>
             <div className={styles.listsContainer}>

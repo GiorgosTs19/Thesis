@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->string('subtype')->nullable();
             $table->string('event')->nullable();
             $table->boolean('is_oa')->default(false);
+            $table->text('authors_string')->nullable();
             $table->dateTime('last_updated_date')->nullable();
             $table->dateTime('created_date')->nullable();
             $table->enum('source', [Work::$orcIdSource, Work::$openAlexSource, Work::$crossRefSource]);

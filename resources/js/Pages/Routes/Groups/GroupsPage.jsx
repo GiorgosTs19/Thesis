@@ -22,7 +22,6 @@ import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
  * @returns The rendered GroupsPage component.
  */
 const GroupsPage = ({ groups }) => {
-    console.log('🚀 ~ GroupsPage.jsx 25', groups);
     const [groupToShow, setGroupToShow] = useState(null);
     const [groupsList, setGroupsList] = useState(groups);
     const [selectedGroup, setSelectedGroup] = useState(null);

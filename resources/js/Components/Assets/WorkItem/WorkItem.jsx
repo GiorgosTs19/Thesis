@@ -11,7 +11,7 @@ import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
     authorElement: 'hover:underline text-xs lg:text-sm',
-    li: 'flex justify-between',
+    li: 'flex justify-between flex-grow',
     index: 'top-0 left-0 pr-2 text-black text-sm lg:text-base 2xl:text-lg flex flex-col gap-2 text-center h-fit',
     infoContainer: 'flex flex-col',
     innerInfoContainer: 'flex flex-wrap border-l-2 border-l-blue-700',
@@ -37,7 +37,6 @@ export const WorkItem = ({
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [showAllAuthors, setShowAllAuthors] = useState(false);
     const visibleAuthors = showAllAuthors ? authors : authors.slice(0, MAX_VISIBLE_AUTHORS);
-
     const filteredAuthors = authorToExclude ? visibleAuthors.filter((author) => author.id !== authorToExclude) : visibleAuthors;
 
     const modalRef = useClickAway(() => {

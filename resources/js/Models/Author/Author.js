@@ -1,6 +1,6 @@
-import {Work} from "@/Models/Work/Work.js";
-import {Statistic} from "@/Models/Statistic/Statistic.js";
-import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
+import { Work } from '@/Models/Work/Work.js';
+import { Statistic } from '@/Models/Statistic/Statistic.js';
+import { numberToDotNotation } from '@/Utility/Numbers/Utils.js';
 
 /**
  * Create a new Author.
@@ -20,21 +20,7 @@ import {numberToDotNotation} from "@/Utility/Numbers/Utils.js";
 const className = 'Author';
 
 export class Author {
-    constructor({
-                    name,
-                    isUser,
-                    citationCount,
-                    worksCount,
-                    openAlexId,
-                    scopusId,
-                    orcId,
-                    works,
-                    statistics,
-                    updatedAt,
-                    id,
-                    localUrl,
-                    biography
-                }) {
+    constructor({ name, isUser, citationCount, worksCount, openAlexId, scopusId, orcId, works, statistics, updatedAt, id, localUrl, biography }) {
         this.id = id;
         this.name = name;
         this.isUser = isUser;
@@ -52,10 +38,20 @@ export class Author {
     }
 
     static parseResponseAuthor({
-                                   name, is_user, citation_count, works_count, open_alex_id,
-                                   scopus_id, orc_id, works = [], statistics, updated_at, id, local_url,
-                                   biography
-                               }) {
+        name,
+        is_user,
+        citation_count,
+        works_count,
+        open_alex_id,
+        scopus_id,
+        orc_id,
+        works = [],
+        statistics,
+        updated_at,
+        id,
+        local_url,
+        biography,
+    }) {
         return new Author({
             id,
             name,
@@ -66,27 +62,46 @@ export class Author {
             biography,
             citationCount: citation_count,
             worksCount: works_count,
-            works: works ? works.map(work => Work.parseResponseWork(work)) : [],
+            works: works ? works.map((work) => Work.parseResponseWork(work)) : [],
             updatedAt: updated_at,
-            statistics: statistics ? statistics.map(statistic => Statistic.parseResponseStatistic(
-                {
-                    assetType: className,
-                    citedCount: statistic.cited_count,
-                    worksCount: statistic.works_count,
-                    assetId: id,
-                    year: statistic.year
-                })) : [],
-            localUrl: local_url
+            statistics: statistics
+                ? statistics.map((statistic) =>
+                      Statistic.parseResponseStatistic({
+                          assetType: className,
+                          citedCount: statistic.cited_count,
+                          worksCount: statistic.works_count,
+                          assetId: id,
+                          year: statistic.year,
+                      }),
+                  )
+                : [],
+            localUrl: local_url,
         });
     }
 
     getProperties() {
         return [
-            {name: 'Citations', value: numberToDotNotation(this.citationCount)},
-            {name: 'Works', value: numberToDotNotation(this.worksCount)},
-            {name: 'Open Alex', value: this.openAlexId ?? '-'},
-            {name: 'Scopus', value: this.scopusId ?? '-'},
-            {name: 'OrcId', value: this.orcId ?? '-'}
+            { name: 'Open Alex', value: this.openAlexId ?? '-' },
+            { name: 'Scopus', value: this.scopusId ?? '-' },
+            { name: 'OrcId', value: this.orcId ?? '-' },
+            { name: 'Citations', value: numberToDotNotation(this.citationCount) },
+            { name: 'Works', value: numberToDotNotation(this.worksCount) },
         ];
+    }
+
+    getScopus() {
+        return [{ name: 'Scopus', value: this.scopusId ?? '-' }];
+    }
+
+    getOpenAlex() {
+        return [
+            { name: 'Open Alex', value: this.openAlexId ?? '-' },
+            { name: 'Citations', value: numberToDotNotation(this.citationCount) },
+            { name: 'Works', value: numberToDotNotation(this.worksCount) },
+        ];
+    }
+
+    getOrcId() {
+        return [{ name: 'OrcId', value: this.orcId ?? '-' }];
     }
 }

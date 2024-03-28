@@ -7,12 +7,10 @@ use App\Http\Controllers\OpenAlexAPI;
 use App\Http\Controllers\OrcIdAPI;
 use App\Utility\Ids;
 use App\Utility\ULog;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\BelongsToMany, Relations\MorphMany};
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use stdClass;
 
 /**
  * @property integer $id
@@ -32,6 +30,7 @@ use stdClass;
  * @property string $abstract
  * @property int $is_referenced_by_count
  * @property string source
+ * @property string $authors_string
  *
  * @method static openAlex($id)
  * @method static mostCitations(int $int)
@@ -48,6 +47,7 @@ class Work extends Model {
     public static string $openAlexSource = 'OpenAlex';
     public static string $orcIdSource = 'ORCID';
     public static string $crossRefSource = 'Crossref';
+    public static string $aggregatedSource = 'Aggregated';
 
     public const SORTING_OPTIONS = [
         ['name' => 'Citations ( Ascending )', 'value' => 0, 'default' => false],
@@ -113,46 +113,46 @@ class Work extends Model {
      * @return void
      * The newly created work.
      */
-    public static function createNewOIWork($work_path, $doi, $db_work): void {
+    public static function createNewOIWork($work_path, $doi): void {
         if (Work::where('doi', $doi)->where('source', Work::$orcIdSource))
             return;
         $new_orc_id_work = new Work;
+
         try {
-            $doi_work_object = DOIAPI::doiRequest($doi);
             $orc_id_work = OrcIdAPI::workRequest($work_path);
 
-            if (!$db_work) {
-                $db_work = Work::where('doi', $doi)->first();
-            }
 
             $new_orc_id_work->doi = $doi;
             $new_orc_id_work->title = data_get($orc_id_work, 'title.title.value') ?? '';
-            $new_orc_id_work->publication_year = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y');
+            $new_orc_id_work->publication_year = data_get($orc_id_work, 'publication-date.year.value');
             $new_orc_id_work->source_title = data_get($orc_id_work, 'journal-title.value');
-            $new_orc_id_work->language = $doi_work_object->language ?? $db_work->language;
+            $new_orc_id_work->language = null;
             $new_orc_id_work->type = property_exists($orc_id_work, 'type') ? $orc_id_work->type : 'Unknown';
             $new_orc_id_work->event = null;
             $new_orc_id_work->is_oa = property_exists($orc_id_work, 'visibility') && $orc_id_work->visibility === 'public';
             $new_orc_id_work->external_id = $work_path;
             $new_orc_id_work->source_url = $doi;
-            $new_orc_id_work->is_referenced_by_count = data_get($doi_work_object, 'is-referenced-by-count');
+            $new_orc_id_work->is_referenced_by_count = null;
             $new_orc_id_work->last_updated_date = null;
-            $new_orc_id_work->subtype = $doi_work_object->type;
-            $new_orc_id_work->created_date = Carbon::parse(data_get($doi_work_object, 'created.date-time'))->format('Y-m-d H:i:s');
+            $new_orc_id_work->subtype = null;
+            $new_orc_id_work->created_date = null;
             $new_orc_id_work->source = self::$orcIdSource;
             $new_orc_id_work->save();
 
-            $new_doi_work = $new_orc_id_work->syncWithDOI($doi_work_object);
 
+            $db_work_authors = AuthorWork::where('work_id', Work::where('doi', $doi)->source(Work::$openAlexSource)->first()->id)->get();
 
-            $db_work->source_title = data_get($orc_id_work, 'journal-title.value');
-            $db_work->subtype = $doi_work_object->type;
-            $db_work->save();
-
-            $db_work_authors = AuthorWork::where('work_id', $db_work->id)->get();
-
-            foreach ($db_work_authors as $author_entry) {
-                Author::find($author_entry->author_id)->associateToWork($new_doi_work, $author_entry->position)->associateToWork($new_orc_id_work, $author_entry->position);
+            if (sizeof($db_work_authors) > 0) {
+                foreach ($db_work_authors as $author_entry) {
+                    Author::find($author_entry->author_id)->associateToWork($new_orc_id_work, $author_entry->position);
+                }
+            } else {
+                $authors_array = data_get($orc_id_work, 'contributors.contributor');
+                $authors_string = '';
+                foreach ($authors_array as $author) {
+                    $authors_string .= data_get($author, 'credit-name');
+                }
+                $new_orc_id_work->authors_string = $authors_string;
             }
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
@@ -361,23 +361,22 @@ class Work extends Model {
     }
 
     /**
-     * @param stdClass | null $doi_object
+     * @param string $doi
      * @return Work
      */
-    public function syncWithDOI(stdClass $doi_object = null): Work {
-        if (!$doi_object)
-            $doi_object = DOIAPI::doiRequest($this->doi);
+    public static function syncWithDOI(string $doi): Work {
+        $doi_object = DOIAPI::doiRequest($doi);
 
         $new_work = new Work();
-        $new_work->doi = $this->doi;
-        $new_work->title = $this->title;
-        $new_work->type = $this->type;
-        $new_work->publication_year = $this->publication_year;
-        $new_work->source_title = $this->source_title;
-        $new_work->source_url = Ids::toDxDoiUrl($this->doi);
-        $new_work->external_id = Ids::extractDoiFromUrl($this->doi);
-        $new_work->is_oa = $this->is_oa;
-        $new_work->language = $this->language;
+        $new_work->doi = $doi;
+        $new_work->title = $doi_object->title;
+        $new_work->type = $doi_object->type;
+        $new_work->publication_year = data_get($doi_object, 'published-online.date-parts')[0];
+        $new_work->source_title = null;
+        $new_work->source_url = Ids::toDxDoiUrl($doi);
+        $new_work->external_id = Ids::extractDoiFromUrl($doi);
+        $new_work->is_oa = false;
+        $new_work->language = $doi_object->language;
         $new_work->abstract = isset($doi_object->abstract) ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
         $new_work->subtype = $doi_object->type ?? null;
         $new_work->event = $doi_object->event ?? null;
