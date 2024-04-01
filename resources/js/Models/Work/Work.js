@@ -124,6 +124,11 @@ export class Work {
         });
     }
 
+    getSources() {
+        const multipleSources = this.source.includes(',');
+        return [multipleSources, this.source];
+    }
+
     getProperties() {
         const properties = [
             { name: 'Doi', value: this.doi },
@@ -131,7 +136,15 @@ export class Work {
             { name: 'Published', value: this.publicationYear },
             { name: 'Open Access', value: this.isOA ? 'Available' : 'Unavailable' },
             { name: 'Versions', value: this.versions.length + 1 },
-            { name: 'Source', value: this.source },
+            {
+                name: this.source === 'Aggregate' ? 'Sources' : 'Source',
+                value:
+                    this.source === 'Aggregate'
+                        ? this.versions.length > 1
+                            ? this.versions.map((version) => version.source).join(', ')
+                            : this.source
+                        : this.source,
+            },
         ];
         if (this.subtype && this.subtype !== this.type) properties.push({ name: 'Subtype', value: this.subtype });
         if (this.referencedByCount) properties.push({ name: 'Referenced By', value: this.referencedByCount });

@@ -28,6 +28,16 @@ use Illuminate\Support\Carbon;
  * @method versions()
  */
 class WorkResource extends JsonResource {
+    private function getSources(): string {
+        if ($this->source !== Work::$aggregateSource)
+            return $this->source;
+        $sources = [];
+        foreach ($this->versions() as $version) {
+            $sources = [...$sources, $version->source];
+        }
+        return implode(', ', $sources);
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -54,7 +64,7 @@ class WorkResource extends JsonResource {
             'external_id' => $this->external_id,
             'local_url' => route('Work.Page', ['id' => $this->id]),
             'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
-            'source' => $this->source,
+            'source' => self::getSources(),
             'versions' => $this->when($this->source === Work::$openAlexSource, WorkResource::collection($this->versions()), [])
         ];
     }

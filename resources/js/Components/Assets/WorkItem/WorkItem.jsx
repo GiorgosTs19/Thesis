@@ -33,7 +33,7 @@ export const WorkItem = ({
     highlightUserAuthors = true,
     hideVersions = false,
 }) => {
-    const { doi, title, authors, type, isOA, publicationYear, referencedByCount, language, localUrl, source, versions } = work;
+    const { doi, title, authors, type, isOA, publicationYear, referencedByCount, language, localUrl, versions } = work;
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [showAllAuthors, setShowAllAuthors] = useState(false);
     const visibleAuthors = showAllAuthors ? authors : authors.slice(0, MAX_VISIBLE_AUTHORS);
@@ -64,7 +64,7 @@ export const WorkItem = ({
     const handleOpenVersions = () => setVersionsOpen(true);
 
     const dropDownOptions = [{ name: 'Hide Work', value: 1, default: false }];
-
+    const [multipleSources, sources] = work.getSources();
     return (
         <li className={styles.li}>
             <Modal show={versionsOpen} onClose={() => setVersionsOpen(false)} ref={modalRef}>
@@ -89,10 +89,12 @@ export const WorkItem = ({
                     <div className={styles.innerInfoContainer}>
                         {!hideType && <div className={styles.infoProperty}>{capitalizeFirstLetter(type)}</div>}
                         {!hideOA && <div className={styles.infoProperty}>{isOA ? 'Open Access Available' : 'Open Access Unavailable'}</div>}
-                        {!hidePublicationDate && <div className={styles.infoProperty}>Published: {publicationYear}</div>}
-                        {!hideCitations && <div className={styles.infoProperty}>Citations: {referencedByCount}</div>}
+                        {!hidePublicationDate && <div className={styles.infoProperty}>Published: {publicationYear ?? '-'}</div>}
+                        {!hideCitations && <div className={styles.infoProperty}>Citations: {referencedByCount ?? '-'}</div>}
                         {!hideLanguage && <div className={styles.infoProperty}>Language: {language}</div>}
-                        <div className={styles.infoProperty}>Source: {source}</div>
+                        <div className={styles.infoProperty}>
+                            {multipleSources ? 'Sources' : 'Source'}: {sources}
+                        </div>
                         {!hideVersions && versions.length > 0 && (
                             <div className={'cursor-pointer pl-3 text-xs text-blue-500 hover:underline md:text-sm'} onClick={handleOpenVersions}>
                                 ( + {versions.length} {versions.length < 2 ? 'version' : 'versions'} )

@@ -6,6 +6,7 @@ use App\Models\Author;
 use App\Models\User;
 use App\Utility\SystemManager;
 use App\Utility\ULog;
+use App\Utility\WorkUtils;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -73,7 +74,8 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
             SystemManager::enableMaintenanceMode();
 
             DB::transaction(function () {
-                foreach ($this->professors as $professor) User::createProfessorUser($professor);
+                WorkUtils::createTypes();
+                foreach ($this->professors as $professor) User::createProfUser($professor);
 
                 // Retrieve all the authors that are also users.
                 $user_authors = Author::user()->get();

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\OpenAlexAPI;
+use App\Utility\AuthorUtils;
 use App\Utility\Ids;
 use App\Utility\ULog;
 use Exception;
@@ -96,7 +97,7 @@ class User extends Authenticatable {
      * @return void
      * Create a new user and save it to the database, using info from the OpenAlex API.
      */
-    public static function createProfessorUser(array $professor): void {
+    public static function createProfUser(array $professor): void {
         $id = $professor['id'];
         // Check what type of id is used to fetch the author's info from OpenAlex api.
         $id_type = Ids::getIdType($id);
@@ -131,7 +132,7 @@ class User extends Authenticatable {
         // Else create a new user.
         self::newProfessorUser($professor, $ids);
 
-        Author::createOpenAlexAuthor($author, $ids, true);
+        AuthorUtils::createOAAuthor($author, $ids, true);
     }
 
     /**
@@ -142,20 +143,20 @@ class User extends Authenticatable {
      * The newly created user.
      */
     private static function newProfessorUser($professor, array $ids): User {
-        $newUser = new User;
+        $new_user = new User;
         try {
-            $newUser->first_name = $professor['first'];
-            $newUser->last_name = $professor['last'];
-            $newUser->email = $professor['email'];
-            $newUser->orc_id = $ids[Ids::ORC_ID_ID];
-            $newUser->scopus_id = $ids[Ids::SCOPUS_ID];
-            $newUser->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
-            $newUser->save();
-            ULog::log("User $newUser->last_name $newUser->first_name has been created");
+            $new_user->first_name = $professor['first'];
+            $new_user->last_name = $professor['last'];
+            $new_user->email = $professor['email'];
+            $new_user->orc_id = $ids[Ids::ORC_ID_ID];
+            $new_user->scopus_id = $ids[Ids::SCOPUS_ID];
+            $new_user->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
+            $new_user->save();
+            ULog::log("User $new_user->last_name $new_user->first_name has been created");
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
-        return $newUser;
+        return $new_user;
     }
 
     public function scopeOrcId($query, $id) {

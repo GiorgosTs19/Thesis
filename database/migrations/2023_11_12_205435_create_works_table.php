@@ -16,19 +16,20 @@ return new class extends Migration {
             $table->text('title');
             $table->text('abstract')->nullable();
             $table->string('source_title')->nullable();
-            $table->unsignedSmallInteger('publication_year');
+            $table->unsignedSmallInteger('publication_year')->nullable();
             $table->integer('is_referenced_by_count')->nullable();
-            $table->string('source_url');
-            $table->string('external_id');
+            $table->string('source_url')->nullable();
+            $table->string('external_id')->nullable();
             $table->string('language');
             $table->string('type');
             $table->string('subtype')->nullable();
+            $table->foreignId('type_id')->constrained()->onUpdate('cascade')->restrictOnDelete();
             $table->string('event')->nullable();
             $table->boolean('is_oa')->default(false);
             $table->text('authors_string')->nullable();
             $table->dateTime('last_updated_date')->nullable();
             $table->dateTime('created_date')->nullable();
-            $table->enum('source', [Work::$orcIdSource, Work::$openAlexSource, Work::$crossRefSource]);
+            $table->enum('source', [Work::$orcIdSource, Work::$openAlexSource, Work::$crossRefSource, Work::$aggregateSource]);
             $table->timestamps();
         });
     }

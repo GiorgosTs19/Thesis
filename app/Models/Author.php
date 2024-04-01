@@ -4,14 +4,13 @@ namespace App\Models;
 
 use App\Http\Controllers\OpenAlexAPI;
 use App\Http\Controllers\OrcIdAPI;
-use App\Utility\{Ids, OrcId, ULog};
+use App\Utility\{Ids, ULog, WorkUtils};
 use Exception;
 use Illuminate\Database\{Eloquent\Factories\HasFactory,
     Eloquent\Model,
     Eloquent\Relations\BelongsToMany,
     Eloquent\Relations\MorphMany};
 use Illuminate\Support\{Facades\Auth, Facades\Config};
-use JetBrains\PhpStorm\ArrayShape;
 
 /**
  * @method static updateOrCreate(array $array, array $array1)
@@ -40,7 +39,6 @@ class Author extends Model {
     use HasFactory;
 
     public static string $openAlexSource = 'OpenAlex';
-    public static string $orcIdSource = 'OrcId';
 
     public static array $updateFields = [
         'id',
@@ -53,7 +51,7 @@ class Author extends Model {
     /**
      * @var array|bool|mixed|string|null
      */
-    private static mixed $authorWorksBaseUrl;
+    public static mixed $authorWorksBaseUrl;
     protected $fillable = [
         'display_name',
         'orc_id',
@@ -76,80 +74,6 @@ class Author extends Model {
     public function __construct(array $attributes = []) {
         parent::__construct($attributes);
         self::$authorWorksBaseUrl = Config::get('openAlex.author_works_base_url');
-    }
-
-    /**
-     * Static Utility Function
-     * @param $external_id
-     * The external id to search the author with
-     * @param string $external_id_name
-     * The name of the external id that will be provided to search for the user
-     * ( defaults to "orc_id" ).
-     * Accepted external ids : "orc_id", "scopus_id", "open_alex_id"
-     * @return mixed
-     * The author if they exist.
-     */
-    public static function getAuthorDbIdByExternalId($external_id, string $external_id_name = 'orc_id'): mixed {
-        return Author::where($external_id_name, $external_id)->first();
-    }
-
-    /**
-     * @param $open_alex_id
-     * The OpenAlex id to search an author with
-     * @return array
-     * An array that contains a boolean as its first element, indicating if an author with a matching id was found,
-     *  and the author ( it they exist, otherwise null ) as its second element.
-     */
-    #[ArrayShape(['exists' => "mixed", 'author' => "mixed"])] public static function authorExists($open_alex_id): array {
-        $author_query = Author::where(Ids::OPEN_ALEX_ID, $open_alex_id);
-        $author_exists = $author_query->exists();
-        return ['exists' => (boolean)$author_exists, 'author' => $author_query->first()];
-    }
-
-    /**
-     * Static Utility Function
-     * @param $author
-     * An author object straight from the response of an OpenAlex api call.
-     * @param array $ids
-     * An associative array of the available ids of the author ( ?orc_id, ?open_alex_id, ?scopus_id )
-     * @param bool $is_user
-     * A boolean indicating if the new author is also a user.
-     * @return Author|null
-     * The newly created author.
-     */
-    public static function createOpenAlexAuthor($author, array $ids = [], bool $is_user = false): ?Author {
-        $new_author = new Author;
-        if (!$is_user) {
-            $author = OpenAlexAPI::authorRequest($ids[Ids::OPEN_ALEX_ID]);
-        }
-        try {
-            // If an author with this OpenAlex id already exists, update them,
-            // in any other case, create a new entry.
-            $new_author = Author::updateOrCreate(
-                [Ids::OPEN_ALEX_ID => $ids[Ids::OPEN_ALEX_ID]],
-                [
-                    Ids::SCOPUS_ID => $ids[Ids::SCOPUS_ID] ?? null,
-                    Ids::ORC_ID_ID => $ids[Ids::ORC_ID_ID] ?? null,
-                    'cited_by_count' => property_exists($author, 'cited_by_count') ? $author->cited_by_count : null,
-                    'display_name' => $author->display_name,
-                    'is_user' => $is_user,
-                    'works_url' => property_exists($author, 'works_api_url') ? $author->works_api_url : self::$authorWorksBaseUrl . $ids['open_alex_id'],
-                    'last_updated_date' => property_exists($author, 'updated_date') ? $author->updated_date : null,
-                    'created_date' => property_exists($author, 'created_date') ? $author->created_date : null,
-                    'works_count' => $author->works_count,
-                    'source' => self::$openAlexSource
-                ]
-            );
-
-            if (!property_exists($author, 'counts_by_year')) {
-                return $new_author;
-            }
-
-            Statistic::generateStatistics($new_author->id, $author->counts_by_year, self::class);
-        } catch (Exception $error) {
-            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
-        }
-        return $new_author;
     }
 
     /**
@@ -251,18 +175,18 @@ class Author extends Model {
 
 
         $year_to_update = date('Y');
-        $databaseStatistic = $this->statistics()
+        $db_statistic = $this->statistics()
             ->where('year', $year_to_update)
             ->first();
 
-        if (!$databaseStatistic) {
-            $request_statistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $request_author->counts_by_year);
-            if (!$request_statistic)
+        if (!$db_statistic) {
+            $req_statistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $request_author->counts_by_year);
+            if (!$req_statistic)
                 return;
-            Statistic::generateStatistic($this->id, $request_statistic, Auth::class);
+            Statistic::generateStatistic($this->id, $req_statistic, Auth::class);
             return;
         }
-        $databaseStatistic->updateStatistic($this, $request_author->counts_by_year);
+        $db_statistic->updateStatistic($this, $request_author->counts_by_year);
     }
 
     /**
@@ -290,23 +214,24 @@ class Author extends Model {
                 continue;
 
             // If not, create a new Work and save it to the database
-            Work::createNewOAWork($work);
+            WorkUtils::createNewOAWork($work);
         }
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
-        $have_been_parsed_count = $prev_count + $works_count;
+        $have_been_parsed = $prev_count + $works_count;
         ULog::memory();
-        ULog::log($have_been_parsed_count . '/' . $total_work_count . ' works parsed for ' . $this->display_name);
+        ULog::log($have_been_parsed . '/' . $total_work_count . ' works parsed for ' . $this->display_name);
 
         // If an author has more works than the maximum count a request can fetch ( current max count is 200/request ),
         // then keep calling the function while incrementing the page parameter passed to the request,
         // until all the author's works have been parsed and stored.
-        if ($have_been_parsed_count < $total_work_count) {
-            $this->parseWorks($have_been_parsed_count, ++$page, $checkNew);
+        if ($have_been_parsed < $total_work_count) {
+            $this->parseWorks($have_been_parsed, ++$page, $checkNew);
         }
     }
 
     /**
+     * Retrieve the author's works from OrcId, parse and store them in the database;
      * @return void
      */
     public function syncWithOrcId(): void {
@@ -315,24 +240,7 @@ class Author extends Model {
         $orc_id_response = OrcIdAPI::authorRequest($this->orc_id);
         $this->biography = $orc_id_response->biography;
         $this->save();
-        $this->syncWorksWithOrcId($orc_id_response->works);
-    }
-
-    /**
-     * @param $works
-     * @return void
-     */
-    private function syncWorksWithOrcId($works): void {
-        foreach ($works as $work) {
-            $work_doi = OrcId::extractWorkDoi($work);
-
-            $path = OrcIdAPI::extractWorkPath($work);
-
-            if (!$work_doi || !$path)
-                continue;
-
-            Work::createNewOIWork($path, $work_doi);
-        }
+        WorkUtils::syncWorksOrcId($orc_id_response->works);
     }
 
     /**
@@ -344,30 +252,72 @@ class Author extends Model {
         return $this->morphMany(Statistic::class, 'asset')->orderBy('year');
     }
 
+    /**
+     * A custom scope used to retrieve the authors with the highest works count.
+     * @param $query
+     * @param int $limit
+     * @return mixed
+     */
     public function scopeMostWorks($query, int $limit) {
         return $query->orderBy('works_count', 'desc')->limit($limit);
     }
 
+    /**
+     * A custom scope used to retrieve the authors with the highest citations count.
+     * @param $query
+     * @param int $limit
+     * @return mixed
+     */
     public function scopeMostCitations($query, int $limit) {
         return $query->orderBy('cited_by_count', 'desc')->limit($limit);
     }
 
+    /**
+     * A custom scope used to search authors by their name.
+     * @param $query
+     * @param $name
+     * @return mixed
+     */
     public function scopeSearchName($query, $name) {
         return $query->where('display_name', $name)->orWhere('display_name', 'LIKE', "%$name%");
     }
 
+    /**
+     * A custom scope used to search authors by their Scopus external ids.
+     * @param $query
+     * @param $scopus_id
+     * @return mixed
+     */
     public function scopeSearchScopus($query, $scopus_id) {
         return $query->orWhere(Ids::SCOPUS_ID, $scopus_id)->orWhere('scopus_id', 'LIKE', "%$scopus_id%");
     }
 
+    /**
+     * A custom scope used to search authors by their OrcId external ids.
+     * @param $query
+     * @param $orc_id
+     * @return mixed
+     */
     public function scopeSearchOrcId($query, $orc_id) {
         return $query->orWhere(Ids::ORC_ID_ID, $orc_id)->orWhere(Ids::ORC_ID_ID, 'LIKE', "%$orc_id%");
     }
 
+
+    /**
+     * A custom scope used to search authors by their Open Alex external ids.
+     * @param $query
+     * @param $open_alex_id
+     * @return mixed
+     */
     public function scopeSearchOpenAlex($query, $open_alex_id) {
         return $query->orWhere(Ids::OPEN_ALEX_ID, $open_alex_id)->orWhere(Ids::OPEN_ALEX_ID, 'LIKE', "%$open_alex_id%");
     }
 
+    /**
+     * Relationship
+     * @return BelongsToMany
+     * All the groups the author belongs to.
+     */
     public function groups(): BelongsToMany {
         return $this->belongsToMany(Group::class, 'author_group');
     }
