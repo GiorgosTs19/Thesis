@@ -61,7 +61,7 @@ class AuthorUtils {
                 return $new_author;
             }
 
-            Statistic::generateStatistics($new_author->id, $author->counts_by_year, self::class);
+            Statistic::generateStatistics($new_author->id, $author->counts_by_year, Author::class);
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }

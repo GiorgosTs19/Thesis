@@ -179,7 +179,7 @@ class WorkUtils {
 
 
             // Generate the counts_by_year statics for the work
-            Statistic::generateStatistics($new_work->id, $work->counts_by_year, self::class);
+            Statistic::generateStatistics($new_work->id, $work->counts_by_year, Work::class);
 
             // Associate all authors from the array with the work being processed
             $new_work->parseAuthors($work->authorships);

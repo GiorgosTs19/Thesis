@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AuthorResource;
 use App\Http\Resources\WorkResource;
+use App\Models\Author;
 use App\Models\Work;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -19,12 +21,12 @@ class Controller extends BaseController {
 //        return Concept::getDynamicConceptsList();
 //        return Concept::getDynamicConceptsList();
 //        return ConceptResource::collection(Concept::all());
-        $works = Work::all();
+//        $works = Work::all();
 //        foreach ($works as $work) {
 //            $work->source = $work->orc_id_put_code !== null ? Work::$orcIdSource : Work::$openAlexSource;
 //            $work->save();
 //        }
-        return new WorkResource(Work::find(3));
+        return new AuthorResource(Author::with(['statistics'])->find(9));
     }
 
 

@@ -7,7 +7,7 @@ use App\Http\Requests\GroupRequests\CreateGroupRequest;
 use App\Http\Requests\GroupRequests\DeleteGroupRequest;
 use App\Http\Requests\GroupRequests\RemoveGroupMemberRequest;
 use App\Http\Resources\GroupResource;
-use App\Http\Resources\WorkCollection;
+use App\Http\Resources\PaginatedWorkCollection;
 use App\Models\AuthorGroup;
 use App\Models\Group;
 use App\Models\Work;
@@ -74,7 +74,7 @@ class GroupController extends Controller {
                 'orcid_works' => $orc_id_works,
                 'open_alex_works' => $open_alex_works,
                 'crossref_works' => $crossref_works
-            ]), 'works' => new WorkCollection($unique_works)]))
+            ]), 'works' => new PaginatedWorkCollection($unique_works)]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 

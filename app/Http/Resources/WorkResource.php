@@ -38,6 +38,13 @@ class WorkResource extends JsonResource {
         return implode(', ', $sources);
     }
 
+    protected bool $shouldLoadVersions;
+
+    public function __construct($resource, $shouldLoadVersions = true) {
+        parent::__construct($resource);
+        $this->shouldLoadVersions = $shouldLoadVersions;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -65,7 +72,7 @@ class WorkResource extends JsonResource {
             'local_url' => route('Work.Page', ['id' => $this->id]),
             'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
             'source' => self::getSources(),
-            'versions' => $this->when($this->source === Work::$openAlexSource, WorkResource::collection($this->versions()), [])
+            'versions' => $this->when($this->shouldLoadVersions, new WorkCollection($this->versions(),false), [])
         ];
     }
 }
