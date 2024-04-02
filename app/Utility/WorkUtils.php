@@ -13,18 +13,18 @@ use Exception;
 
 class WorkUtils {
     const TYPES = [
-        'CONFERENCE_PROCEEDINGS_WITH_REVIEWERS' => 'Ανακοινώσεις σε πρακτικά συνεδρίων με κριτές',
-        'CONFERENCE_PROCEEDINGS_WITHOUT_REVIEWERS' => 'Ανακοινώσεις σε πρακτικά συνεδρίων χωρίς κριτές',
-        'BOOKS_MONOGRAPHS' => 'Βιβλία/Μονογραφίες',
-        'BOOK_REVIEW_BY_DEPARTMENT_MEMBERS' => 'Βιβλιοκρισία που συντάχθηκε από μέλη Δ.Ε.Π. του Τμήματος',
-        'SCIENTIFIC_JOURNAL_ARTICLES_WITH_REVIEWERS' => 'Εργασίες σε επιστημονικά περιοδικά με κριτές',
-        'SCIENTIFIC_JOURNAL_ARTICLES_WITHOUT_REVIEWERS' => 'Εργασίες σε επιστημονικά περιοδικά χωρίς κριτές',
-        'CHAPTERS_IN_COLLECTIVE_VOLUMES' => 'Κεφάλαια σε συλλογικούς τόμους',
-        'BOOK_TRANSLATIONS' => 'Μεταφράσεις βιβλίων',
-        'CONFERENCES_UNDER_THE_AEGIS_OF_THE_ACADEMIC_UNIT' => 'Συνέδρια υπό την αιγίδα της ακαδημαϊκής μονάδας',
-        'BOOK_EDITOR' => 'Συντάκτης έκδοσης (editor) επιστημονικού βιβλίου',
-        'JOURNAL_EDITOR' => 'Συντάκτης έκδοσης (editor) επιστημονικού περιοδικού',
-        'CONFERENCE_PROCEEDINGS_EDITOR' => 'Συντάκτης έκδοσης (editor) πρακτικών επιστημονικού συνεδρίου'
+        'CONFERENCE_PROCEEDINGS_WITH_REVIEWERS' => 'Papers in conference proceedings with reviewers',
+        'CONFERENCE_PROCEEDINGS_WITHOUT_REVIEWERS' => 'Papers in conference proceedings without reviewers',
+        'BOOKS_MONOGRAPHS' => 'Books/Monographs',
+        'BOOK_REVIEW_BY_DEPARTMENT_MEMBERS' => 'Book review authored by department members',
+        'SCIENTIFIC_JOURNAL_ARTICLES_WITH_REVIEWERS' => 'Articles in scientific journals with reviewers',
+        'SCIENTIFIC_JOURNAL_ARTICLES_WITHOUT_REVIEWERS' => 'Articles in scientific journals without reviewers',
+        'CHAPTERS_IN_COLLECTIVE_VOLUMES' => 'Chapters in collective volumes',
+        'BOOK_TRANSLATIONS' => 'Book translations',
+        'CONFERENCES_UNDER_THE_AEGIS_OF_THE_ACADEMIC_UNIT' => 'Conferences under the aegis of the academic unit',
+        'BOOK_EDITOR' => 'Editor of scientific book',
+        'JOURNAL_EDITOR' => 'Editor of scientific journal',
+        'CONFERENCE_PROCEEDINGS_EDITOR' => 'Editor of conference proceedings'
     ];
 
     public static function createTypes(): void {

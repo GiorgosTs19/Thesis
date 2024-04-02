@@ -8,10 +8,11 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 class WorkCollection extends ResourceCollection {
     protected bool $shouldLoadVersions;
 
-    public function __construct($resource, $shouldLoadVersions) {
+    public function __construct($resource, $shouldLoadVersions = true) {
         parent::__construct($resource);
         $this->shouldLoadVersions = $shouldLoadVersions;
     }
+
     /**
      * Transform the resource collection into an array.
      *
