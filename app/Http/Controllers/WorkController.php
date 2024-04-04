@@ -45,7 +45,7 @@ class WorkController extends Controller {
         $max_citations = array_key_exists('max_citations', $params) ? $params['max_citations'] : null;
 
         if (sizeof($params) === 0)
-            return $should_paginate ? new PaginatedWorkCollection(Work::source(Work::$aggregateSource)->limit(20)->paginate($per_page)->get()) : new WorkCollection(Work::source(Work::$aggregateSource)->limit(10)->get());
+            return $should_paginate ? new PaginatedWorkCollection(Work::source(Work::$aggregateSource)->limit(20)->paginate($per_page)) : new WorkCollection(Work::source(Work::$aggregateSource)->limit(10)->get());
 
         $works_query = Work::with(['authors']);
         // Check if the author_ids is set and only get the works that are authored by these authors.

@@ -25,38 +25,28 @@ class PaginatedWorkCollection extends ResourceCollection {
      * @return array<int|string, mixed>
      */
     public function toArray(Request $request): array {
-        $filter = $request->has('filter') ? $request->only(['filter'])['filter'] : -1;
-        $totalForFilter = Work::where('type_id', $filter)->count();
-        $works = $this->resource->collect();
-        if ($filter > 0) {
-            $resources = $works->where('type_id', '=', $filter)->map(function ($item) {
-                return new WorkResource($item);
-            });
-        } else {
-            $resources = $works->map(function ($item) {
-                return new WorkResource($item);
-            });
-        }
+        $works = $this->resource->collect()->map(function ($item) {
+            return new WorkResource($item);
+        });
 
         return [
-            'data' => $resources,
-            'links' => $this->when(sizeof($resources) > $this->perPage(),
+            'data' => $works,
+            'links' => $this->when(sizeof($works) > $this->perPage(),
                 [
                     'first' => $this->url(1),
                     'last' => $this->url($this->lastPage()),
                     'prev' => $this->previousPageUrl(),
                     'next' => $this->nextPageUrl(),
                 ]),
-            'meta' => $this->when(sizeof($resources) > $this->perPage(), [
+            'meta' => $this->when(sizeof($works) > $this->perPage(), [
                 'current_page' => $this->currentPage(),
                 'from' => $this->firstItem(),
                 'last_page' => $this->lastPage(),
                 'path' => $this->path(),
                 'per_page' => $this->perPage(),
                 'to' => $this->lastItem(),
-                'total' => $filter ? $totalForFilter : $this->total(),
+                'total' => $this->total(),
                 'links' => $this->resource->linkCollection(),
-                'filter' => $filter
             ]),
         ];
     }
