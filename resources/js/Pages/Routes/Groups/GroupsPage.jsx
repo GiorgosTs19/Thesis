@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Spinner } from 'flowbite-react';
-import { arrayOf, object, oneOfType } from 'prop-types';
+import { arrayOf, number, object, oneOfType, shape, string } from 'prop-types';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
 import { SelectedGroup } from '@/Pages/Routes/Groups/SelectedGroup.jsx';
 import { useScrollIntoView } from '@/Hooks/useScrollIntoView/useScrollIntoView.js';
@@ -19,9 +19,10 @@ import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
  * <GroupsPage groups={groups}/>
  *
  * @param {Array} groups - An array of group objects to be displayed and managed.
+ * @param customTypes
  * @returns The rendered GroupsPage component.
  */
-const GroupsPage = ({ groups }) => {
+const GroupsPage = ({ groups, customTypes }) => {
     const [groupToShow, setGroupToShow] = useState(null);
     const [groupsList, setGroupsList] = useState(groups);
     const [selectedGroup, setSelectedGroup] = useState(null);
@@ -109,6 +110,7 @@ const GroupsPage = ({ groups }) => {
                     setGroupsList={setGroupsList}
                     worksPaginationInfo={worksPaginationInfo}
                     setWorksPaginationInfo={setWorksPaginationInfo}
+                    customTypes={customTypes}
                 />
             )}
         </div>
@@ -127,5 +129,6 @@ const styles = {
 
 GroupsPage.propTypes = {
     groups: oneOfType([object, arrayOf(object)]),
+    customTypes: arrayOf(shape({ id: number.isRequired, name: string.isRequired })).isRequired,
 };
 export default GroupsPage;

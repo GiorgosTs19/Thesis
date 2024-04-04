@@ -10,6 +10,7 @@ use App\Http\Resources\GroupResource;
 use App\Http\Resources\PaginatedWorkCollection;
 use App\Models\AuthorGroup;
 use App\Models\Group;
+use App\Models\Type;
 use App\Models\Work;
 use App\Utility\Requests;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +31,8 @@ class GroupController extends Controller {
      */
     public function show(): Response {
         $groups = GroupResource::collection(Group::noParent()->with(['childrenRecursive'])->get());
-        return Inertia::render('Routes/Groups/GroupsPage', ['groups' => GroupResource::collection($groups)]);
+        $custom_types = Type::all();
+        return Inertia::render('Routes/Groups/GroupsPage', ['groups' => GroupResource::collection($groups), 'customTypes' => $custom_types]);
     }
 
     /**

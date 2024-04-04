@@ -44,8 +44,8 @@ Route::prefix('/groups')->group(function () {
     Route::post('/remove/member', [\App\Http\Controllers\GroupController::class, 'removeMember'])->name('Group.Remove.Member');
 });
 
-Route::prefix('work')->group(function () {
-
+Route::prefix('works')->group(function () {
+    Route::post('/filter', [WorkController::class, 'filterWorks'])->name('Works.Filter');
 });
 
 Route::prefix('test')->group(function () {

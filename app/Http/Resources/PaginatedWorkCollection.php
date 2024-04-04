@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -24,29 +25,39 @@ class PaginatedWorkCollection extends ResourceCollection {
      * @return array<int|string, mixed>
      */
     public function toArray(Request $request): array {
-        $resources = $this->resource->collect()->map(function ($item) {
-            return new WorkResource($item);
-        });
+        $filter = $request->has('filter') ? $request->only(['filter'])['filter'] : -1;
+        $totalForFilter = Work::where('type_id', $filter)->count();
+        $works = $this->resource->collect();
+        if ($filter > 0) {
+            $resources = $works->where('type_id', '=', $filter)->map(function ($item) {
+                return new WorkResource($item);
+            });
+        } else {
+            $resources = $works->map(function ($item) {
+                return new WorkResource($item);
+            });
+        }
+
         return [
-            'data' => $resources
-            ,
-            'links' => [
-                'first' => $this->url(1),
-                'last' => $this->url($this->lastPage()),
-                'prev' => $this->previousPageUrl(),
-                'next' => $this->nextPageUrl(),
-            ],
-            'paginator' => $this->resource,
-            'meta' => [
+            'data' => $resources,
+            'links' => $this->when(sizeof($resources) > $this->perPage(),
+                [
+                    'first' => $this->url(1),
+                    'last' => $this->url($this->lastPage()),
+                    'prev' => $this->previousPageUrl(),
+                    'next' => $this->nextPageUrl(),
+                ]),
+            'meta' => $this->when(sizeof($resources) > $this->perPage(), [
                 'current_page' => $this->currentPage(),
                 'from' => $this->firstItem(),
                 'last_page' => $this->lastPage(),
                 'path' => $this->path(),
                 'per_page' => $this->perPage(),
                 'to' => $this->lastItem(),
-                'total' => $this->total(),
-                'links' => $this->resource->linkCollection()
-            ],
+                'total' => $filter ? $totalForFilter : $this->total(),
+                'links' => $this->resource->linkCollection(),
+                'filter' => $filter
+            ]),
         ];
     }
 }

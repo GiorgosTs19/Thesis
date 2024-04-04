@@ -36,7 +36,7 @@ const styles = {
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
 };
-export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, setWorksPaginationInfo }) => {
+export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, setWorksPaginationInfo, customTypes }) => {
     const { width } = useWindowSize();
     const [canvasOpen, setCanvasOpen] = useState(false);
     const tabsRef = useRef(0);
@@ -44,7 +44,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
     const api = useAPI();
 
     const handleLinkClick = async (url) => {
-        api.pagination.getPage(url).then((res) => {
+        api.pagination.getPage(`${url}&filter=1`).then((res) => {
             setWorksPaginationInfo(res.data.works);
         });
     };
@@ -208,6 +208,14 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
 
     const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
 
+    const parsedCustomTypes = customTypes.map((t) => ({
+        name: t.name,
+        value: t.id,
+        url: '',
+        default: false,
+    }));
+
+    console.log('🚀 ~ SelectedGroup.jsx 218', worksPaginationInfo);
     return (
         <div className={`w-full px-8 py-5`}>
             <UtilityModal
@@ -279,6 +287,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                                             parser={Work.parseResponseWork}
                                             onLinkClick={handleLinkClick}
                                             className={'mt-auto w-full'}
+                                            sortingOptions={parsedCustomTypes}
                                         >
                                             <div className={styles.listTitle}>{`Group Works ( ${worksPaginationInfo.meta.total} )`}</div>
                                         </PaginatedList>
@@ -343,6 +352,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                                         onLinkClick={handleLinkClick}
                                         title={`Group Works ( ${worksPaginationInfo.meta.total} )`}
                                         gap={6}
+                                        sortingOptions={parsedCustomTypes}
                                     ></PaginatedList>
                                 </Card>
                             </div>
@@ -367,4 +377,5 @@ SelectedGroup.propTypes = {
     setGroupsList: func.isRequired,
     setWorksPaginationInfo: func.isRequired,
     worksPaginationInfo: object.isRequired,
+    customTypes: arrayOf(shape({ id: number.isRequired, name: string.isRequired })).isRequired,
 };

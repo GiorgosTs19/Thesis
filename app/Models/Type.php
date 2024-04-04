@@ -10,6 +10,7 @@ class Type extends Model {
     use HasFactory;
 
     protected $fillable = ['name'];
+    protected $hidden = ['updated_at', 'created_at'];
 
     public function works(): HasMany {
         return $this->hasMany(Work::class);

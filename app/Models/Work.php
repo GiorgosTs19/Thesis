@@ -104,15 +104,16 @@ class Work extends Model {
     }
 
     /**
-     * @param $query
-     * @param $source
+     * @param $query - The query object.
+     * @param $source - The source to use for filtering.
+     * @param bool $or - A boolean to indicate whether the "where" statement should be used with an "or" or "and" prefix.
      * @return bool
      * A boolean indicating if a work with the given doi exists in the database.
      */
-    public static function scopeSource($query, $source) {
-        if (!in_array($source, [Work::$openAlexSource, Work::$orcIdSource, Work::$crossRefSource]))
+    public static function scopeSource($query, $source, bool $or = false) {
+        if (!in_array($source, [Work::$openAlexSource, Work::$orcIdSource, Work::$crossRefSource, Work::$aggregateSource]))
             return $query;
-        return $query->where('source', $source);
+        return $or ? $query->orWhere('source', $source) : $query->where('source', $source);
     }
 
     /**
@@ -247,6 +248,48 @@ class Work extends Model {
     public function scopeCountByType($query) {
         return $query->selectRaw('type, COUNT(*) as count')
             ->groupBy('type');
+    }
+
+    public function scopeMinCitations($query, $min_citations) {
+        if (!$min_citations)
+            return $query;
+        return $query->where('is_referenced_by_count', '>=', $min_citations);
+    }
+
+    public function scopeMaxCitations($query, $max_citations) {
+        if (!$max_citations)
+            return $query;
+        return $query->where('is_referenced_by_count', '<=', $max_citations);
+    }
+
+    public function scopeFromPublicationYear($query, $from_year) {
+        if (!$from_year)
+            return $query;
+        return $query->where('publication_year', '>=', $from_year);
+    }
+
+    public function scopeToPublicationYear($query, $to_year) {
+        if (!$to_year)
+            return $query;
+        return $query->where('publication_year', '<=', $to_year);
+    }
+
+    public function scopeSources($query, $sources) {
+        if (!$sources || sizeof($sources) === 0)
+            return $query;
+        return $query->whereIn('source', $sources);
+    }
+
+    public function scopeTypes($query, $types) {
+        if (!$types || sizeof($types) === 0)
+            return $query;
+        return $query->whereIn('type', $types);
+    }
+
+    public function scopeCustomTypes($query, $custom_types) {
+        if (!$custom_types || sizeof($custom_types) === 0)
+            return $query;
+        return $query->whereIn('type_id', $custom_types);
     }
 
     public function generateConcepts($concepts): void {
