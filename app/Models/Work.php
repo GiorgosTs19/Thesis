@@ -292,6 +292,12 @@ class Work extends Model {
         return $query->whereIn('type_id', $custom_types);
     }
 
+    public function scopeOrder($query, $col, $direction) {
+        if (!$col)
+            return $query->orderBy('id', $direction);
+        return $query->orderBy($col, $direction);
+    }
+
     public function generateConcepts($concepts): void {
         foreach ($concepts as $concept) {
             $database_concept = Concept::existsByName($concept->display_name)->first();

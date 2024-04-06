@@ -28,21 +28,24 @@ use Illuminate\Support\Carbon;
  * @method versions()
  */
 class WorkResource extends JsonResource {
+
     private function getSources(): string {
         if ($this->source !== Work::$aggregateSource)
             return $this->source;
         $sources = [];
-        foreach ($this->versions() as $version) {
-            $sources = [...$sources, $version->source];
+        foreach ($this->versions as $version) {
+            $sources[] = $version->source;
         }
         return implode(', ', $sources);
     }
 
     protected bool $shouldLoadVersions;
+    private $versions;
 
     public function __construct($resource, $shouldLoadVersions = true) {
         parent::__construct($resource);
         $this->shouldLoadVersions = $shouldLoadVersions;
+        $this->versions = $this->versions();
     }
 
     /**
@@ -51,6 +54,7 @@ class WorkResource extends JsonResource {
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array {
+
         return [
             'id' => $this->id,
             'doi' => $this->doi ?? '',
@@ -72,7 +76,7 @@ class WorkResource extends JsonResource {
             'local_url' => route('Work.Page', ['id' => $this->id]),
             'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
             'source' => self::getSources(),
-            'versions' => $this->when($this->shouldLoadVersions, new WorkCollection($this->versions(),false), [])
+            'versions' => $this->when($this->shouldLoadVersions, new WorkCollection($this->versions, false), null),
         ];
     }
 }

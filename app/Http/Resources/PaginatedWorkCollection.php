@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -19,26 +18,33 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
  * @method lastItem()
  */
 class PaginatedWorkCollection extends ResourceCollection {
+
+    protected bool $shouldLoadVersions;
+
+    public function __construct($resource, $shouldLoadVersions = true) {
+        parent::__construct($resource);
+        $this->shouldLoadVersions = $shouldLoadVersions;
+    }
+
     /**
      * Transform the resource collection into an array.
      *
      * @return array<int|string, mixed>
      */
     public function toArray(Request $request): array {
-        $works = $this->resource->collect()->map(function ($item) {
-            return new WorkResource($item);
+        $works = $this->collection->map(function ($item) {
+            return new WorkResource($item, $this->shouldLoadVersions);
         });
 
         return [
             'data' => $works,
-            'links' => $this->when(sizeof($works) > $this->perPage(),
-                [
-                    'first' => $this->url(1),
-                    'last' => $this->url($this->lastPage()),
-                    'prev' => $this->previousPageUrl(),
-                    'next' => $this->nextPageUrl(),
-                ]),
-            'meta' => $this->when(sizeof($works) > $this->perPage(), [
+            'links' => [
+                'first' => $this->url(1),
+                'last' => $this->url($this->lastPage()),
+                'prev' => $this->previousPageUrl(),
+                'next' => $this->nextPageUrl(),
+            ],
+            'meta' => [
                 'current_page' => $this->currentPage(),
                 'from' => $this->firstItem(),
                 'last_page' => $this->lastPage(),
@@ -47,7 +53,7 @@ class PaginatedWorkCollection extends ResourceCollection {
                 'to' => $this->lastItem(),
                 'total' => $this->total(),
                 'links' => $this->resource->linkCollection(),
-            ]),
+            ]
         ];
     }
 }
