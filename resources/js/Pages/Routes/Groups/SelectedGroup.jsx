@@ -1,13 +1,10 @@
-import { Button, Card, Tabs } from 'flowbite-react';
+import { Button, Card, Spinner, Tabs } from 'flowbite-react';
 import RowOfProperties from '@/Components/RowOfProperties/RowOfProperties.jsx';
 import List from '@/Components/List/List.jsx';
 import { Author } from '@/Models/Author/Author.js';
 import GroupUsersSearch from '@/Components/Search/AdminSearch/GroupUsersSearch.jsx';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { arrayOf, func, number, object, shape, string } from 'prop-types';
-import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
-import { renderWorkItem } from '@/Models/Work/Utils.jsx';
-import { Work } from '@/Models/Work/Work.js';
 import { AuthorItem } from '@/Components/Assets/AuthorItem/AuthorItem.jsx';
 import UtilityModal from '@/Components/Modal/UtilityModal.jsx';
 import { AiOutlineDelete } from 'react-icons/ai';
@@ -22,6 +19,11 @@ import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart
 import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
 import { VscGroupByRefType } from 'react-icons/vsc';
+import useAsync from '@/Hooks/useAsync/useAsync.js';
+import { renderWorkItem } from '@/Models/Work/Utils.jsx';
+import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
+import { Work } from '@/Models/Work/Work.js';
+import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
 
 const styles = {
     groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white my-1',
@@ -36,16 +38,29 @@ const styles = {
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
 };
-export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, setWorksPaginationInfo, customTypes }) => {
+export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
     const { width } = useWindowSize();
     const [canvasOpen, setCanvasOpen] = useState(false);
     const tabsRef = useRef(0);
     const [activeTab, setActiveTab] = useState(0);
     const api = useAPI();
+    const [groupWorks, setGroupWorks] = useState(null);
+    const filters = useWorkFilters({ authors: group.members });
+
+    const handleFetchGroup = useCallback(() => {
+        if (!group) return;
+        return api.works
+            .filterWorks({ author_ids: group.members.map((t) => t.id), from_pub_year: 2019, to_pub_year: 2019, per_page: 25 })
+            .then((res) => {
+                setGroupWorks(res.data);
+            });
+    }, [group]);
+
+    const { loading } = useAsync(handleFetchGroup, true);
 
     const handleLinkClick = async (url) => {
-        api.pagination.getPage(`${url}&filter=1`).then((res) => {
-            setWorksPaginationInfo(res.data.works);
+        api.pagination.getPage(`${url}`).then((res) => {
+            setGroupWorks(res.data);
         });
     };
     const deleteModalRef = useRef(null);
@@ -77,7 +92,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
         () => [
             group.parent && { name: 'Parent Group', value: group.parent.name, onClick: () => setSelectedGroup(group.parent.id) },
             { name: 'Total Number of Authors', value: group?.members.length },
-            { name: 'Total Number of Works', value: worksPaginationInfo?.meta.total },
+            { name: 'Total Number of Works', value: groupWorks?.meta?.total },
             {
                 name: 'Total Amount of Citations',
                 value: group?.members.reduce((accumulator, currentValue) => {
@@ -88,7 +103,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
             { name: 'Crossref Works', value: group.uniqueWorksCount.Crossref },
             { name: 'ORCID Works', value: group.uniqueWorksCount.ORCID },
         ],
-        [group, worksPaginationInfo],
+        [group, groupWorks],
     );
 
     const DOUGHNUT_CHART_DATA = {
@@ -215,7 +230,6 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
         default: false,
     }));
 
-    console.log('🚀 ~ SelectedGroup.jsx 218', worksPaginationInfo);
     return (
         <div className={`w-full px-8 py-5`}>
             <UtilityModal
@@ -248,10 +262,10 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                                     color="gray"
                                     onClick={() => handleOpenOffCanvas(1)}
                                     className={'flex-grow text-nowrap'}
-                                    disabled={!worksPaginationInfo.meta.total}
+                                    disabled={!groupWorks?.meta?.total}
                                 >
                                     <MdDashboard />
-                                    <span className={'mx-3'}> {`Works ( ${worksPaginationInfo.meta.total} )`}</span>
+                                    <span className={'mx-3'}> {`Works ( ${groupWorks?.meta?.total} )`}</span>
                                 </Button>
                             </Button.Group>
                             <Button
@@ -280,17 +294,24 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                                         </List>
                                     </Tabs.Item>
                                     <Tabs.Item title="Works" icon={MdDashboard} disabled={activeTab === 1}>
-                                        <PaginatedList
-                                            response={worksPaginationInfo}
-                                            renderFn={renderWorkItem}
-                                            emptyListPlaceholder={'This group has no works'}
-                                            parser={Work.parseResponseWork}
-                                            onLinkClick={handleLinkClick}
-                                            className={'mt-auto w-full'}
-                                            sortingOptions={parsedCustomTypes}
-                                        >
-                                            <div className={styles.listTitle}>{`Group Works ( ${worksPaginationInfo.meta.total} )`}</div>
-                                        </PaginatedList>
+                                        {filters}
+                                        {!loading && groupWorks ? (
+                                            <PaginatedList
+                                                response={groupWorks}
+                                                renderFn={renderWorkItem}
+                                                emptyListPlaceholder={'This group has no works'}
+                                                parser={Work.parseResponseWork}
+                                                onLinkClick={handleLinkClick}
+                                                className={'mt-auto w-full'}
+                                                sortingOptions={parsedCustomTypes}
+                                            >
+                                                <div className={styles.listTitle}>{`Group Works ( ${groupWorks?.meta?.total} )`}</div>
+                                            </PaginatedList>
+                                        ) : (
+                                            <div className={'m-auto'}>
+                                                <Spinner size="xl" />
+                                            </div>
+                                        )}
                                     </Tabs.Item>
                                     {group.children.length !== 0 && (
                                         <Tabs.Item title="Sub-Groups" icon={VscGroupByRefType} disabled={activeTab === 2}>
@@ -343,17 +364,24 @@ export const SelectedGroup = ({ group, setSelectedGroup, worksPaginationInfo, se
                                         <GroupUsersSearch group={group} />
                                     </List>
                                 </Card>
-                                <Card className={`w-full`}>
-                                    <PaginatedList
-                                        response={worksPaginationInfo}
-                                        renderFn={renderWorkItem}
-                                        parser={Work.parseResponseWork}
-                                        emptyListPlaceholder={'This group has no works'}
-                                        onLinkClick={handleLinkClick}
-                                        title={`Group Works ( ${worksPaginationInfo.meta.total} )`}
-                                        gap={6}
-                                        sortingOptions={parsedCustomTypes}
-                                    ></PaginatedList>
+                                <Card className={`flex w-full`}>
+                                    {filters}
+                                    {!loading && groupWorks ? (
+                                        <PaginatedList
+                                            response={groupWorks}
+                                            renderFn={renderWorkItem}
+                                            parser={Work.parseResponseWork}
+                                            emptyListPlaceholder={'This group has no works'}
+                                            onLinkClick={handleLinkClick}
+                                            title={`Group Works ( ${groupWorks?.meta?.total} )`}
+                                            gap={6}
+                                            sortingOptions={parsedCustomTypes}
+                                        ></PaginatedList>
+                                    ) : (
+                                        <div className={'m-auto'}>
+                                            <Spinner size="xl" />
+                                        </div>
+                                    )}
                                 </Card>
                             </div>
                         </>

@@ -3,6 +3,6 @@
     "prettier-plugin-tailwindcss",
     "@prettier/plugin-php"
   ],
-  "printWidth": 150,
+  "printWidth": 200,
   "singleQuote": true
 }

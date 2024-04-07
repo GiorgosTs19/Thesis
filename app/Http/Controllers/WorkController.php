@@ -42,12 +42,17 @@ class WorkController extends Controller {
         $to_pub_year = array_key_exists('to_pub_year', $params) ? $params['to_pub_year'] : null;
         $min_citations = array_key_exists('min_citations', $params) ? $params['min_citations'] : null;
         $max_citations = array_key_exists('max_citations', $params) ? $params['max_citations'] : null;
-        $with_versions = array_key_exists('with_versions', $params) ? $params['with_versions'] : false;
+        $with = array_key_exists('with', $params) ? $params['with'] : [];
         $sort_by = array_key_exists('sort_by', $params) ? $params['sort_by'] : 'id';
         $sort_direction = array_key_exists('sort_direction', $params) ? $params['sort_direction'] : 'asc';
+        $with_versions = in_array('versions', $with);
 
-        $works_query = Work::with(['authors']);
-        // Check if the author_ids is set and only get the works that are authored by these authors.
+        $relationships = in_array('versions', $with) ? array_diff($with, ['versions']) : $with;
+
+
+        // Load the relationships that were requested
+        $works_query = Work::with($relationships);
+        // Check if the author_ids is set and only get the works that are associated with these authors.
         if (sizeof($authors_ids) > 0)
             $works_query = $works_query->whereHas('authors', function ($query) use ($authors_ids) {
                 $query->whereIn('author_id', $authors_ids);
@@ -56,6 +61,6 @@ class WorkController extends Controller {
         $works_query = $works_query->minCitations($min_citations)->maxCitations($max_citations)->fromPublicationYear($from_pub_year)
             ->toPublicationYear($to_pub_year)->sources($sources)->types($work_types)->customTypes($type_filters)->order($sort_by, $sort_direction);
 
-        return new PaginatedWorkCollection($works_query->paginate($per_page), $with_versions);
+        return new PaginatedWorkCollection($works_query->paginate($per_page)->appends(request()->query()), $with_versions);
     }
 }

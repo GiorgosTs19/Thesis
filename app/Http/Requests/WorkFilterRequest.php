@@ -12,7 +12,24 @@ use Illuminate\Validation\Rule;
 
 class WorkFilterRequest extends FormRequest {
 
-    private const WORKS_SORTING_COLS = ['id', 'doi', 'title', 'publication_year', 'is_referenced_by_count', 'external_id', 'language', 'type', 'type_id'];
+    private const WORKS_SORTING_COLS = ['id', 'doi', 'title', 'publication_year', 'is_referenced_by_count', 'language', 'type'];
+
+    protected function prepareForValidation(): void {
+        $this->merge([
+            'per_page' => $this->query('per_page', 10),
+            'author_ids' => $this->query('author_ids', []),
+            'sources' => $this->query('sources', []),
+            'from_pub_year' => $this->query('from_pub_year', 1900),
+            'to_pub_year' => $this->query('to_pub_year', date('Y')),
+            'min_citations' => $this->query('min_citations', 0),
+            'max_citations' => $this->query('max_citations', Work::max('is_referenced_by_count')),
+            'type_filters' => $this->query('type_filters', []),
+            'work_types' => $this->query('work_types', []),
+            'with' => $this->query('with', []),
+            'sort_by' => $this->query('sort_by', 'id'),
+            'sort_direction' => $this->query('sort_direction', 'asc')]);
+    }
+
 
     /**
      * Determine if the user is authorized to make this request.
@@ -41,7 +58,8 @@ class WorkFilterRequest extends FormRequest {
             'type_filters.*' => ['numeric', 'integer', new ExistsInTable((new Type())->getTable())],
             'work_types' => 'array',
             'work_types.*' => 'string',
-            'with_versions' => 'boolean',
+            'with' => 'array',
+            'with.*' => ['string', Rule::in(['authors', 'versions', 'statistics'])],
             'sort_by' => ['string', Rule::in(self::WORKS_SORTING_COLS)],
             'sort_direction' => ['string', Rule::in(['asc', 'desc'])]
         ];
@@ -54,6 +72,8 @@ class WorkFilterRequest extends FormRequest {
      */
     public function messages(): array {
         $work_attrs_string = implode(', ', self::WORKS_SORTING_COLS);
+        $work_sources_string = implode(', ', [Work::$openAlexSource, Work::$orcIdSource, Work::$crossRefSource]);
+        $work_relationships = implode(', ', ['authors', 'versions', 'statistics']);
         return [
             'per_page.numeric' => 'The per_page parameter must be a number.',
             'per_page.integer' => 'The per_page parameter must be an integer.',
@@ -62,6 +82,7 @@ class WorkFilterRequest extends FormRequest {
             'author_ids.*.integer' => 'The author_ids array must only consist of integers.',
             'sources.array' => 'The sources parameter must be an array.',
             'sources.*.string' => 'The sources array must only consist of strings.',
+            'sources.*.in' => "The sources can be any of [ $work_sources_string ]",
             'from_pub_year.numeric' => 'The from_pub_year parameter must be a number.',
             'from_pub_year.integer' => 'The from_pub_year parameter must be an integer.',
             'to_pub_year.numeric' => 'The to_pub_year parameter must be a number.',
@@ -75,7 +96,9 @@ class WorkFilterRequest extends FormRequest {
             'type_filters.array' => 'The type_filters parameter must be an array.',
             'type_filters.*.numeric' => 'The type_filters array must only consist of numbers.',
             'type_filters.*.integer' => 'The type_filters array must only consist of integers.',
-            'with_versions.boolean' => 'The include versions parameter must be a boolean.',
+            'with' => 'The with parameter must be an array.',
+            'with.*.string' => 'The values contained in the with parameter, must be strings.',
+            'with.*.in' => "The values contained in the with parameter, must be any of [ $work_relationships ].",
             'sort_by.string' => "The sort_by parameter must be a string, and one of [ $work_attrs_string ].",
             'sort_by.in' => "The sort_by parameter must be one of [ $work_attrs_string ].",
             'sort_direction.string' => 'The sort_direction parameter must be a string and one of [asc, desc].',

@@ -1,5 +1,6 @@
-import {Groups} from "@/API/BackEnd/Groups.js";
-import {Pagination} from "@/API/BackEnd/Pagination.js";
+import { Groups } from '@/API/BackEnd/Groups.js';
+import { Pagination } from '@/API/BackEnd/Pagination.js';
+import { Works } from '@/API/BackEnd/Works.js';
 
 export class API {
     static #instance;
@@ -12,5 +13,6 @@ export class API {
         API.#instance = this;
         this.groups = new Groups();
         this.pagination = new Pagination();
+        this.works = new Works();
     }
 }

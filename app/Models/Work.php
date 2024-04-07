@@ -99,7 +99,7 @@ class Work extends Model {
      */
     public function versions(): Collection {
         if (!$this->doi)
-            return collect([]);
+            return collect();
         return Work::with(['authors'])->where('doi', $this->doi)->whereNotIn('id', [$this->id])->get();
     }
 
