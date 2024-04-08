@@ -63,4 +63,9 @@ class WorkController extends Controller {
 
         return new PaginatedWorkCollection($works_query->paginate($per_page)->appends(request()->query()), $with_versions);
     }
+
+    public function getMetadata(Request $request) {
+        return ['minYear' => Work::min('publication_year'), 'maxYear' => Work::max('publication_year'),
+            'minCitations' => Work::min('is_referenced_by_count'), 'maxCitations' => Work::max('is_referenced_by_count')];
+    }
 }

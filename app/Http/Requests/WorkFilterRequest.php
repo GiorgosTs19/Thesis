@@ -19,12 +19,12 @@ class WorkFilterRequest extends FormRequest {
             'per_page' => $this->query('per_page', 10),
             'author_ids' => $this->query('author_ids', []),
             'sources' => $this->query('sources', []),
-            'from_pub_year' => $this->query('from_pub_year', 1900),
-            'to_pub_year' => $this->query('to_pub_year', date('Y')),
-            'min_citations' => $this->query('min_citations', 0),
-            'max_citations' => $this->query('max_citations', Work::max('is_referenced_by_count')),
+            'from_pub_year' => $this->query('from_pub_year'),
+            'to_pub_year' => $this->query('to_pub_year'),
+            'min_citations' => $this->query('min_citations'),
+            'max_citations' => $this->query('max_citations'),
             'type_filters' => $this->query('type_filters', []),
-            'work_types' => $this->query('work_types', []),
+            'work_types' => $this->query('work_types'),
             'with' => $this->query('with', []),
             'sort_by' => $this->query('sort_by', 'id'),
             'sort_direction' => $this->query('sort_direction', 'asc')]);
@@ -45,23 +45,23 @@ class WorkFilterRequest extends FormRequest {
      */
     public function rules(): array {
         return [
-            'per_page' => 'numeric|integer',
-            'author_ids' => 'array',
+            'per_page' => 'numeric|integer|nullable',
+            'author_ids' => 'array|nullable',
             'author_ids.*' => ['numeric', 'integer', new ExistsInTable((new Author())->getTable())],
-            'sources' => 'array',
+            'sources' => 'array|nullable',
             'sources.*' => ['string', Rule::in([Work::$openAlexSource, Work::$orcIdSource, Work::$crossRefSource])],
-            'from_pub_year' => ['numeric', 'integer'],
-            'to_pub_year' => ['numeric', 'integer'],
-            'min_citations' => ['numeric', 'integer'],
-            'max_citations' => ['numeric', 'integer'],
-            'type_filters' => 'array',
+            'from_pub_year' => ['numeric', 'integer', 'nullable'],
+            'to_pub_year' => ['numeric', 'integer', 'nullable'],
+            'min_citations' => ['numeric', 'integer', 'nullable'],
+            'max_citations' => ['numeric', 'integer', 'nullable'],
+            'type_filters' => 'array|nullable',
             'type_filters.*' => ['numeric', 'integer', new ExistsInTable((new Type())->getTable())],
-            'work_types' => 'array',
+            'work_types' => 'array|nullable',
             'work_types.*' => 'string',
-            'with' => 'array',
+            'with' => 'array|nullable',
             'with.*' => ['string', Rule::in(['authors', 'versions', 'statistics'])],
-            'sort_by' => ['string', Rule::in(self::WORKS_SORTING_COLS)],
-            'sort_direction' => ['string', Rule::in(['asc', 'desc'])]
+            'sort_by' => ['string', 'nullable', Rule::in(self::WORKS_SORTING_COLS)],
+            'sort_direction' => ['string', 'nullable', Rule::in(['asc', 'desc'])]
         ];
     }
 

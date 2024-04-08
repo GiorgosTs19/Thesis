@@ -47,6 +47,9 @@ const SimpleDoughnutChart = ({ labels, title, dataSet, className }) => {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 0, // Set animation duration to 0 to disable animation
+                },
             },
         };
 

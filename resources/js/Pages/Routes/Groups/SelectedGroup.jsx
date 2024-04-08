@@ -38,23 +38,21 @@ const styles = {
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
 };
-export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
+export const SelectedGroup = ({ group, setSelectedGroup }) => {
     const { width } = useWindowSize();
     const [canvasOpen, setCanvasOpen] = useState(false);
     const tabsRef = useRef(0);
     const [activeTab, setActiveTab] = useState(0);
     const api = useAPI();
     const [groupWorks, setGroupWorks] = useState(null);
-    const filters = useWorkFilters({ authors: group.members });
-
+    const { button, filters } = useWorkFilters({ authors: group.members });
+    console.log('🚀 ~ SelectedGroup.jsx 49', filters);
     const handleFetchGroup = useCallback(() => {
         if (!group) return;
-        return api.works
-            .filterWorks({ author_ids: group.members.map((t) => t.id), from_pub_year: 2019, to_pub_year: 2019, per_page: 25 })
-            .then((res) => {
-                setGroupWorks(res.data);
-            });
-    }, [group]);
+        return api.works.filterWorks(filters).then((res) => {
+            setGroupWorks(res.data);
+        });
+    }, [group, filters]);
 
     const { loading } = useAsync(handleFetchGroup, true);
 
@@ -191,7 +189,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
 
     const charts = group.members.length !== 0 && (
         <>
-            <div className={styles.chartsContainer}>
+            <div>
                 <Switch
                     checkedLabel={CHART_DATA.WORKS.title}
                     uncheckedLabel={CHART_DATA.CITATIONS.title}
@@ -208,12 +206,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
                 </div>
             </div>
             <div className={'mb-5 mt-10 flex flex-col gap-10 border-t border-t-gray-300 pt-5'}>
-                <SimpleDoughnutChart
-                    dataSet={DOUGHNUT_CHART_DATA.dataSet}
-                    labels={DOUGHNUT_CHART_DATA.labels}
-                    title={DOUGHNUT_CHART_DATA.title}
-                    className={'mx-auto max-h-60'}
-                />
+                <SimpleDoughnutChart dataSet={DOUGHNUT_CHART_DATA.dataSet} labels={DOUGHNUT_CHART_DATA.labels} title={DOUGHNUT_CHART_DATA.title} className={'mx-auto max-h-60'} />
                 <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
             </div>
         </>
@@ -223,12 +216,12 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
 
     const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
 
-    const parsedCustomTypes = customTypes.map((t) => ({
-        name: t.name,
-        value: t.id,
-        url: '',
-        default: false,
-    }));
+    // const parsedCustomTypes = customTypes.map((t) => ({
+    //     name: t.name,
+    //     value: t.id,
+    //     url: '',
+    //     default: false,
+    // }));
 
     return (
         <div className={`w-full px-8 py-5`}>
@@ -258,22 +251,12 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
                                     <HiUserCircle />
                                     <span className={'mx-3'}>{`Members ${group.members.length ? ` ( ${group.members.length} )` : `( 0 )`}`}</span>
                                 </Button>
-                                <Button
-                                    color="gray"
-                                    onClick={() => handleOpenOffCanvas(1)}
-                                    className={'flex-grow text-nowrap'}
-                                    disabled={!groupWorks?.meta?.total}
-                                >
+                                <Button color="gray" onClick={() => handleOpenOffCanvas(1)} className={'flex-grow text-nowrap'} disabled={!groupWorks?.meta?.total}>
                                     <MdDashboard />
                                     <span className={'mx-3'}> {`Works ( ${groupWorks?.meta?.total} )`}</span>
                                 </Button>
                             </Button.Group>
-                            <Button
-                                color="gray"
-                                onClick={() => handleOpenOffCanvas(2)}
-                                className={'flex-grow text-nowrap'}
-                                disabled={!group.members.length}
-                            >
+                            <Button color="gray" onClick={() => handleOpenOffCanvas(2)} className={'flex-grow text-nowrap'} disabled={!group.members.length}>
                                 <VscGroupByRefType />
                                 <span className={'mx-3'}> {`Sub-Groups`}</span>
                             </Button>
@@ -294,7 +277,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
                                         </List>
                                     </Tabs.Item>
                                     <Tabs.Item title="Works" icon={MdDashboard} disabled={activeTab === 1}>
-                                        {filters}
+                                        {button}
                                         {!loading && groupWorks ? (
                                             <PaginatedList
                                                 response={groupWorks}
@@ -303,7 +286,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
                                                 parser={Work.parseResponseWork}
                                                 onLinkClick={handleLinkClick}
                                                 className={'mt-auto w-full'}
-                                                sortingOptions={parsedCustomTypes}
+                                                // sortingOptions={parsedCustomTypes}
                                             >
                                                 <div className={styles.listTitle}>{`Group Works ( ${groupWorks?.meta?.total} )`}</div>
                                             </PaginatedList>
@@ -338,34 +321,15 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
                                     <div className={'mb-2 text-left text-xl font-bold'}>Sub-groups</div>
                                     <div className={'flex gap-10'}>
                                         {group.children.map((group) => (
-                                            <GroupItem
-                                                key={group.id}
-                                                group={group}
-                                                className={'rounded-none px-2 py-1 underline'}
-                                                onClick={() => setSelectedGroup(group.id)}
-                                                isSelected={false}
-                                            />
+                                            <GroupItem key={group.id} group={group} className={'rounded-none px-2 py-1 underline'} onClick={() => setSelectedGroup(group.id)} isSelected={false} />
                                         ))}
                                     </div>
                                 </div>
                             )}
                             {charts}
                             <div className={'flex min-h-96 flex-col gap-10 lg:flex-row'}>
-                                <Card className={'w-full lg:max-w-fit '}>
-                                    <List
-                                        data={group.members}
-                                        renderFn={renderAuthorItem}
-                                        wrapperClassName={`mb-auto`}
-                                        vertical
-                                        title={`Group Members ${group.members.length ? ` ( ${group.members.length} )` : ''}`}
-                                        parser={Author.parseResponseAuthor}
-                                        emptyListPlaceholder={'This group has no members'}
-                                    >
-                                        <GroupUsersSearch group={group} />
-                                    </List>
-                                </Card>
                                 <Card className={`flex w-full`}>
-                                    {filters}
+                                    {button}
                                     {!loading && groupWorks ? (
                                         <PaginatedList
                                             response={groupWorks}
@@ -375,7 +339,7 @@ export const SelectedGroup = ({ group, setSelectedGroup, customTypes }) => {
                                             onLinkClick={handleLinkClick}
                                             title={`Group Works ( ${groupWorks?.meta?.total} )`}
                                             gap={6}
-                                            sortingOptions={parsedCustomTypes}
+                                            // sortingOptions={parsedCustomTypes}
                                         ></PaginatedList>
                                     ) : (
                                         <div className={'m-auto'}>
@@ -402,8 +366,4 @@ SelectedGroup.propTypes = {
         uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref: number }),
     }),
     setSelectedGroup: func.isRequired,
-    setGroupsList: func.isRequired,
-    setWorksPaginationInfo: func.isRequired,
-    worksPaginationInfo: object.isRequired,
-    customTypes: arrayOf(shape({ id: number.isRequired, name: string.isRequired })).isRequired,
 };

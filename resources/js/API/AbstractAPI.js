@@ -8,10 +8,7 @@ const headers = {
 export class AbstractAPI {
     parseParameters(params) {
         return `?${Object.entries(params)
-            .map(
-                ([key, value]) =>
-                    `${key}=${Array.isArray(value) ? value.map((val) => `${encodeURIComponent(key)}[]=${encodeURIComponent(val)}`).join('&') : value}`,
-            )
+            .map(([key, value]) => (Array.isArray(value) ? value.map((val) => `${encodeURIComponent(key)}[]=${encodeURIComponent(val)}`).join('&') : `${key}=${value}`))
             .join('&')}`;
     }
 

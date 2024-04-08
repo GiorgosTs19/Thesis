@@ -7,7 +7,7 @@ use App\Http\Requests\GroupRequests\CreateGroupRequest;
 use App\Http\Requests\GroupRequests\DeleteGroupRequest;
 use App\Http\Requests\GroupRequests\RemoveGroupMemberRequest;
 use App\Http\Resources\GroupResource;
-use App\Http\Resources\PaginatedWorkCollection;
+use App\Models\Author;
 use App\Models\AuthorGroup;
 use App\Models\Group;
 use App\Models\Type;
@@ -48,35 +48,36 @@ class GroupController extends Controller {
             return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
         }
 
-        $group = Group::with('members.works', 'parent', 'members.statistics')->find($id);
+        $group = Group::with('members', 'parent', 'members.statistics')->find($id);
 
         if (!$group) {
             return response()->json(Requests::clientError('A group with this id does not exist', 200));
         }
 
         $success = !!$group;
+        
+        $authors_ids = $group->members->map(function (Author $author) {
+            return $author->id;
+        });
 
-        $works = collect();
+        $orc_id_works = Work::whereHas('authors', function ($query) use ($authors_ids) {
+            $query->whereIn('author_id', $authors_ids);
+        })->source(Work::$orcIdSource)->count();
 
-        foreach ($group->members as $member) {
-            $works = $works->merge($member->works);
-            unset($member->works);
-        }
+        $open_alex_works = Work::whereHas('authors', function ($query) use ($authors_ids) {
+            $query->whereIn('author_id', $authors_ids);
+        })->source(Work::$openAlexSource)->count();
 
-        $orc_id_works = $works->where('source', '=', Work::$orcIdSource)->count();
-        $open_alex_works = $works->where('source', '=', Work::$openAlexSource)->count();
-        $crossref_works = $works->where('source', '=', Work::$crossRefSource)->count();
-
-        $unique_work_ids = $works->where('source', '=', Work::$openAlexSource)->unique('id')->pluck('id');
-
-        $unique_works = Work::with(['authors'])->whereIn('id', $unique_work_ids)->orderBy('is_referenced_by_count', 'desc')->paginate(10);
+        $crossref_works = Work::whereHas('authors', function ($query) use ($authors_ids) {
+            $query->whereIn('author_id', $authors_ids);
+        })->source(Work::$crossRefSource)->count();
 
         return $success ? response()->json(Requests::success('Group retrieved successfully',
             ['group' => new GroupResource($group, [
                 'orcid_works' => $orc_id_works,
                 'open_alex_works' => $open_alex_works,
                 'crossref_works' => $crossref_works
-            ]), 'works' => new PaginatedWorkCollection($unique_works)]))
+            ])]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 

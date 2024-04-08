@@ -46,6 +46,7 @@ Route::prefix('/groups')->group(function () {
 
 Route::prefix('works')->group(function () {
     Route::get('/filter', [WorkController::class, 'filterWorks'])->name('Works.Filter');
+    Route::get('/metadata', [WorkController::class, 'getMetadata'])->name('Works.Metadata');
 });
 
 Route::prefix('test')->group(function () {

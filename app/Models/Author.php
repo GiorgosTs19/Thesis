@@ -21,6 +21,7 @@ use Illuminate\Support\{Facades\Auth, Facades\Config};
  * @method static searchName(mixed $query)
  * @method static mostCitations(int $int)
  * @method static where(string $external_id_name, $external_id)
+ * @method static count()
  *
  * @property int id
  * @property string orc_id

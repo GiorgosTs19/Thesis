@@ -11,7 +11,7 @@ import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
     authorElement: 'hover:underline text-xs lg:text-sm',
-    li: 'flex justify-between flex-grow',
+    li: 'flex justify-between',
     index: 'top-0 left-0 pr-2 text-black text-sm lg:text-base 2xl:text-lg flex flex-col gap-2 text-center h-fit',
     infoContainer: 'flex flex-col',
     innerInfoContainer: 'flex flex-wrap border-l-2 border-l-blue-700',
@@ -110,14 +110,9 @@ export const WorkItem = ({
                         <div className={styles.authorsList}>
                             {authorElements}
                             {remainingAuthors > 0 && !showAllAuthors ? (
-                                <span
-                                    className={styles.showMoreLessAuthors}
-                                    onClick={() => setShowAllAuthors(true)}
-                                >{`+${remainingAuthors} more`}</span>
+                                <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(true)}>{`+${remainingAuthors} more`}</span>
                             ) : (
-                                remainingAuthors > 0 && (
-                                    <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(false)}>{`show less`}</span>
-                                )
+                                remainingAuthors > 0 && <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(false)}>{`show less`}</span>
                             )}
                         </div>
                     )}

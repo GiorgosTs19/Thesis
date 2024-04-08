@@ -22,11 +22,10 @@ import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
  * @param customTypes
  * @returns The rendered GroupsPage component.
  */
-const GroupsPage = ({ groups, customTypes }) => {
+const GroupsPage = ({ groups }) => {
     const [groupToShow, setGroupToShow] = useState(null);
     const [groupsList, setGroupsList] = useState(groups);
     const [selectedGroup, setSelectedGroup] = useState(null);
-    const [worksPaginationInfo, setWorksPaginationInfo] = useState(null);
     const [worksShouldRefresh, setWorksShouldRefresh] = useState(false);
     const activeGroupBadgeRef = useRef(null);
     const api = useAPI();
@@ -74,26 +73,20 @@ const GroupsPage = ({ groups, customTypes }) => {
         if (!selectedGroup) return;
         return api.groups.getGroup(selectedGroup).then((data) => {
             setGroupToShow(data.data.group);
-            setWorksPaginationInfo(data.data.works);
+            // setWorksPaginationInfo(data.data.works);
         });
     }, [selectedGroup]);
 
     const { loading } = useAsync(handleFetchGroup, !!selectedGroup, [worksShouldRefresh]);
 
-    const showCurrentGroup = !loading && !!groupToShow && !!worksPaginationInfo;
+    const showCurrentGroup = !loading && !!groupToShow;
 
     return (
         <div className={'flex min-h-[calc(100vh-4rem)] flex-col md:flex-row'}>
             <div className={'my-10 flex w-full flex-wrap gap-4 pl-2 pr-5 md:w-64 md:flex-col md:gap-3 md:border-r md:border-r-gray-300'}>
                 <NewGroupModal groups={groupsList} />
                 {groupsList.map((group) => (
-                    <GroupItem
-                        key={group.id}
-                        group={group}
-                        className={'mx-auto w-5/12 md:w-full'}
-                        onClick={() => setSelectedGroup(group.id)}
-                        isSelected={selectedGroup === group.id}
-                    />
+                    <GroupItem key={group.id} group={group} className={'mx-auto w-5/12 md:w-full'} onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id} />
                 ))}
             </div>
 
@@ -103,16 +96,7 @@ const GroupsPage = ({ groups, customTypes }) => {
                 </div>
             )}
             {!loading && !groupToShow && <h4 className={'m-auto text-center  text-2xl'}>Select a group to see more details</h4>}
-            {showCurrentGroup && (
-                <SelectedGroup
-                    group={groupToShow}
-                    setSelectedGroup={setSelectedGroup}
-                    setGroupsList={setGroupsList}
-                    worksPaginationInfo={worksPaginationInfo}
-                    setWorksPaginationInfo={setWorksPaginationInfo}
-                    customTypes={customTypes}
-                />
-            )}
+            {showCurrentGroup && <SelectedGroup group={groupToShow} setSelectedGroup={setSelectedGroup} />}
         </div>
     );
 };

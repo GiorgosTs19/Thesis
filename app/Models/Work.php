@@ -265,13 +265,13 @@ class Work extends Model {
     public function scopeFromPublicationYear($query, $from_year) {
         if (!$from_year)
             return $query;
-        return $query->where('publication_year', '>=', $from_year);
+        return $query->where('publication_year', '>=', $from_year)->orWhereNull('publication_year');
     }
 
     public function scopeToPublicationYear($query, $to_year) {
         if (!$to_year)
             return $query;
-        return $query->where('publication_year', '<=', $to_year);
+        return $query->where('publication_year', '<=', $to_year)->orWhereNull('publication_year');
     }
 
     public function scopeSources($query, $sources) {
