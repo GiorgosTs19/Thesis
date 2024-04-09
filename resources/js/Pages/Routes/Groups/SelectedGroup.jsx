@@ -46,7 +46,6 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
     const api = useAPI();
     const [groupWorks, setGroupWorks] = useState(null);
     const { button, filters } = useWorkFilters({ authors: group.members });
-    console.log('🚀 ~ SelectedGroup.jsx 49', filters);
     const handleFetchGroup = useCallback(() => {
         if (!group) return;
         return api.works.filterWorks(filters).then((res) => {
@@ -282,7 +281,7 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
                                             <PaginatedList
                                                 response={groupWorks}
                                                 renderFn={renderWorkItem}
-                                                emptyListPlaceholder={'This group has no works'}
+                                                emptyListPlaceholder={filterActive ? 'No works matching your criteria' : 'This group has no works'}
                                                 parser={Work.parseResponseWork}
                                                 onLinkClick={handleLinkClick}
                                                 className={'mt-auto w-full'}
@@ -335,7 +334,7 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
                                             response={groupWorks}
                                             renderFn={renderWorkItem}
                                             parser={Work.parseResponseWork}
-                                            emptyListPlaceholder={'This group has no works'}
+                                            emptyListPlaceholder={filterActive ? 'No works matching your criteria' : 'This group has no works'}
                                             onLinkClick={handleLinkClick}
                                             title={`Group Works ( ${groupWorks?.meta?.total} )`}
                                             gap={6}
