@@ -37,12 +37,10 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
             work,
             index + 1,
             {
-                authors: false,
+                authors: true,
                 type: true,
                 oa: true,
-                publicationDate: false,
                 language: true,
-                citations: false,
             },
             { authors: true },
         );
@@ -56,9 +54,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                     <div className={styles.card}>
                         <div className={'m-auto'}>
                             <AuthorSVG width={64} height={64} className={styles.image} />
-                            <div className={styles.text}>
-                                Explore a vast collection of renowned authors. Uncover insights, and statistical data for each literary figure.
-                            </div>
+                            <div className={styles.text}>Explore a vast collection of renowned authors. Uncover insights, and statistical data for each literary figure.</div>
                             {/*<button*/}
                             {/*    className={clsx(*/}
                             {/*        styles.button,*/}
@@ -96,9 +92,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                     <div className={styles.card}>
                         <div className={'m-auto'}>
                             <WorksSVG width={64} height={64} className={styles.image} />
-                            <div className={styles.text}>
-                                Search through an extensive catalog of papers, discover details about each piece, and explore statistical analyses.
-                            </div>
+                            <div className={styles.text}>Search through an extensive catalog of papers, discover details about each piece, and explore statistical analyses.</div>
                             {/*<button*/}
                             {/*    className={clsx(*/}
                             {/*        styles.button,*/}
@@ -111,15 +105,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                         </div>
                     </div>
                     <div className={styles.listWrapper}>
-                        <List
-                            data={mostCitationsWorks}
-                            renderFn={renderWork}
-                            vertical
-                            title={'Most Cited Works'}
-                            parser={Work.parseResponseWork}
-                            wrapperClassName={styles.list}
-                            rounded
-                        />
+                        <List data={mostCitationsWorks} renderFn={renderWork} vertical title={'Most Cited Works'} parser={Work.parseResponseWork} wrapperClassName={styles.list} rounded />
                     </div>
                 </div>
             </div>
@@ -127,8 +113,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                 <div className={styles.bannerInnerContainer}>
                     <div className={styles.bannerTextContainer}>
                         <p className={styles.bannerText}>
-                            Advance your scholarly presence effortlessly with our platform. Follow these streamlined steps to create your account and
-                            showcase your work seamlessly.
+                            Advance your scholarly presence effortlessly with our platform. Follow these streamlined steps to create your account and showcase your work seamlessly.
                         </p>
                     </div>
                     {/*<div className={styles.bannerButtonContainer}>*/}
@@ -149,9 +134,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                     <div className={styles.timeLineCardInnerContainer}>
                         <RiNumber2 className={styles.timelineStepNumber} />
                         <div className={'flex w-full flex-col'}>
-                            <div className={styles.timelineText}>
-                                Tell us who you are by providing your unique identifiers, along with some essential details.
-                            </div>
+                            <div className={styles.timelineText}>Tell us who you are by providing your unique identifiers, along with some essential details.</div>
                             <div className={'mx-auto mt-2 flex gap-4'}>
                                 <OrcidSVG height={24} width={24} />
                                 <OpenAlexSVG height={24} width={24} />
@@ -163,9 +146,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                 <Card className={styles.timeLineCard}>
                     <div className={styles.timeLineCardInnerContainer}>
                         <RiNumber3 className={styles.timelineStepNumber} />
-                        <div className={styles.timelineText}>
-                            Once you have shared your info, leave the rest to us. We will seamlessly fetch your works and build your profile.
-                        </div>
+                        <div className={styles.timelineText}>Once you have shared your info, leave the rest to us. We will seamlessly fetch your works and build your profile.</div>
                     </div>
                 </Card>
             </div>
@@ -193,13 +174,11 @@ const styles = {
     button: 'px-4 py-2 rounded-xl border border-gray-200 bg-gray-200 mt-5 w-fit mx-auto',
     activeButton: 'hover:bg-gray-100',
     disabledButton: 'opacity-50',
-    timelineText:
-        'text-accent font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base 4xl:text-xl  flex flex-col text-center',
+    timelineText: 'text-accent font-bold truncate whitespace-pre-wrap mx-auto md:w-9/12 xl:w-7/12 text-sm lg:text-base 4xl:text-xl  flex flex-col text-center',
     timelineWrapper: 'flex flex-col xl:flex-row gap-5 w-full mt-20',
     timelineStepNumber: 'my-auto text-2xl',
     banner: 'text-center mt-20 mb-3 rounded-xl col-span-5',
-    bannerInnerContainer:
-        'flex flex-col justify-between rounded-lg border-t-0 border border-background shadow-lg rounded-t-none bg-accent p-4 md:flex-row w-fit mx-auto',
+    bannerInnerContainer: 'flex flex-col justify-between rounded-lg border-t-0 border border-background shadow-lg rounded-t-none bg-accent p-4 md:flex-row w-fit mx-auto',
     bannerTextContainer: 'mb-3 mr-4 flex flex-col items-start md:mb-0 md:flex-row md:items-center',
     bannerButtonContainer: 'flex flex-shrink-0 items-center',
     bannerText: 'flex items-center text-xl 4xl:text-2xl font-normal text-background',

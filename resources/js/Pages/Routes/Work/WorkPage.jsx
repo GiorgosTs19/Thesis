@@ -70,23 +70,11 @@ const WorkPage = ({ work, workVersions }) => {
                     <RowOfProperties properties={workObject.getProperties()} className={'my-auto'} />
                     {workObject.abstract && (
                         <div
-                            className={clsx(
-                                styles.abstractWrapper,
-                                showPartialAbstract ? styles.partialAbstract : '',
-                                abstractTooLong ? 'cursor-pointer' : '',
-                            )}
+                            className={clsx(styles.abstractWrapper, showPartialAbstract ? styles.partialAbstract : '', abstractTooLong ? 'cursor-pointer' : '')}
                             onClick={() => setShowPartialAbstract((prev) => !prev)}
                         >
                             <div className={styles.abstractTitle}>Abstract</div>
-                            <div
-                                className={clsx(
-                                    showPartialAbstract ? styles.partialAbstract : '',
-                                    abstractTooLong ? 'cursor-pointer' : '',
-                                    styles.abstractText,
-                                )}
-                            >
-                                {workObject.abstract}
-                            </div>
+                            <div className={clsx(showPartialAbstract ? styles.partialAbstract : '', abstractTooLong ? 'cursor-pointer' : '', styles.abstractText)}>{workObject.abstract}</div>
                         </div>
                     )}
                     <div className={`${abstractPresent ? 'mt-5' : 'my-auto'} flex w-full flex-col`}>
@@ -96,11 +84,7 @@ const WorkPage = ({ work, workVersions }) => {
                                     <div className={styles.chartDescription}>{REFERENCES_CHART.description}</div>
                                     <div className={styles.chartDescription}>Source : {REFERENCES_CHART.source}</div>
                                     <div className={styles.chart}>
-                                        <SimpleStatisticsChart
-                                            title={REFERENCES_CHART.title}
-                                            dataSet={REFERENCES_CHART.dataSet}
-                                            labels={REFERENCES_CHART.labels}
-                                        />
+                                        <SimpleStatisticsChart title={REFERENCES_CHART.title} dataSet={REFERENCES_CHART.dataSet} labels={REFERENCES_CHART.labels} />
                                     </div>
                                     <div className={styles.chartDisclaimer}>{REFERENCES_CHART.disclaimer}</div>
                                 </>
@@ -116,7 +100,7 @@ const WorkPage = ({ work, workVersions }) => {
                             </div>
                             <ul className={'mx-auto text-left'}>
                                 {versions.map((item, index) => (
-                                    <WorkItem key={index} work={item} index={index + 1} hideVersions />
+                                    <WorkItem key={index} work={item} index={index + 1} hiddenProperties={{ versions: true }} />
                                 ))}
                             </ul>
                         </div>

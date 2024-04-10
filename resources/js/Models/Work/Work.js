@@ -2,6 +2,12 @@ import { Author } from '@/Models/Author/Author.js';
 import { capitalizeFirstLetter } from '@/Utility/Strings/Utils.js';
 import { Statistic } from '@/Models/Statistic/Statistic.js';
 
+export const SOURCES = {
+    OPENALEX: 'OpenAlex',
+    ORCID: 'ORCID',
+    CROSSREF: 'Crossref',
+};
+
 /**
  * Class representing a work (e.g., publication).
  * @class
@@ -52,6 +58,9 @@ export class Work {
         referencedByCount,
         versions,
         source,
+        isAggregated,
+        authorsString,
+        authorsAsString,
     }) {
         this.title = title;
         this.id = id;
@@ -73,6 +82,9 @@ export class Work {
         this.referencedByCount = referencedByCount;
         this.versions = versions;
         this.source = source;
+        this.isAggregated = isAggregated;
+        this.authorsString = authorsString;
+        this.authorsAsString = authorsAsString;
     }
 
     static parseResponseWork({
@@ -96,7 +108,13 @@ export class Work {
         referenced_by_count,
         source,
         versions,
+        is_aggregated,
+        authors_string,
+        authors_as_string,
     }) {
+        let authorsArray = authors ? authors.map((author) => Author.parseResponseAuthor(author)) : [];
+        if (!authorsArray.length && authors_as_string) authorsArray = authors_string.split(',').map((item) => ({ localUrl: null, isUser: false, name: item.replace(',', '') }));
+
         return new Work({
             id,
             doi,
@@ -107,12 +125,9 @@ export class Work {
             isOA: is_oa,
             sourceUrl: source_url,
             updatedAt: updated_at,
-            authors: authors ? authors.map((author) => Author.parseResponseAuthor(author)) : [],
+            authors: authorsArray,
             externalId: external_id,
-            statistics:
-                statistics?.map((statistic) =>
-                    Statistic.parseResponseStatistic({ assetType: className, citedCount: statistic.cited_count, assetId: id, year: statistic.year }),
-                ) ?? [],
+            statistics: statistics?.map((statistic) => Statistic.parseResponseStatistic({ assetType: className, citedCount: statistic.cited_count, assetId: id, year: statistic.year })) ?? [],
             localUrl: local_url,
             event,
             abstract,
@@ -121,6 +136,9 @@ export class Work {
             referencedByCount: referenced_by_count,
             versions: versions ? versions.map((work) => Work.parseResponseWork(work)) : [],
             source,
+            isAggregated: is_aggregated,
+            authorsString: authors_string,
+            authorsAsString: authors_as_string,
         });
     }
 
@@ -138,12 +156,7 @@ export class Work {
             { name: 'Versions', value: this.versions.length + 1 },
             {
                 name: this.source === 'Aggregate' ? 'Sources' : 'Source',
-                value:
-                    this.source === 'Aggregate'
-                        ? this.versions.length > 1
-                            ? this.versions.map((version) => version.source).join(', ')
-                            : this.source
-                        : this.source,
+                value: this.source === 'Aggregate' ? (this.versions.length > 1 ? this.versions.map((version) => version.source).join(', ') : this.source) : this.source,
             },
         ];
         if (this.subtype && this.subtype !== this.type) properties.push({ name: 'Subtype', value: this.subtype });

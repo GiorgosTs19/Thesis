@@ -1,38 +1,43 @@
 import React, { useState } from 'react';
 import { ExternalSVG } from '@/SVGS/ExternalSVG.jsx';
 import { capitalizeFirstLetter } from '@/Utility/Strings/Utils.js';
-import { bool, instanceOf, number } from 'prop-types';
-import { Work } from '@/Models/Work/Work.js';
+import { bool, instanceOf, number, shape } from 'prop-types';
+import { SOURCES, Work } from '@/Models/Work/Work.js';
 import clsx from 'clsx';
-import { Modal } from 'flowbite-react';
+import { Modal, Tooltip } from 'flowbite-react';
 import { useClickAway } from '@uidotdev/usehooks';
 import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
+import { containsKey } from '@/Utility/Objects/utils.js';
+import { FaCircleNodes } from 'react-icons/fa6';
+import { OpenAlexSVG } from '@/SVGS/OpenAlexSVG.jsx';
+import { OrcidSVG } from '@/SVGS/OrcidSVG.jsx.jsx';
+import { DoiSVG } from '@/SVGS/DoiSVG.jsx';
 
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
-    authorElement: 'hover:underline text-xs lg:text-sm',
+    authorElement: 'text-xs lg:text-sm',
+    authorElementLink: 'hover:underline text-xs lg:text-sm text-blue-500',
     li: 'flex justify-between',
     index: 'top-0 left-0 pr-2 text-black text-sm lg:text-base 2xl:text-lg flex flex-col gap-2 text-center h-fit',
-    infoContainer: 'flex flex-col',
-    innerInfoContainer: 'flex flex-wrap border-l-2 border-l-blue-700',
+    infoContainer: 'flex flex-col border-l-2 border-l-blue-700',
+    innerInfoContainer: 'flex flex-wrap ',
     infoProperty: 'text-gray-600 pl-3 text-xs md:text-sm',
     title: 'text-black text-sm lg:text-base font-bold truncate whitespace-pre-wrap hover:underline',
-    authorsList: 'pl-3 text-blue-500',
+    authorsList: 'pl-3',
     showMoreLessAuthors: 'cursor-pointer underline text-amber-950 ml-2 text-xs lg:text-sm',
 };
-export const WorkItem = ({
-    work,
-    index,
-    authorToExclude,
-    hideAuthors = false,
-    hideType = false,
-    hideOA = false,
-    hidePublicationDate = false,
-    hideCitations = false,
-    hideLanguage = false,
-    highlightUserAuthors = true,
-    hideVersions = false,
-}) => {
+
+export const PROPERTIES = {
+    TYPE: 'type',
+    AUTHORS: 'authors',
+    OA: 'oa',
+    VERSIONS: 'versions',
+    PUBLICATION_DATE: 'publicationDate',
+    LANGUAGE: 'lang',
+    CITATIONS: 'citations',
+};
+
+export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, highlightUserAuthors }) => {
     const { doi, title, authors, type, isOA, publicationYear, referencedByCount, language, localUrl, versions } = work;
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [showAllAuthors, setShowAllAuthors] = useState(false);
@@ -46,9 +51,13 @@ export const WorkItem = ({
     const authorElements = filteredAuthors.map((author, index) => {
         return (
             <React.Fragment key={index}>
-                <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser && highlightUserAuthors ? 'font-bold' : '')}>
-                    {author.name}
-                </a>
+                {author.localUrl ? (
+                    <a href={author.localUrl} className={clsx(styles.authorElementLink, author.isUser && highlightUserAuthors ? 'font-bold' : '')}>
+                        {author.name}
+                    </a>
+                ) : (
+                    <span className={clsx(styles.authorElement, author.isUser && highlightUserAuthors ? 'font-bold' : '')}>{author.name}</span>
+                )}
                 {index < filteredAuthors.length - 1 && ', '}
             </React.Fragment>
         );
@@ -56,13 +65,52 @@ export const WorkItem = ({
 
     const remainingAuthors = authors.length - MAX_VISIBLE_AUTHORS;
 
+    const authorsToShow = (
+        <div className={styles.authorsList}>
+            {authorElements}
+            {remainingAuthors > 0 && !showAllAuthors ? (
+                <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(true)}>{`+${remainingAuthors} more`}</span>
+            ) : (
+                remainingAuthors > 0 && <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(false)}>{`show less`}</span>
+            )}
+        </div>
+    );
+
     // TODO implement when authentication is implemented.
     // const hideWork = () => {
     //
     // }
 
     const handleOpenVersions = () => setVersionsOpen(true);
-
+    const getSourceIcon = () => {
+        if (work.isAggregated) {
+            return (
+                <Tooltip content="Unified version: This version combines information from multiple sources into a comprehensive representation of the work.">
+                    <FaCircleNodes className={'mx-2'} width={24} height={24} />
+                </Tooltip>
+            );
+        }
+        switch (work.source) {
+            case SOURCES.OPENALEX:
+                return (
+                    <Tooltip content="All the information about this work version, was retrieved from Open Alex">
+                        <OpenAlexSVG className={'mx-2'} />
+                    </Tooltip>
+                );
+            case SOURCES.ORCID:
+                return (
+                    <Tooltip content="All the iInformation about this work version, was retrieved from ORCIDx">
+                        <OrcidSVG className={'mx-2'} />
+                    </Tooltip>
+                );
+            case SOURCES.CROSSREF:
+                return (
+                    <Tooltip content="All the information about this work version, was retrieved from CROSSREF">
+                        <DoiSVG className={'mx-2'} />
+                    </Tooltip>
+                );
+        }
+    };
     const dropDownOptions = [{ name: 'Hide Work', value: 1, default: false }];
     const [multipleSources, sources] = work.getSources();
     return (
@@ -81,21 +129,22 @@ export const WorkItem = ({
                 </Modal.Body>
             </Modal>
             <div className={'mb-5 flex h-fit flex-grow list-none '}>
+                <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />
                 <div className={styles.index}>
                     {index}
-                    <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />
+                    {getSourceIcon()}
                 </div>
                 <div className={styles.infoContainer}>
                     <div className={styles.innerInfoContainer}>
-                        {!hideType && <div className={styles.infoProperty}>{capitalizeFirstLetter(type)}</div>}
-                        {!hideOA && <div className={styles.infoProperty}>{isOA ? 'Open Access Available' : 'Open Access Unavailable'}</div>}
-                        {!hidePublicationDate && <div className={styles.infoProperty}>Published: {publicationYear ?? '-'}</div>}
-                        {!hideCitations && <div className={styles.infoProperty}>Citations: {referencedByCount ?? '-'}</div>}
-                        {!hideLanguage && <div className={styles.infoProperty}>Language: {language}</div>}
+                        {!containsKey(hiddenProperties, PROPERTIES.TYPE) && <div className={styles.infoProperty}>{capitalizeFirstLetter(type)}</div>}
+                        {!containsKey(hiddenProperties, PROPERTIES.OA) && <div className={styles.infoProperty}>{isOA ? 'Open Access Available' : 'Open Access Unavailable'}</div>}
+                        {!containsKey(hiddenProperties, PROPERTIES.PUBLICATION_DATE) && <div className={styles.infoProperty}>Published: {publicationYear ?? '-'}</div>}
+                        {!containsKey(hiddenProperties, PROPERTIES.CITATIONS) && <div className={styles.infoProperty}>Citations: {referencedByCount ?? '-'}</div>}
+                        {!containsKey(hiddenProperties, PROPERTIES.LANGUAGE) && <div className={styles.infoProperty}>Language: {language}</div>}
                         <div className={styles.infoProperty}>
                             {multipleSources ? 'Sources' : 'Source'}: {sources}
                         </div>
-                        {!hideVersions && versions.length > 0 && (
+                        {!containsKey(hiddenProperties, PROPERTIES.VERSIONS) && versions.length > 0 && (
                             <div className={'cursor-pointer pl-3 text-xs text-blue-500 hover:underline md:text-sm'} onClick={handleOpenVersions}>
                                 ( + {versions.length} {versions.length < 2 ? 'version' : 'versions'} )
                             </div>
@@ -106,16 +155,7 @@ export const WorkItem = ({
                             {title ?? 'Title Unavailable'}
                         </a>
                     </div>
-                    {!hideAuthors && (
-                        <div className={styles.authorsList}>
-                            {authorElements}
-                            {remainingAuthors > 0 && !showAllAuthors ? (
-                                <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(true)}>{`+${remainingAuthors} more`}</span>
-                            ) : (
-                                remainingAuthors > 0 && <span className={styles.showMoreLessAuthors} onClick={() => setShowAllAuthors(false)}>{`show less`}</span>
-                            )}
-                        </div>
-                    )}
+                    {!containsKey(hiddenProperties, PROPERTIES.AUTHORS) && authorsToShow}
                 </div>
             </div>
             <a href={doi} title={'Go to source'} className={'mt-2'}>
@@ -129,12 +169,14 @@ WorkItem.propTypes = {
     work: instanceOf(Work).isRequired,
     index: number.isRequired,
     authorToExclude: number,
-    hideAuthors: bool,
-    hideType: bool,
-    hideOA: bool,
-    hidePublicationDate: bool,
-    hideCitations: bool,
-    hideLanguage: bool,
     highlightUserAuthors: bool,
-    hideVersions: bool,
+    hiddenProperties: shape({
+        authors: bool,
+        type: bool,
+        oa: bool,
+        publicationDate: bool,
+        citations: bool,
+        lang: bool,
+        versions: bool,
+    }),
 };

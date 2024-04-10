@@ -120,8 +120,9 @@ class WorkUtils {
             $new_work->save();
 
             $aggregated_work = $new_work->getAggregateVersion();
-
+            $shouldParseAuthors = false;
             if (!$aggregated_work) {
+                $shouldParseAuthors = true;
                 $aggregated_work = WorkUtils::createAggregatedWork($new_work);
             }
 
@@ -130,14 +131,16 @@ class WorkUtils {
 
             if (sizeof($db_work_authors) > 0) {
                 foreach ($db_work_authors as $author_entry) {
-                    Author::find($author_entry->author_id)->associateToWork($new_work, $author_entry->position)->associateToWork($aggregated_work, $author_entry->position);
+                    $author = Author::find($author_entry->author_id)->associateToWork($new_work, $author_entry->position);
+                    if ($shouldParseAuthors) $author->associateToWork($aggregated_work, $author_entry->position);
                 }
             } else {
                 $authors_array = data_get($orc_id_work, 'contributors.contributor');
                 $authors_string = '';
                 foreach ($authors_array as $author) {
-                    $authors_string .= data_get($author, 'credit-name.value');
+                    $authors_string .= data_get($author, 'credit-name.value') . ', ';
                 }
+                $authors_string = rtrim($authors_string, ',');
                 $new_work->authors_string = $authors_string;
                 $aggregated_work->authors_string = $authors_string;
             }
@@ -221,6 +224,12 @@ class WorkUtils {
         $new_work->type_id = self::getCustomType($new_work->type);
         $new_work->is_referenced_by_count = data_get($doi_object, 'is-referenced-by-count') ?? null;
         $new_work->source = Work::$crossRefSource;
+        $authors_string = '';
+        foreach ($doi_object->author as $author) {
+            $authors_string .= $author->given . ' ' . $author->family;
+        }
+        $new_work = self::getAuthorsForCrossref($doi_object, $new_work);
+        $new_work->authors_string = $authors_string;
         $new_work->save();
 
         $aggregated_work = $new_work->getAggregateVersion();
@@ -228,7 +237,23 @@ class WorkUtils {
         $aggregated_work->subtype = $doi_object->type ?? null;
         $aggregated_work->save();
 
+
         return $new_work;
+    }
+
+    public static function getAuthorsForCrossref($doi_object, $work) {
+        $authors_string = '';
+        if (!property_exists($doi_object, 'author')) {
+            $work->authors_string = 'Authors not available for this version of the work.';
+            return $work;
+        }
+        foreach ($doi_object->author as $author) {
+            $authors_string .= $author->given . ' ' . $author->family . ', ';
+        }
+        $authors_string = rtrim($authors_string, ',');
+        $work->authors_string = $authors_string;
+        return $work;
+
     }
 
     public static function getDynamicTypes(int $threshold = 3) {

@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property string $source
  * @property string $source_url
  * @property string external_id
+ * @property string $authors_string
  * @method versions()
  */
 class WorkResource extends JsonResource {
@@ -39,12 +40,12 @@ class WorkResource extends JsonResource {
         return implode(', ', $sources);
     }
 
-    protected bool $shouldLoadVersions;
+    protected bool $loadVersions;
     private $versions;
 
-    public function __construct($resource, $shouldLoadVersions = true) {
+    public function __construct($resource, $loadVersions = true) {
         parent::__construct($resource);
-        $this->shouldLoadVersions = $shouldLoadVersions;
+        $this->loadVersions = $loadVersions;
         $this->versions = $this->versions();
     }
 
@@ -76,7 +77,10 @@ class WorkResource extends JsonResource {
             'local_url' => route('Work.Page', ['id' => $this->id]),
             'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
             'source' => self::getSources(),
-            'versions' => $this->when($this->shouldLoadVersions, new WorkCollection($this->versions, false), null),
+            'versions' => $this->when($this->loadVersions, new WorkCollection($this->versions, false), null),
+            'is_aggregated' => $this->source === Work::$aggregateSource,
+            'authors_string' => $this->authors_string,
+            'authors_as_string' => !!$this->authors_string
         ];
     }
 }

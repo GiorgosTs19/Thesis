@@ -35,7 +35,7 @@ class WorkController extends Controller {
         $params = $request->safe()->all();
         $per_page = array_key_exists('per_page', $params) ? $params['per_page'] : 10;
         $authors_ids = array_key_exists('author_ids', $params) ? $params['author_ids'] : [];
-        $sources = array_key_exists('sources', $params) ? $params['sources'] : [];
+        $sources = array_key_exists('sources', $params) && sizeof($params['sources']) ? $params['sources'] : [Work::$aggregateSource];
         $type_filters = array_key_exists('type_filters', $params) ? $params['type_filters'] : [];
         $work_types = array_key_exists('work_types', $params) ? $params['work_types'] : [];
         $from_pub_year = array_key_exists('from_pub_year', $params) ? $params['from_pub_year'] : null;
@@ -45,7 +45,8 @@ class WorkController extends Controller {
         $with = array_key_exists('with', $params) ? $params['with'] : [];
         $sort_by = array_key_exists('sort_by', $params) ? $params['sort_by'] : 'id';
         $sort_direction = array_key_exists('sort_direction', $params) ? $params['sort_direction'] : 'asc';
-        $with_versions = in_array('versions', $with);
+        // For now, always load the versions
+        $with_versions = in_array('versions', $with) || in_array(Work::$aggregateSource, $sources) || true;
 
         $relationships = in_array('versions', $with) ? array_diff($with, ['versions']) : $with;
 

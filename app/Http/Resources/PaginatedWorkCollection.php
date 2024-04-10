@@ -21,9 +21,9 @@ class PaginatedWorkCollection extends ResourceCollection {
 
     protected bool $shouldLoadVersions;
 
-    public function __construct($resource, $shouldLoadVersions = true) {
+    public function __construct($resource, $loadVersions = true) {
         parent::__construct($resource);
-        $this->shouldLoadVersions = $shouldLoadVersions;
+        $this->shouldLoadVersions = $loadVersions;
     }
 
     /**

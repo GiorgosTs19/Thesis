@@ -25,7 +25,7 @@ class WorkFilterRequest extends FormRequest {
             'max_citations' => $this->query('max_citations'),
             'type_filters' => $this->query('type_filters', []),
             'work_types' => $this->query('work_types'),
-            'with' => $this->query('with', []),
+            'with' => $this->query('with', ['authors']),
             'sort_by' => $this->query('sort_by', 'id'),
             'sort_direction' => $this->query('sort_direction', 'asc')]);
     }
