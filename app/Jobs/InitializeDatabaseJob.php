@@ -88,7 +88,8 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
             });
 
         } catch (Exception $error) {
-            ULog::error("Something went wrong while initializing the database," . $error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            ULog::error("Something went wrong while initializing the database, " . $error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine() . ". Rolling back database.");
+            DB::rollBack();
         } finally {
             $ended_time = date("H:i:s");
             ULog::log("Database Initialization ended at $ended_time");

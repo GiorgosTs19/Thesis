@@ -68,10 +68,11 @@ class WorkUtils {
     }
 
     /**
-     * @param $works
+     * @param $works - The works object form the ORCID response.
+     * @param int $author_id - The author's id with whom the work will be associated.
      * @return void
      */
-    public static function syncWorksOrcId($works): void {
+    public static function syncWorksOrcId($works, int $author_id): void {
         foreach ($works as $work) {
             $work_doi = OrcId::extractWorkDoi($work);
 
@@ -80,20 +81,21 @@ class WorkUtils {
             if (!$work_doi || !$orc_id_path)
                 continue;
 
-            WorkUtils::createNewOIWork($orc_id_path, $work_doi);
-            WorkUtils::createDOIWork($work_doi);
+            WorkUtils::createNewOIWork($orc_id_path, $work_doi, $author_id);
+            WorkUtils::createDOIWork($work_doi, $author_id);
         }
     }
 
     /**
      * Creates a new work from an orc id api response.
      *
-     * @param $work_path
-     * A work object straight from an OrcId API call response.
+     * @param string $work_path - The work's ORCID path.
+     * @param string $doi - The work's doi.
+     * @param int $author_id - The author's id, with whom the work will be associated.
      * @return void
      * The newly created work.
      */
-    public static function createNewOIWork($work_path, $doi): void {
+    public static function createNewOIWork(string $work_path, string $doi, int $author_id): void {
         if (Work::where('doi', $doi)->source(Work::$orcIdSource)->exists())
             return;
 
@@ -120,9 +122,9 @@ class WorkUtils {
             $new_work->save();
 
             $aggregated_work = $new_work->getAggregateVersion();
-            $shouldParseAuthors = false;
+            $parse_authors = false;
             if (!$aggregated_work) {
-                $shouldParseAuthors = true;
+                $parse_authors = true;
                 $aggregated_work = WorkUtils::createAggregatedWork($new_work);
             }
 
@@ -132,9 +134,11 @@ class WorkUtils {
             if (sizeof($db_work_authors) > 0) {
                 foreach ($db_work_authors as $author_entry) {
                     $author = Author::find($author_entry->author_id)->associateToWork($new_work, $author_entry->position);
-                    if ($shouldParseAuthors) $author->associateToWork($aggregated_work, $author_entry->position);
+                    if ($parse_authors) $author->associateToWork($aggregated_work, $author_entry->position);
                 }
             } else {
+                AuthorWork::create(['author_id' => $author_id, 'work_id' => $new_work->id, 'position' => 1]);
+
                 $authors_array = data_get($orc_id_work, 'contributors.contributor');
                 $authors_string = '';
                 foreach ($authors_array as $author) {
@@ -199,10 +203,11 @@ class WorkUtils {
 
 
     /**
-     * @param string $doi
-     * @return Work|null
+     * @param string $doi - The doi identifier of the object to retrieve its information from Crossref
+     * @param int $author_id - The author with whom the work will be associated.
+     * @return Work|null - The newly created work if doi was defined and the work was successfully created, otherwise null.
      */
-    public static function createDOIWork(string $doi): ?Work {
+    public static function createDOIWork(string $doi, int $author_id): ?Work {
         $doi_object = DOIAPI::doiRequest($doi);
 
         if (!$doi_object)
@@ -224,29 +229,25 @@ class WorkUtils {
         $new_work->type_id = self::getCustomType($new_work->type);
         $new_work->is_referenced_by_count = data_get($doi_object, 'is-referenced-by-count') ?? null;
         $new_work->source = Work::$crossRefSource;
-        $authors_string = '';
-        foreach ($doi_object->author as $author) {
-            $authors_string .= $author->given . ' ' . $author->family;
-        }
-        $new_work = self::getAuthorsForCrossref($doi_object, $new_work);
-        $new_work->authors_string = $authors_string;
+        $new_work = self::parseCRefAuthors($doi_object, $new_work);
         $new_work->save();
+        AuthorWork::create(['author_id' => $author_id, 'work_id' => $new_work->id, 'position' => 1]);
 
         $aggregated_work = $new_work->getAggregateVersion();
         $aggregated_work->abstract = isset($doi_object->abstract) ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
         $aggregated_work->subtype = $doi_object->type ?? null;
         $aggregated_work->save();
 
-
         return $new_work;
     }
 
-    public static function getAuthorsForCrossref($doi_object, $work) {
+    public static function parseCRefAuthors($doi_object, $work) {
         $authors_string = '';
         if (!property_exists($doi_object, 'author')) {
             $work->authors_string = 'Authors not available for this version of the work.';
             return $work;
         }
+
         foreach ($doi_object->author as $author) {
             $authors_string .= $author->given . ' ' . $author->family . ', ';
         }

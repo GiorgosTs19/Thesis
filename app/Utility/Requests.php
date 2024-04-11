@@ -7,6 +7,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class Requests {
+    private static int $callCount = 0;
     const CREATE_ACTION = 'create';
 
     const UPDATE_ACTION = 'update';
@@ -16,6 +17,9 @@ class Requests {
     const REQUEST_ASSET = 'request';
 
     public static function get($url, $headers = []): PromiseInterface|Response {
+        $calls = ++self::$callCount;
+
+        ULog::log("Times called : $calls,Requests.php, 21");
         if (env('APP_ENV') === 'production')
             return Http::withHeaders($headers)->get($url);
         return Http::withoutVerifying()->withHeaders($headers)->get($url);

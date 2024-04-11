@@ -11,11 +11,11 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder {
 
     public function run(): void {
-        self::InitializeDatabase();
+        self::initDatabase();
 //        self::UpdateDatabase();
     }
 
-    private function InitializeDatabase(): void {
+    private function initDatabase(): void {
         try {
             InitializeDatabaseJob::dispatchSync();
         } catch (Exception $error) {
@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder {
         }
     }
 
-    private function UpdateDatabase(): void {
+    private function updateDatabase(): void {
         try {
             UpdateDatabaseJob::dispatchSync();
         } catch (Exception $error) {

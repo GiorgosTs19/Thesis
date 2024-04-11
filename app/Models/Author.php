@@ -217,6 +217,7 @@ class Author extends Model {
             // If not, create a new Work and save it to the database
             WorkUtils::createNewOAWork($work);
         }
+        unset($works);
         // Update the $have_been_parsed_count based on the works that have been parsed from this request to keep track of the total amount parsed.
         // This will allow us to check whether all the author's works have been fetched, processed and stored in our DB
         $have_been_parsed = $prev_count + $works_count;
@@ -241,7 +242,7 @@ class Author extends Model {
         $orc_id_response = OrcIdAPI::authorRequest($this->orc_id);
         $this->biography = $orc_id_response->biography;
         $this->save();
-        WorkUtils::syncWorksOrcId($orc_id_response->works);
+        WorkUtils::syncWorksOrcId($orc_id_response->works, $this->id);
     }
 
     /**

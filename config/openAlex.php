@@ -2,7 +2,7 @@
 
 return [
     // Limits the number of works that will be fetched for each author
-    'perPage' => 200,
+    'perPage' => 20,
 
     // An email is required for the OpenAlex api to function correctly.
     'mailTo' => 'it185302@it.teithe.gr',

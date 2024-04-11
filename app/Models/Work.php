@@ -90,7 +90,7 @@ class Work extends Model {
             if (!$author_is_user && !$db_author_exists)
                 $new_author = AuthorUtils::createOAAuthor($author_object->author, $author_ids);
 
-            $new_author->associateToWork($this, $index);
+            $new_author->associateToWork($this, $index + 1);
         }
     }
 

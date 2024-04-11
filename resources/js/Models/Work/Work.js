@@ -113,7 +113,11 @@ export class Work {
         authors_as_string,
     }) {
         let authorsArray = authors ? authors.map((author) => Author.parseResponseAuthor(author)) : [];
-        if (!authorsArray.length && authors_as_string) authorsArray = authors_string.split(',').map((item) => ({ localUrl: null, isUser: false, name: item.replace(',', '') }));
+        if (!authorsArray.length && authors_as_string)
+            authorsArray = authors_string
+                .replace(/, +$/, '')
+                .split(',')
+                .map((item) => ({ localUrl: null, isUser: false, name: item.replace(',', '') }));
 
         return new Work({
             id,
