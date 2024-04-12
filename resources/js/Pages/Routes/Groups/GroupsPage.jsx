@@ -7,8 +7,7 @@ import { useScrollIntoView } from '@/Hooks/useScrollIntoView/useScrollIntoView.j
 import { useGroupCreatedEventListener, useGroupDeletedEventListener, useGroupUpdatedEventListener } from '@/Events/GroupEvent/GroupEvent.js';
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
-import NewGroupModal from '@/Components/Modal/NewGroupModal.jsx';
-import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
+import GroupsList from '@/Pages/Routes/Groups/GroupsList.jsx';
 
 /**
  * @component
@@ -16,15 +15,13 @@ import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
  * A component for displaying and managing groups, including group details and members.
  *
  * @example
- * <GroupsPage groups={groups}/>
+ * <GroupsPage/>
  *
- * @param {Array} groups - An array of group objects to be displayed and managed.
- * @param customTypes
  * @returns The rendered GroupsPage component.
  */
-const GroupsPage = ({ groups }) => {
+const GroupsPage = () => {
     const [groupToShow, setGroupToShow] = useState(null);
-    const [groupsList, setGroupsList] = useState(groups);
+
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [worksShouldRefresh, setWorksShouldRefresh] = useState(false);
     const activeGroupBadgeRef = useRef(null);
@@ -48,7 +45,6 @@ const GroupsPage = ({ groups }) => {
             showToast(e.data.action, e.data.toastType, e.success);
             setWorksShouldRefresh((prev) => !prev);
             // * Add the new group to the list of groups.
-            setGroupsList((prev) => [...prev, e.data.group]);
             setSelectedGroup(e.data.group.id);
         } else if (e.error) {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
@@ -61,7 +57,6 @@ const GroupsPage = ({ groups }) => {
             showToast(e.data.action, e.data.toastType, e.success);
             setWorksShouldRefresh((prev) => !prev);
             // * Remove the group from the list of groups.
-            setGroupsList((prev) => prev.filter((group) => group.id !== e.data.group.id));
             setGroupToShow(null);
         } else if (e.error) {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
@@ -83,13 +78,7 @@ const GroupsPage = ({ groups }) => {
 
     return (
         <div className={'flex min-h-[calc(100vh-4rem)] flex-col md:flex-row'}>
-            <div className={'my-10 flex w-full flex-wrap gap-4 pl-2 pr-5 md:w-64 md:flex-col md:gap-3 md:border-r md:border-r-gray-300'}>
-                <NewGroupModal groups={groupsList} />
-                {groupsList.map((group) => (
-                    <GroupItem key={group.id} group={group} className={'mx-auto w-5/12 md:w-full'} onClick={() => setSelectedGroup(group.id)} isSelected={selectedGroup === group.id} />
-                ))}
-            </div>
-
+            <GroupsList setSelectedGroup={setSelectedGroup} />
             {loading && (
                 <div className={'m-auto'}>
                     <Spinner size="xl" />

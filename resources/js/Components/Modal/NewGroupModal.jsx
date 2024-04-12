@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Badge, Button, Label, Modal, Select, Textarea, TextInput } from 'flowbite-react';
-import { array } from 'prop-types';
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 import { IoAdd } from 'react-icons/io5';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
@@ -11,13 +10,10 @@ import useAPI from '@/Hooks/useAPI/useAPI.js';
  * A component for creating a new group with a modal interface.
 
  * @example
- * <NewGroupModal setGroups={setGroups} groups={groups} />;
- *
- * @param {Function} setGroups - The function to update the list of groups after creating a new group.
- * @param {Array} groups - An array of existing groups to select as the parent group (optional).
+ * <NewGroupModal/>;
  * @returns The rendered NewGroupModal component.
  */
-const NewGroupModal = ({ groups }) => {
+const NewGroupModal = () => {
     const [openModal, setOpenModal] = useState(false);
     const [groupName, setGroupName] = useState('');
     const [groupDesc, setGroupDesc] = useState('');
@@ -25,6 +21,15 @@ const NewGroupModal = ({ groups }) => {
     const [errors, setErrors] = useState(null);
     const { showToast } = useToast();
     const api = useAPI();
+    const [groups, setGroups] = useState([]);
+
+    useEffect(() => {
+        if (openModal) {
+            api.groups.getGroupsMinInfo().then((res) => {
+                setGroups(res);
+            });
+        }
+    }, [openModal]);
     const handleAccept = () => {
         api.groups.createGroup(groupName, groupDesc, groupParent).then((response) => {
             if (response.ok) {
@@ -129,14 +134,10 @@ const NewGroupModal = ({ groups }) => {
 };
 
 const styles = {
-    newGroupButton: 'px-6 py-3 rounded-lg cursor-pointer hover:scale-110 transition-transform duration-300 w-5/12 md:w-full mx-auto',
+    newGroupButton: 'px-6 py-3 rounded-lg cursor-pointer hover:scale-110 transition-transform duration-300 w-5/12 md:w-full mr-auto',
     groupDesc: 'p-2 bg-white',
     error: 'bold text-red-400 px-1',
     section: 'max-w-full mb-4',
-};
-
-NewGroupModal.propTypes = {
-    groups: array,
 };
 
 export default NewGroupModal;

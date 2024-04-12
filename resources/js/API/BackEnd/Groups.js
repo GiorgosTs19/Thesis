@@ -2,6 +2,12 @@ import { AbstractAPI } from '@/API/AbstractAPI.js';
 import { dispatchGroupCreatedEvent, dispatchGroupDeletedEvent, dispatchGroupUpdatedEvent } from '@/Events/GroupEvent/GroupEvent.js';
 import { ToastTypes } from '@/Contexts/ToastContext.jsx';
 
+export const EVENT_TYPES = {
+    GROUP_CREATED: 'Group Created',
+    MEMBERS_ADDED: 'Members Added',
+    MEMBER_REMOVED: 'Member Removed',
+};
+
 export class Groups extends AbstractAPI {
     async addMembers(group, authors) {
         if (!authors || !group.id) {
@@ -14,7 +20,7 @@ export class Groups extends AbstractAPI {
         }).then((res) => {
             if (!res.errors)
                 dispatchGroupUpdatedEvent({
-                    type: 'Members Added',
+                    type: EVENT_TYPES.MEMBERS_ADDED,
                     success: res.success,
                     error: res.error,
                     data: {
@@ -38,7 +44,7 @@ export class Groups extends AbstractAPI {
         }).then((res) => {
             if (!res.errors)
                 dispatchGroupUpdatedEvent({
-                    type: 'Member Removed',
+                    type: EVENT_TYPES.MEMBER_REMOVED,
                     success: res.success,
                     error: res.error,
                     data: {
@@ -64,7 +70,7 @@ export class Groups extends AbstractAPI {
         }).then((res) => {
             if (!res.errors)
                 dispatchGroupCreatedEvent({
-                    type: 'Member Removed',
+                    type: EVENT_TYPES.GROUP_CREATED,
                     success: res.success,
                     error: res.error,
                     data: {
@@ -107,5 +113,13 @@ export class Groups extends AbstractAPI {
         }
         const url = route('Groups.Get.Group', id);
         return this.get(url);
+    }
+
+    async getGroupsMinInfo() {
+        return this.get(route('Group.Minimal.Info'));
+    }
+
+    async getAllGroups() {
+        return this.get(route('Group.All'));
     }
 }

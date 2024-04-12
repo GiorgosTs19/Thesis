@@ -47,7 +47,7 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
     const [groupWorks, setGroupWorks] = useState(null);
     const { button, filters } = useWorkFilters({ authors: group.members });
     const handleFetchGroup = useCallback(() => {
-        if (!group) return;
+        if (!group || !group.members.length) return;
         return api.works.filterWorks(filters).then((res) => {
             setGroupWorks(res.data);
         });
@@ -315,16 +315,6 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
                         </div>
                     ) : (
                         <>
-                            {group.children.length > 0 && (
-                                <div className={'flex w-full flex-col border-b border-b-gray-200 px-2'}>
-                                    <div className={'mb-2 text-left text-xl font-bold'}>Sub-groups</div>
-                                    <div className={'flex gap-10'}>
-                                        {group.children.map((group) => (
-                                            <GroupItem key={group.id} group={group} className={'rounded-none px-2 py-1 underline'} onClick={() => setSelectedGroup(group.id)} isSelected={false} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                             {charts}
                             <div className={'flex min-h-96 flex-col gap-10 lg:flex-row'}>
                                 <Card className={`flex w-full`}>

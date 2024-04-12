@@ -1,6 +1,6 @@
 <?php /** @noinspection ALL */
 
-use App\Http\Controllers\{AuthorController, HomeController, SearchController, WorkController};
+use App\Http\Controllers\{AuthorController, GroupController, HomeController, SearchController, WorkController};
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,12 +36,14 @@ Route::prefix('search')->group(function () {
 
 // TODO Make sure only admins can access these routes ( when roles are implemented in THESIS-5 )
 Route::prefix('/groups')->group(function () {
-    Route::get('/', [\App\Http\Controllers\GroupController::class, 'show'])->name('Groups.Page');
-    Route::get('/{id}', [\App\Http\Controllers\GroupController::class, 'getGroup'])->name('Groups.Get.Group');
-    Route::post('/create', [\App\Http\Controllers\GroupController::class, 'create'])->name('Group.Create');
-    Route::post('/delete', [\App\Http\Controllers\GroupController::class, 'destroy'])->name('Group.Delete');
-    Route::post('/add/member', [\App\Http\Controllers\GroupController::class, 'addMember'])->name('Group.Add.Member');
-    Route::post('/remove/member', [\App\Http\Controllers\GroupController::class, 'removeMember'])->name('Group.Remove.Member');
+    Route::get('/', [GroupController::class, 'show'])->name('Groups.Page');
+    Route::get('/all', [GroupController::class, 'getAllGroups'])->name('Group.All');
+    Route::get('/{id}', [GroupController::class, 'getGroup'])->name('Groups.Get.Group');
+    Route::post('/create', [GroupController::class, 'create'])->name('Group.Create');
+    Route::post('/delete', [GroupController::class, 'destroy'])->name('Group.Delete');
+    Route::post('/add/member', [GroupController::class, 'addMember'])->name('Group.Add.Member');
+    Route::post('/remove/member', [GroupController::class, 'removeMember'])->name('Group.Remove.Member');
+    Route::get('/get/all/info', [GroupController::class, 'getGroupMinInfo'])->name('Group.Minimal.Info');
 });
 
 Route::prefix('works')->group(function () {

@@ -36,7 +36,7 @@ class Group extends Model {
     }
 
     public function childrenRecursive(): HasMany {
-        return $this->children()->with(['childrenRecursive', 'members']);
+        return $this->children()->with(['childrenRecursive']);
     }
 
     public function scopeNoParent($query) {

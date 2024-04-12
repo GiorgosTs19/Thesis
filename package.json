@@ -26,6 +26,7 @@
         "@heroicons/react": "^2.0.18",
         "@inertiajs/inertia-react": "^0.8.1",
         "@inertiajs/react": "^1.0.14",
+        "@mui/x-tree-view": "^7.1.1",
         "@uidotdev/usehooks": "^2.4.1",
         "chart.js": "^4.4.1",
         "clsx": "^2.1.0",

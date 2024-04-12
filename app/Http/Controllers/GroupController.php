@@ -13,6 +13,7 @@ use App\Models\Group;
 use App\Models\Type;
 use App\Models\Work;
 use App\Utility\Requests;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -20,9 +21,18 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class GroupController extends Controller {
-    private function getAllGroups(): AnonymousResourceCollection {
+    private function retrieveAllGroups(): AnonymousResourceCollection {
         return GroupResource::collection(Group::all());
     }
+
+    public function getGroupMinInfo(Request $request): Collection {
+        return Group::all(['id', 'name']);
+    }
+
+    public function getAllGroups(Request $request): AnonymousResourceCollection {
+        return GroupResource::collection(Group::noParent()->with(['childrenRecursive'])->get());
+    }
+
 
     /**
      *  Handles the request to show the groups page.
@@ -55,7 +65,7 @@ class GroupController extends Controller {
         }
 
         $success = !!$group;
-        
+
         $authors_ids = $group->members->map(function (Author $author) {
             return $author->id;
         });
