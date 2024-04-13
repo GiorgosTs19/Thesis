@@ -1,87 +1,75 @@
-import React from 'react'
-import ReactDOM from 'react-dom';
-import {arrayOf, bool, func, node, oneOfType, string} from "prop-types";
-import clsx from "clsx";
+import React from 'react';
+import { arrayOf, bool, func, node, number, oneOfType, string } from 'prop-types';
+import Drawer from '@mui/material/Drawer';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid/index.js';
+import { useClickAway } from '@uidotdev/usehooks';
 
-const OffCanvas = ({
-                       position, isOpen = false, onClose = () => {
-    }, children
-                   }) => {
-
-    const getPositionClasses = () => {
-        switch (position) {
-            case 'left':
-                return '-left-96 h-screen';
-            case 'right':
-                return '-right-96 h-screen';
-            case 'top':
-                return '-top-3/4 h-3/4';
-            case 'bottom':
-                return '-bottom-3/4 h-3/4';
-            default:
-                return '-right-full h-screen';
-        }
-    };
-
-    const getHiddenClasses = () => {
-        switch (position) {
-            case 'left':
-                return 'peer-checked:translate-x-full';
-            case 'right':
-                return 'peer-checked:-translate-x-full';
-            case 'top':
-                return 'peer-checked:translate-y-full -translate-y-3/4 w-full rounded-b-3xl';
-            case 'bottom':
-                return 'peer-checked:-translate-y-full translate-y-3/4 w-full rounded-t-3xl';
-            default:
-                return 'peer-checked:-translate-y-full';
-        }
-    };
-
-    const handleClose = () => {
+const OffCanvas = ({ isOpen, position, onClose = () => {}, children, width = 240, header = '' }) => {
+    const ref = useClickAway(() => {
         onClose();
-    }
+    });
 
-    if (!document.getElementById('off-canvas'))
-        return null;
+    if (!document.getElementById('off-canvas')) return null;
 
-    return ReactDOM.createPortal(
+    const handleDrawerClose = () => {
+        onClose();
+    };
+
+    const getBorderRadius = () => {
+        switch (position) {
+            case 'top':
+                return '0 0 25px 25px';
+            case 'bottom':
+                return '25px 25px 0 0';
+            case 'left':
+                return '0 10px 10px 0';
+            case 'right':
+                return '10px 0 0 10px';
+        }
+    };
+
+    return (
         <>
-            {/*Toggle visibility button*/}
-            <input className="peer hidden" type="checkbox" name="offcanvas" id="offcanvas" checked={isOpen} readOnly/>
-            {/*BackDrop*/}
-            {isOpen && (
-                <div
-                    className={styles.backDrop}
-                    onClick={handleClose} // Close off-canvas when backdrop is clicked
-                ></div>
-            )}
-            <div className='pointer-events-none fixed top-0 left-0 z-10 h-screen w-screen bg-gray-700/30 opacity-0 peer-checked:opacity-100 peer-checked:translate'></div>
-            {/*Off Canvas*/}
-            <div className={clsx(`${getPositionClasses()} ${getHiddenClasses()}`, styles.offCanvas)}>
-                <div className={styles.closeButton} onClick={handleClose}/>
-                <div className={styles.childrenWrapper}>
-                    {children}
+            <Drawer
+                ref={ref}
+                hideBackdrop={true}
+                sx={{
+                    width: position === 'bottom' ? '100%' : width,
+                    flexShrink: 0,
+                    '& .MuiDrawer-paper': {
+                        width: position === 'bottom' ? '100%' : width,
+                        boxSizing: 'border-box',
+                        maxHeight: position === 'bottom' || position === 'top' ? '75%' : '100%',
+                        borderRadius: getBorderRadius(),
+                        zIndex: 9999,
+                    },
+                }}
+                variant="temporary"
+                anchor={position}
+                open={isOpen}
+            >
+                <div className={'align-items-center flex justify-between p-2'}>
+                    <div className={'font-bold'}>{header}</div>
+                    <div onClick={handleDrawerClose}>{position === 'left' ? <ChevronLeftIcon /> : <ChevronRightIcon />}</div>
                 </div>
-            </div>
+                <div className={'mt-5 border-t border-t-gray-100'}>{children}</div>
+            </Drawer>
         </>
-        ,
-        document.getElementById('off-canvas')
-    )
-        ;
+    );
 };
 const styles = {
     backDrop: 'fixed top-0 left-0 z-20 w-full h-full bg-black opacity-50',
     closeButton: 'w-24 py-1 bg-gray-200 rounded-3xl mx-auto mt-5',
     childrenWrapper: 'my-auto flex w-full px-4 py-10 overflow-y-auto h-full',
-    offCanvas: 'fixed z-30 flex flex-col max-w-full bg-white shadow-lg duration-300 transition-all'
-
-}
+    offCanvas: 'fixed z-30 flex flex-col max-w-full bg-white shadow-lg duration-300 transition-all',
+};
 
 OffCanvas.propTypes = {
+    header: string,
     position: string.isRequired,
     onClose: func.isRequired,
     isOpen: bool.isRequired,
-    children: oneOfType([node, arrayOf(node)])
-}
+    children: oneOfType([node, arrayOf(node)]),
+    width: number,
+};
 export default OffCanvas;

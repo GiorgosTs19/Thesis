@@ -14,7 +14,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed $childrenRecursive
  */
 class GroupResource extends JsonResource {
-    public function __construct($resource, $additionalParameters = []) {
+    private mixed $additionalParameters;
+
+    public function __construct($resource, $additionalParameters = null) {
         parent::__construct($resource);
         $this->additionalParameters = $additionalParameters;
 

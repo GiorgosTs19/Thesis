@@ -3,6 +3,7 @@ import { Badge, Button, Label, Modal, Select, Textarea, TextInput } from 'flowbi
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 import { IoAdd } from 'react-icons/io5';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
+import { func } from 'prop-types';
 
 /**
  * NewGroupModal Component
@@ -13,7 +14,7 @@ import useAPI from '@/Hooks/useAPI/useAPI.js';
  * <NewGroupModal/>;
  * @returns The rendered NewGroupModal component.
  */
-const NewGroupModal = () => {
+const NewGroupModal = ({ onOpen }) => {
     const [openModal, setOpenModal] = useState(false);
     const [groupName, setGroupName] = useState('');
     const [groupDesc, setGroupDesc] = useState('');
@@ -30,6 +31,12 @@ const NewGroupModal = () => {
             });
         }
     }, [openModal]);
+
+    const handleOpenModal = () => {
+        setOpenModal(true);
+        onOpen();
+    };
+
     const handleAccept = () => {
         api.groups.createGroup(groupName, groupDesc, groupParent).then((response) => {
             if (response.ok) {
@@ -50,7 +57,7 @@ const NewGroupModal = () => {
 
     return (
         <>
-            <Badge key={'createNewGroup'} icon={IoAdd} onClick={() => setOpenModal(true)} color={'success'} className={styles.newGroupButton}>
+            <Badge key={'createNewGroup'} icon={IoAdd} onClick={handleOpenModal} color={'success'} className={styles.newGroupButton}>
                 Create Group
             </Badge>
             <Modal show={openModal} onClose={() => setOpenModal(false)} dismissible>
@@ -140,4 +147,7 @@ const styles = {
     section: 'max-w-full mb-4',
 };
 
+NewGroupModal.propTypes = {
+    onOpen: func.isRequired,
+};
 export default NewGroupModal;

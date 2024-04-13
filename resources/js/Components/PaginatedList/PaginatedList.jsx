@@ -65,31 +65,23 @@ const PaginatedList = ({
     return (
         <div className={clsx(`${rounded ? 'rounded-lg' : ''} flex h-full flex-col p-4`, className)}>
             <div className={'mb-3 flex justify-between'}>
-                <div
-                    className={clsx(` ${collapsable ? 'cursor-pointer' : ''}`, styles.title)}
-                    onClick={() => collapsable && setListCollapsed((prev) => !prev)}
-                >
+                <div className={clsx(` ${collapsable ? 'cursor-pointer' : ''}`, styles.title)} onClick={() => collapsable && setListCollapsed((prev) => !prev)}>
                     {title}
                     {collapsable && <span className={'ml-3 mt-1.5 flex'}>{listCollapsed ? <BsChevronRight /> : <BsChevronDown />}</span>}
                 </div>
                 {!listCollapsed && sortingOptions && (
                     <div className={'col-span-1 flex sm:mx-auto md:ml-auto md:mr-0'}>
-                        <DropDownMenu
-                            options={sortingOptions}
-                            renderLinks
-                            className={'relative ms-auto'}
-                            defaultOption={sortingOptions.find((option) => option.value === currentSortOption)}
-                        />
+                        <DropDownMenu options={sortingOptions} renderLinks className={'relative ms-auto'} defaultOption={sortingOptions.find((option) => option.value === currentSortOption)} />
                     </div>
                 )}
             </div>
             {!listCollapsed ? (
                 <>
                     {header && <div className={styles.header}>{header}</div>}
-                    {items.length ? (
+                    {items?.length ? (
                         <ul className={`flex h-full list-disc flex-col gap-${gap}`}>
-                            {items.length ? (
-                                items.map((item, index) => renderFn(item, index + (response.meta.from ?? 0)))
+                            {items?.length ? (
+                                items?.map((item, index) => renderFn(item, index + (response.meta.from ?? 0)))
                             ) : (
                                 <h4 className={'col-span-full m-auto text-center text-xl'}>{emptyListPlaceholder}</h4>
                             )}
@@ -97,7 +89,7 @@ const PaginatedList = ({
                     ) : (
                         <h4 className={'m-auto text-xl'}>{emptyListPlaceholder}</h4>
                     )}
-                    <Pagination response={response} className={'mx-auto mt-2 text-sm'} useInertia={useInertia} onLinkClick={onLinkClick} />
+                    {response.meta && <Pagination meta={response.meta} className={'mx-auto mt-2 text-sm'} useInertia={useInertia} onLinkClick={onLinkClick} />}
                 </>
             ) : (
                 <span className={'m-auto text-base text-gray-500 opacity-85'}>List Collapsed</span>
@@ -136,24 +128,24 @@ PaginatedList.propTypes = {
     response: shape({
         data: array.isRequired,
         links: shape({
-            first: string.isRequired,
-            last: string.isRequired,
+            first: string,
+            last: string,
             prev: string,
             next: string,
         }),
         meta: shape({
-            current_page: number.isRequired,
+            current_page: number,
             from: number,
-            last_page: number.isRequired,
-            per_page: number.isRequired,
-            path: string.isRequired,
+            last_page: number,
+            per_page: number,
+            path: string,
             to: number,
-            total: number.isRequired,
+            total: number,
             links: arrayOf(
                 shape({
                     url: string,
-                    label: string.isRequired,
-                    active: bool.isRequired,
+                    label: string,
+                    active: bool,
                 }),
             ),
         }),
@@ -161,14 +153,7 @@ PaginatedList.propTypes = {
     emptyListPlaceholder: string,
     gap: function (props, propName, componentName) {
         if (props.gap < 0 || props.gap > 10) {
-            return new Error(
-                'Invalid prop `' +
-                    propName +
-                    '` supplied to' +
-                    ' `' +
-                    componentName +
-                    '`. Validation failed. gap has to be a number between 0 and 10',
-            );
+            return new Error('Invalid prop `' + propName + '` supplied to' + ' `' + componentName + '`. Validation failed. gap has to be a number between 0 and 10');
         }
     },
 };

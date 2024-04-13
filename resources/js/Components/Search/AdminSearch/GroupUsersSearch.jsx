@@ -4,7 +4,7 @@ import { SearchSVG } from '@/SVGS/SearchSVG.jsx';
 import { Badge, Button, Modal, Spinner } from 'flowbite-react';
 import SearchResultsList from '@/Components/Search/SearchResults/SearchResultsList.jsx';
 import { Author } from '@/Models/Author/Author.js';
-import { object } from 'prop-types';
+import { bool, object } from 'prop-types';
 import useSearch from '@/Hooks/useSearch/useSearch.js';
 import { useClickAway } from '@uidotdev/usehooks';
 import { RiUserAddLine } from 'react-icons/ri';
@@ -15,13 +15,13 @@ import useAPI from '@/Hooks/useAPI/useAPI.js';
  * @component
  * A component for searching and adding authors to a group, with a modal interface.
  * @example
- * <GroupUsersSearch group={group} setGroups={setGroups} />;
+ * <GroupUsersSearch group={group}/>;
  *
  * @param {object} group - The group object to which authors will be added.
- * @param {Function} setGroups - The function to update the list of groups after adding authors.
+ * @param {boolean} noModal - Whether the component should be rendered inside a modal.
  * @returns The rendered GroupUsersSearch component.
  */
-const GroupUsersSearch = ({ group }) => {
+const GroupUsersSearch = ({ group, noModal }) => {
     const [openModal, setOpenModal] = useState(false);
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const authorsToAdd = selectedAuthors.map((author) => author.id);
@@ -39,7 +39,7 @@ const GroupUsersSearch = ({ group }) => {
     const [query, setQuery, { authors }, noResultsFound, loading] = useSearch({
         group: group.id,
         onlyUserAuthors: true,
-        bypassLengthRestriction: openModal,
+        bypassLengthRestriction: openModal || noModal,
         dependencies: [openModal, group.id],
     });
 
@@ -90,6 +90,80 @@ const GroupUsersSearch = ({ group }) => {
         setSelectedAuthors(authors);
     };
 
+    const searchBody = (
+        <div>
+            <ExtendedInput
+                onChange={handleQueryChange}
+                name={'Search'}
+                value={query}
+                placeholder={`Search authors to add to ${group.name}`}
+                inputClassName={styles.extendedInput}
+                containerClassName={'top-0 bg-white rounded-t-xl'}
+                type={'search'}
+                autoFocus
+                leadingElement={'children'}
+            >
+                <SearchSVG className={'bg-transparent'} />
+            </ExtendedInput>
+            <div className={styles.content}>
+                <div className={styles.selectedAuthorBadges}>
+                    {selectedAuthors.length ? (
+                        selectedAuthors.map((author) => (
+                            <Badge color="gray" key={author.id}>
+                                {author.name}
+                            </Badge>
+                        ))
+                    ) : (
+                        <div className={styles.noAuthorsSelected}>No authors selected</div>
+                    )}
+                </div>
+                <div className={styles.authorSearchTip}>Only showing registered authors who are not members of this group</div>
+                <div className={'mb-5 flex justify-center gap-5'}>
+                    <Button disabled={selectedAuthors.length === authors.length} onClick={handleSelectAll} size={'xs'} color={'gray'}>
+                        Select All
+                    </Button>
+                    <Button disabled={!selectedAuthors.length} onClick={handleClearSelections} size={'xs'} color={'gray'}>
+                        Clear Selections
+                    </Button>
+                </div>
+                {authorsToAdd.length > 0 && (
+                    <button
+                        className={styles.saveChangesIcon}
+                        onClick={() =>
+                            api.groups.addMembers(group, authorsToAdd).then(() => {
+                                setOpenModal(false);
+                            })
+                        }
+                    >
+                        Add {selectedAuthors.length} {selectedAuthors.length < 2 ? 'author' : 'authors'}
+                    </button>
+                )}
+                {loading && (
+                    <span className={'m-auto text-center'}>
+                        <Spinner aria-label="Loading" />
+                    </span>
+                )}
+                {authors.length > 0 && !loading && (
+                    <SearchResultsList
+                        listClassName={styles.searchResultList}
+                        data={authors}
+                        parser={Author.parseResponseAuthor}
+                        query={query}
+                        title={`Authors ( ${authors.length} )`}
+                        selectable
+                        onSelect={handleSelectAuthor}
+                        selected={isAuthorSelected}
+                    />
+                )}
+                {content}
+            </div>
+        </div>
+    );
+
+    if (noModal) {
+        return searchBody;
+    }
+
     return (
         <>
             <div className={styles.addIcon} onClick={() => setOpenModal(true)}>
@@ -108,62 +182,9 @@ const GroupUsersSearch = ({ group }) => {
                         autoFocus
                         leadingElement={'children'}
                     >
-                        <SearchSVG className={'bg-transparent'} />
+                        <SearchSVG className={'max-h-80 bg-transparent'} />
                     </ExtendedInput>
-                    <Modal.Body className={styles.modalBody}>
-                        <div className={styles.content}>
-                            <div className={styles.selectedAuthorBadges}>
-                                {selectedAuthors.length ? (
-                                    selectedAuthors.map((author) => (
-                                        <Badge color="gray" key={author.id}>
-                                            {author.name}
-                                        </Badge>
-                                    ))
-                                ) : (
-                                    <div className={styles.noAuthorsSelected}>No authors selected</div>
-                                )}
-                            </div>
-                            <div className={styles.authorSearchTip}>Only showing registered authors who are not members of this group</div>
-                            <div className={'mb-5 flex justify-center gap-5'}>
-                                <Button disabled={selectedAuthors.length === authors.length} onClick={handleSelectAll} size={'xs'} color={'gray'}>
-                                    Select All
-                                </Button>
-                                <Button disabled={!selectedAuthors.length} onClick={handleClearSelections} size={'xs'} color={'gray'}>
-                                    Clear Selections
-                                </Button>
-                            </div>
-                            {authorsToAdd.length > 0 && (
-                                <button
-                                    className={styles.saveChangesIcon}
-                                    onClick={() =>
-                                        api.groups.addMembers(group, authorsToAdd).then(() => {
-                                            setOpenModal(false);
-                                        })
-                                    }
-                                >
-                                    Add {selectedAuthors.length} {selectedAuthors.length < 2 ? 'author' : 'authors'}
-                                </button>
-                            )}
-                            {loading && (
-                                <span className={'m-auto text-center'}>
-                                    <Spinner aria-label="Loading" />
-                                </span>
-                            )}
-                            {authors.length > 0 && !loading && (
-                                <SearchResultsList
-                                    listClassName={styles.searchResultList}
-                                    data={authors}
-                                    parser={Author.parseResponseAuthor}
-                                    query={query}
-                                    title={`Authors ( ${authors.length} )`}
-                                    selectable
-                                    onSelect={handleSelectAuthor}
-                                    selected={isAuthorSelected}
-                                />
-                            )}
-                            {content}
-                        </div>
-                    </Modal.Body>
+                    <Modal.Body className={styles.modalBody}>{searchBody}</Modal.Body>
                 </div>
             </Modal>
         </>
@@ -179,11 +200,10 @@ const styles = {
     content: 'space-y-3 flex flex-col',
     belowMinChars: 'mx-auto text-sm text-red-400 opacity-75 mt-2',
     deleteIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
-    saveChangesIcon:
-        'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow  mx-auto cursor-pointer',
+    saveChangesIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow  mx-auto cursor-pointer',
     addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full ml-4 shadow cursor-pointer flex',
     modalBody: 'p-3 bg-white rounded-b-2xl',
-    searchResultList: 'max-h-96 overflow-y-auto',
+    searchResultList: 'max-h-[22rem] overflow-y-auto',
     selectedAuthorBadges: 'flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto',
     noAuthorsSelected: 'mx-auto mt-2 mb-4 opacity-90 text-gray-600',
     authorSearchTip: 'text-sm opacity-80 text-gray-700 text-center',
@@ -191,6 +211,7 @@ const styles = {
 
 GroupUsersSearch.propTypes = {
     group: object.isRequired,
+    noModal: bool,
 };
 
 export default GroupUsersSearch;

@@ -2,7 +2,6 @@ import React, { useEffect, useReducer, useState } from 'react';
 import { Button, Checkbox, Label, Modal, Select, TextInput } from 'flowbite-react';
 import { useClickAway } from '@uidotdev/usehooks';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
-import _ from 'lodash';
 
 const InitialState = {
     author_ids: [],
@@ -112,22 +111,19 @@ const useWorkFilters = ({ authors }) => {
         }
     };
 
-    const [filters, setFilters] = useState(InitialState);
-    const [newFilters, dispatch] = useReducer(reducer, filters, () => filters);
+    const [filters, dispatch] = useReducer(reducer, InitialState, () => ({
+        ...InitialState,
+        author_ids: authors.map((t) => t.id),
+    }));
+
     useEffect(() => {
-        setFiltersHaveChanged(!_.isEqual(filters, newFilters));
-    }, [newFilters, filters]);
+        dispatch({ type: ACTION_TYPES.SET_AUTHORS });
+    }, [authors]);
 
     const onClose = () => setOpenModal(false);
 
-    const handleClose = (accept) => {
-        if (!accept || !setFiltersHaveChanged) {
-            setFiltersHaveChanged(false);
-            return setOpenModal(false);
-        }
-        setFilters(newFilters);
+    const handleClose = () => {
         setOpenModal(false);
-        setFiltersHaveChanged(false);
     };
 
     const modalRef = useClickAway((e) => {
@@ -141,17 +137,17 @@ const useWorkFilters = ({ authors }) => {
     });
 
     const handleClearSelections = () => {
-        if (!newFilters.author_ids.length) return;
+        if (!filters.author_ids.length) return;
         return dispatch({ type: ACTION_TYPES.UNSET_AUTHORS });
     };
 
     const handleSelectAll = () => {
-        if (newFilters.author_ids.length === authors.length) return;
+        if (filters.author_ids.length === authors.length) return;
         return dispatch({ type: ACTION_TYPES.SET_AUTHORS });
     };
 
     const handleSelectAuthor = (id) => {
-        if (newFilters.author_ids.includes(id)) return dispatch({ type: ACTION_TYPES.REMOVE_AUTHOR, payload: id });
+        if (filters.author_ids.includes(id)) return dispatch({ type: ACTION_TYPES.REMOVE_AUTHOR, payload: id });
         return dispatch({ type: ACTION_TYPES.ADD_AUTHOR, payload: id });
     };
 
@@ -168,7 +164,7 @@ const useWorkFilters = ({ authors }) => {
     const handleSetNoneSources = () => dispatch({ type: ACTION_TYPES.UNSET_SOURCES });
 
     const handleSelectSource = (source) => {
-        if (newFilters.sources.includes(source)) {
+        if (filters.sources.includes(source)) {
             return dispatch({ type: ACTION_TYPES.REMOVE_SOURCE, payload: source });
         }
         return dispatch({ type: ACTION_TYPES.ADD_SOURCE, payload: source });
@@ -196,7 +192,7 @@ const useWorkFilters = ({ authors }) => {
                                 <div className="mb-2 block">
                                     <Label htmlFor="perPage" value="Per Page" />
                                 </div>
-                                <Select id="perPage" required onChange={handleSelectPerPage} value={newFilters.per_page ?? 10}>
+                                <Select id="perPage" required onChange={handleSelectPerPage} value={filters.per_page ?? 10}>
                                     <option value={10}>10</option>
                                     <option value={15}>15</option>
                                     <option value={20}>20</option>
@@ -207,7 +203,7 @@ const useWorkFilters = ({ authors }) => {
                                 <div className="mb-2 block">
                                     <Label htmlFor="sortBy" value="Sort By" />
                                 </div>
-                                <Select id="sortBy" required onChange={handleSelectSortBy} value={newFilters.sort_by ?? 'id'}>
+                                <Select id="sortBy" required onChange={handleSelectSortBy} value={filters.sort_by ?? 'id'}>
                                     <option value={'id'}>ID</option>
                                     <option value={'doi'}>DOI</option>
                                     <option value={'title'}>Title</option>
@@ -221,7 +217,7 @@ const useWorkFilters = ({ authors }) => {
                                 <div className="mb-2 block">
                                     <Label htmlFor="sortDirection" value="Sorting Direction" />
                                 </div>
-                                <Select id="sortDirection" required onChange={handleChangeSortDirection} value={newFilters.sort_direction ?? 'asc'}>
+                                <Select id="sortDirection" required onChange={handleChangeSortDirection} value={filters.sort_direction ?? 'asc'}>
                                     <option value={'asc'}>Ascending</option>
                                     <option value={'desc'}>Descending</option>
                                 </Select>
@@ -230,17 +226,17 @@ const useWorkFilters = ({ authors }) => {
                         <div className={'mb-4 mt-2 border-b border-b-gray-200 pb-3'}>
                             <div className={'mb-2 ml-3 flex gap-3 text-left'}>
                                 <div>Works from Source</div>
-                                <Button disabled={newFilters.sources.length === WORK_SOURCES.length} onClick={handleSetAllSources} size={'xs'} color={'gray'}>
+                                <Button disabled={filters.sources.length === WORK_SOURCES.length} onClick={handleSetAllSources} size={'xs'} color={'gray'}>
                                     All
                                 </Button>
-                                <Button disabled={!newFilters.sources.length} onClick={handleSetNoneSources} size={'xs'} color={'gray'}>
+                                <Button disabled={!filters.sources.length} onClick={handleSetNoneSources} size={'xs'} color={'gray'}>
                                     None
                                 </Button>
                             </div>
                             <div className={'flex'}>
                                 {WORK_SOURCES.map((source) => (
                                     <div className="mx-auto flex items-center gap-2" key={source.name}>
-                                        <Checkbox id={`Source${source.name}`} checked={newFilters.sources.includes(source.value)} onChange={() => handleSelectSource(source.value)} />
+                                        <Checkbox id={`Source${source.name}`} checked={filters.sources.includes(source.value)} onChange={() => handleSelectSource(source.value)} />
                                         <Label htmlFor={`Source${source.name}`} className="flex">
                                             {source.name}
                                         </Label>
@@ -251,17 +247,17 @@ const useWorkFilters = ({ authors }) => {
                         <div className={'flex flex-col border-b border-b-gray-300 p-1'}>
                             <div className={'mb-2 ml-3 flex gap-3 text-left'}>
                                 <div>Authors</div>
-                                <Button disabled={newFilters.author_ids.length === authors.length} onClick={handleSelectAll} size={'xs'} color={'gray'}>
+                                <Button disabled={filters.author_ids.length === authors.length} onClick={handleSelectAll} size={'xs'} color={'gray'}>
                                     All
                                 </Button>
-                                <Button disabled={!newFilters.author_ids.length} onClick={handleClearSelections} size={'xs'} color={'gray'}>
+                                <Button disabled={!filters.author_ids.length} onClick={handleClearSelections} size={'xs'} color={'gray'}>
                                     None
                                 </Button>
                             </div>
                             <div className={'grid-col-1 grid max-h-52 gap-3 overflow-y-auto p-3 md:grid-cols-2'}>
                                 {authors.map((author) => (
                                     <div className="col-span-2 flex items-center gap-2 md:col-span-1" key={author.id}>
-                                        <Checkbox id={`Author${author.id}`} checked={newFilters.author_ids.includes(author.id)} onChange={() => handleSelectAuthor(author.id)} />
+                                        <Checkbox id={`Author${author.id}`} checked={filters.author_ids.includes(author.id)} onChange={() => handleSelectAuthor(author.id)} />
                                         <Label htmlFor={`Author${author.id}`} className="flex">
                                             {author.name}
                                         </Label>
@@ -277,14 +273,14 @@ const useWorkFilters = ({ authors }) => {
                                         <div className="mb-2 block text-center">
                                             <Label htmlFor="fromYear" value="From" />
                                         </div>
-                                        <TextInput id={'fromYear'} onChange={handleChangeFromPubYear} value={newFilters.from_pub_year} placeholder={placeholders.minYear} />
+                                        <TextInput id={'fromYear'} onChange={handleChangeFromPubYear} value={filters.from_pub_year} placeholder={placeholders.minYear} />
                                     </div>
                                     <span className={'mt-9 text-xl'}>-</span>
                                     <div className={'flex-grow'}>
                                         <div className="mb-2 block text-center">
                                             <Label htmlFor="toYear" value="To" />
                                         </div>
-                                        <TextInput id={'toYear'} onChange={handleChangeToPubYear} value={newFilters.to_pub_year} placeholder={placeholders.maxYear} />
+                                        <TextInput id={'toYear'} onChange={handleChangeToPubYear} value={filters.to_pub_year} placeholder={placeholders.maxYear} />
                                     </div>
                                 </div>
                             </div>
@@ -295,14 +291,14 @@ const useWorkFilters = ({ authors }) => {
                                         <div className="mb-2 block text-center">
                                             <Label htmlFor="minCitations" value="Min" className={'text-center'} />
                                         </div>
-                                        <TextInput id={'minCitations'} onChange={handleChangeMinCitations} value={newFilters.min_citations} placeholder={placeholders.minCitations} />
+                                        <TextInput id={'minCitations'} onChange={handleChangeMinCitations} value={filters.min_citations} placeholder={placeholders.minCitations} />
                                     </div>
                                     <span className={'mt-9 text-xl'}>-</span>
                                     <div className={'flex-grow'}>
                                         <div className="mb-2 block text-center">
                                             <Label htmlFor="maxCitations" value="Max" className={'text-center'} />
                                         </div>
-                                        <TextInput id={'maxCitations'} onChange={handleChangeMaxCitations} value={newFilters.max_citations} placeholder={placeholders.maxCitations} />
+                                        <TextInput id={'maxCitations'} onChange={handleChangeMaxCitations} value={filters.max_citations} placeholder={placeholders.maxCitations} />
                                     </div>
                                 </div>
                             </div>

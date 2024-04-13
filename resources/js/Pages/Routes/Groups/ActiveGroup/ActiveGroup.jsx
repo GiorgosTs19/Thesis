@@ -1,29 +1,19 @@
-import { Button, Card, Spinner, Tabs } from 'flowbite-react';
 import RowOfProperties from '@/Components/RowOfProperties/RowOfProperties.jsx';
-import List from '@/Components/List/List.jsx';
-import { Author } from '@/Models/Author/Author.js';
-import GroupUsersSearch from '@/Components/Search/AdminSearch/GroupUsersSearch.jsx';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { arrayOf, func, number, object, shape, string } from 'prop-types';
 import { AuthorItem } from '@/Components/Assets/AuthorItem/AuthorItem.jsx';
 import UtilityModal from '@/Components/Modal/UtilityModal.jsx';
 import { AiOutlineDelete } from 'react-icons/ai';
-import { useWindowSize } from '@uidotdev/usehooks';
-import OffCanvas from '@/Components/OffCanvas/OffCanvas.jsx';
-import { HiUserCircle } from 'react-icons/hi';
-import { MdDashboard } from 'react-icons/md';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
 import SimpleDoughnutChart from '@/Charts/DoughnutChart/SimpleDoughnutChart.jsx';
 import Switch from '@/Components/Switch/Switch.jsx';
 import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart.jsx';
 import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
-import GroupItem from '@/Components/Assets/GroupItem/GroupItem.jsx';
-import { VscGroupByRefType } from 'react-icons/vsc';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
-import { renderWorkItem } from '@/Models/Work/Utils.jsx';
-import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
-import { Work } from '@/Models/Work/Work.js';
 import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
+import CompactGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/CompactGroupInfo/CompactGroupInfo.jsx';
+import ExpandedGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/ExpandedGroupInfo/ExpandedGroupInfo.jsx';
+import NewEmptyGroup from '@/Pages/Routes/Groups/ActiveGroup/NewEmptyGroup/NewEmptyGroup.jsx';
 
 const styles = {
     groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white my-1',
@@ -38,14 +28,11 @@ const styles = {
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
 };
-export const SelectedGroup = ({ group, setSelectedGroup }) => {
-    const { width } = useWindowSize();
-    const [canvasOpen, setCanvasOpen] = useState(false);
-    const tabsRef = useRef(0);
-    const [activeTab, setActiveTab] = useState(0);
+export const ActiveGroup = ({ group, setSelectedGroup }) => {
     const api = useAPI();
-    const [groupWorks, setGroupWorks] = useState(null);
+    const [groupWorks, setGroupWorks] = useState({ data: [] });
     const { button, filters } = useWorkFilters({ authors: group.members });
+    console.log('🚀 ~ ActiveGroup.jsx 35', filters);
     const handleFetchGroup = useCallback(() => {
         if (!group || !group.members.length) return;
         return api.works.filterWorks(filters).then((res) => {
@@ -89,7 +76,7 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
         () => [
             group.parent && { name: 'Parent Group', value: group.parent.name, onClick: () => setSelectedGroup(group.parent.id) },
             { name: 'Total Number of Authors', value: group?.members.length },
-            { name: 'Total Number of Works', value: groupWorks?.meta?.total },
+            { name: 'Total Number of Works', value: groupWorks?.meta?.total ?? 0 },
             {
                 name: 'Total Amount of Citations',
                 value: group?.members.reduce((accumulator, currentValue) => {
@@ -176,16 +163,6 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
 
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
 
-    const handleOpenOffCanvas = (tab) => {
-        setCanvasOpen(true);
-        tabsRef.current.setActiveTab(tab);
-    };
-
-    // Handles the closing of the off-canvas
-    const handleOnClose = () => {
-        setCanvasOpen(false);
-    };
-
     const charts = group.members.length !== 0 && (
         <>
             <div>
@@ -215,137 +192,52 @@ export const SelectedGroup = ({ group, setSelectedGroup }) => {
 
     const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
 
-    // const parsedCustomTypes = customTypes.map((t) => ({
-    //     name: t.name,
-    //     value: t.id,
-    //     url: '',
-    //     default: false,
-    // }));
-
     return (
-        <div className={`w-full px-8 py-5`}>
-            <UtilityModal
-                ref={deleteModalRef}
-                acceptText={'Delete'}
-                header={`Delete ${group.name}`}
-                message={`Are you sure you want to permanently delete ${group.name}?`}
-                declineText={'Cancel'}
-                buttonClassName={'cursor-pointer'}
-                onAccept={handleDelete}
-            ></UtilityModal>
-            <div className={'flex w-full justify-between gap-5'}>
-                <h5 className={styles.groupName}>{group.name}</h5>
-                <DropDownMenu dotsButton options={dropDownOptions} position={'right'} />
-            </div>
-            <p className={styles.groupDescription}>{group.description}</p>
-            <div className={'flex w-full'}>
-                <div className={'w-full'}>
-                    <div>
-                        <RowOfProperties properties={properties} />
+        <div className={`w-full px-8 py-5 ${group.members.length ? '' : 'flex'}`}>
+            {group.members.length ? (
+                <>
+                    <UtilityModal
+                        ref={deleteModalRef}
+                        acceptText={'Delete'}
+                        header={`Delete ${group.name}`}
+                        message={`Are you sure you want to permanently delete ${group.name}?`}
+                        declineText={'Cancel'}
+                        buttonClassName={'cursor-pointer'}
+                        onAccept={handleDelete}
+                    ></UtilityModal>
+                    <div className={'flex w-full justify-between gap-5'}>
+                        <h5 className={styles.groupName}>{group.name}</h5>
+                        <DropDownMenu dotsButton options={dropDownOptions} position={'right'} />
                     </div>
-                    {width <= 1100 ? (
-                        <div className={'flex flex-col gap-5'}>
-                            <Button.Group className={'w-full'}>
-                                <Button color="gray" onClick={() => handleOpenOffCanvas(0)} className={'flex-grow text-nowrap'}>
-                                    <HiUserCircle />
-                                    <span className={'mx-3'}>{`Members ${group.members.length ? ` ( ${group.members.length} )` : `( 0 )`}`}</span>
-                                </Button>
-                                <Button color="gray" onClick={() => handleOpenOffCanvas(1)} className={'flex-grow text-nowrap'} disabled={!groupWorks?.meta?.total}>
-                                    <MdDashboard />
-                                    <span className={'mx-3'}> {`Works ( ${groupWorks?.meta?.total} )`}</span>
-                                </Button>
-                            </Button.Group>
-                            <Button color="gray" onClick={() => handleOpenOffCanvas(2)} className={'flex-grow text-nowrap'} disabled={!group.members.length}>
-                                <VscGroupByRefType />
-                                <span className={'mx-3'}> {`Sub-Groups`}</span>
-                            </Button>
-                            {charts}
-                            <OffCanvas isOpen={canvasOpen} position={'bottom'} onClose={handleOnClose}>
-                                <Tabs style={'fullWidth'} className={'w-full'} ref={tabsRef} onActiveTabChange={(tab) => setActiveTab(tab)}>
-                                    <Tabs.Item title="Members" icon={HiUserCircle} disabled={activeTab === 0}>
-                                        <List
-                                            data={group.members}
-                                            renderFn={renderAuthorItem}
-                                            wrapperClassName={'w-full'}
-                                            vertical={width >= 1280}
-                                            title={`Group Members ${group.members.length ? ` ( ${group.members.length} )` : 0}`}
-                                            parser={Author.parseResponseAuthor}
-                                            emptyListPlaceholder={'This group has no members'}
-                                        >
-                                            <GroupUsersSearch group={group} />
-                                        </List>
-                                    </Tabs.Item>
-                                    <Tabs.Item title="Works" icon={MdDashboard} disabled={activeTab === 1}>
-                                        {button}
-                                        {!loading && groupWorks ? (
-                                            <PaginatedList
-                                                response={groupWorks}
-                                                renderFn={renderWorkItem}
-                                                emptyListPlaceholder={'This group has no works'}
-                                                parser={Work.parseResponseWork}
-                                                onLinkClick={handleLinkClick}
-                                                className={'mt-auto w-full'}
-                                                // sortingOptions={parsedCustomTypes}
-                                            >
-                                                <div className={styles.listTitle}>{`Group Works ( ${groupWorks?.meta?.total} )`}</div>
-                                            </PaginatedList>
-                                        ) : (
-                                            <div className={'m-auto'}>
-                                                <Spinner size="xl" />
-                                            </div>
-                                        )}
-                                    </Tabs.Item>
-                                    {group.children.length !== 0 && (
-                                        <Tabs.Item title="Sub-Groups" icon={VscGroupByRefType} disabled={activeTab === 2}>
-                                            <div className={'w-full'}>
-                                                {group.children.map((group) => (
-                                                    <GroupItem
-                                                        key={group.id}
-                                                        group={group}
-                                                        className={'mx-auto my-5 w-full text-center underline'}
-                                                        onClick={() => setSelectedGroup(group.id)}
-                                                        isSelected={false}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </Tabs.Item>
-                                    )}
-                                </Tabs>
-                            </OffCanvas>
-                        </div>
-                    ) : (
-                        <>
-                            {charts}
-                            <div className={'flex min-h-96 flex-col gap-10 lg:flex-row'}>
-                                <Card className={`flex w-full`}>
-                                    {button}
-                                    {!loading && groupWorks ? (
-                                        <PaginatedList
-                                            response={groupWorks}
-                                            renderFn={renderWorkItem}
-                                            parser={Work.parseResponseWork}
-                                            emptyListPlaceholder={'This group has no works'}
-                                            onLinkClick={handleLinkClick}
-                                            title={`Group Works ( ${groupWorks?.meta?.total} )`}
-                                            gap={6}
-                                            // sortingOptions={parsedCustomTypes}
-                                        ></PaginatedList>
-                                    ) : (
-                                        <div className={'m-auto'}>
-                                            <Spinner size="xl" />
-                                        </div>
-                                    )}
-                                </Card>
+                    <p className={styles.groupDescription}>{group.description}</p>
+                    <div className={'flex w-full'}>
+                        <div className={'w-full'}>
+                            <div>
+                                <RowOfProperties properties={properties} />
                             </div>
-                        </>
-                    )}
-                </div>
-            </div>
+                            <CompactGroupInfo
+                                setSelectedGroup={setSelectedGroup}
+                                group={group}
+                                groupWorks={groupWorks}
+                                button={button}
+                                charts={charts}
+                                handleLinkClick={handleLinkClick}
+                                loading={loading}
+                                styles={styles}
+                                visibleWidth={1100}
+                            />
+                            <ExpandedGroupInfo groupWorks={groupWorks} button={button} charts={charts} visibleWidth={1100} loading={loading} handleLinkClick={handleLinkClick} />
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <NewEmptyGroup group={group} />
+            )}
         </div>
     );
 };
 
-SelectedGroup.propTypes = {
+ActiveGroup.propTypes = {
     group: shape({
         name: string.isRequired,
         parent: object,

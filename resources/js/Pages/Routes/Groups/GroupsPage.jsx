@@ -2,12 +2,12 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Spinner } from 'flowbite-react';
 import { arrayOf, number, object, oneOfType, shape, string } from 'prop-types';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
-import { SelectedGroup } from '@/Pages/Routes/Groups/SelectedGroup.jsx';
+import { ActiveGroup } from '@/Pages/Routes/Groups/ActiveGroup/ActiveGroup.jsx';
 import { useScrollIntoView } from '@/Hooks/useScrollIntoView/useScrollIntoView.js';
 import { useGroupCreatedEventListener, useGroupDeletedEventListener, useGroupUpdatedEventListener } from '@/Events/GroupEvent/GroupEvent.js';
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
-import GroupsList from '@/Pages/Routes/Groups/GroupsList.jsx';
+import GroupsList from '@/Pages/Routes/Groups/GroupsList/GroupsList.jsx';
 
 /**
  * @component
@@ -85,7 +85,7 @@ const GroupsPage = () => {
                 </div>
             )}
             {!loading && !groupToShow && <h4 className={'m-auto text-center  text-2xl'}>Select a group to see more details</h4>}
-            {showCurrentGroup && <SelectedGroup group={groupToShow} setSelectedGroup={setSelectedGroup} />}
+            {showCurrentGroup && <ActiveGroup group={groupToShow} setSelectedGroup={setSelectedGroup} />}
         </div>
     );
 };
