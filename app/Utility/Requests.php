@@ -20,9 +20,9 @@ class Requests {
         $calls = ++self::$callCount;
 
         ULog::log("Times called : $calls,Requests.php, 21");
-        if (env('APP_ENV') === 'production')
+//        if (env('APP_ENV') === 'production')
             return Http::withHeaders($headers)->get($url);
-        return Http::withoutVerifying()->withHeaders($headers)->get($url);
+//        return Http::withoutVerifying()->withHeaders($headers)->get($url);
     }
 
     public static function success($message, $data = [], $code = 200): array {

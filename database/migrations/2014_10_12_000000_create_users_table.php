@@ -11,16 +11,18 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->primary();
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
-            $table->string('isAdmin')->default(false);
+            $table->string('display_name');
+            $table->string('is_admin')->default(false);
+            $table->string('is_staff')->default(true);
             $table->string(Ids::ORC_ID_ID)->nullable()->unique();
             $table->string(Ids::SCOPUS_ID)->nullable()->unique();
             $table->string(Ids::OPEN_ALEX_ID)->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password')->default('');
+            $table->foreignId('author_id')->unique()->constrained();
             $table->rememberToken();
             $table->timestamps();
         });

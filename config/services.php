@@ -30,5 +30,10 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
+    'iee' => [
+        'client_id' => env('CLIENT_ID'),
+        'redirect' => env('REDIRECT_URI'),
+        'client_secret' => env('CLIENT_SECRET'),
+        'response_type' => env('RESPONSE_TYPE')
+    ]
 ];

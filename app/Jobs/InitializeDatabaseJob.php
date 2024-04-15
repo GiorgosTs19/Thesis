@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Author;
 use App\Models\User;
+use App\Utility\AuthorUtils;
 use App\Utility\SystemManager;
 use App\Utility\ULog;
 use App\Utility\WorkUtils;
@@ -75,7 +76,7 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
 
             DB::transaction(function () {
                 WorkUtils::createTypes();
-                foreach ($this->professors as $professor) User::createProfUser($professor);
+                foreach ($this->professors as $professor) AuthorUtils::createProfessor($professor);
 
                 // Retrieve all the authors that are also users.
                 $user_authors = Author::user()->get();

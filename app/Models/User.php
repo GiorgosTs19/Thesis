@@ -21,17 +21,21 @@ use Laravel\Sanctum\HasApiTokens;
  * @property mixed first_name
  * @property mixed open_alex_id
  * @property mixed scopus_id
- * @property mixed email
+ * @property string display_name
+ * @property string email
  * @property mixed orc_id
- * @property mixed isAdmin
+ * @property mixed is_admin
+ * @property mixed is_staff
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)
  * @method static openAlex(string|null $open_alex_id)
  * @method static searchOpenAlex(mixed $query)
+ * @method static firstOrCreate(array $array, array $array1)
  */
 class User extends Authenticatable {
     use HasApiTokens, HasFactory, Notifiable;
 
+    const STAFF_AFFILIATION_NAME = 'staff';
     /**
      * The attributes that are mass assignable.
      *
@@ -40,11 +44,13 @@ class User extends Authenticatable {
     protected $fillable = [
         'first_name',
         'last_name',
+        'display_name',
         'email',
         'password',
         'orc_id',
         'scopus_id',
         'open_alex_id',
+        'author_id',
         'password'
     ];
 
@@ -70,7 +76,7 @@ class User extends Authenticatable {
     ];
 
     public function isAdmin(): bool {
-        return $this->isAdmin === 1;
+        return $this->is_admin === 1;
     }
 
     /**
@@ -87,76 +93,26 @@ class User extends Authenticatable {
     }
 
     /**
-     * @param array $professor
-     * The professor object to be used to retrieve info from the OpenAlex API.
-     * $professor #ArrayShape
-     * 'email' (string): The user's email address.
-     * 'first' (string): The user's first name.
-     * 'last' (string): The user's last name.
-     * 'id' (string): The user's ID.
-     * @return void
-     * Create a new user and save it to the database, using info from the OpenAlex API.
-     */
-    public static function createProfUser(array $professor): void {
-        $id = $professor['id'];
-        // Check what type of id is used to fetch the author's info from OpenAlex api.
-        $id_type = Ids::getIdType($id);
-
-        $author = match ($id_type) {
-            Ids::ORC_ID, Ids::OPEN_ALEX => OpenAlexAPI::authorRequest($id),
-            // Using a filter request since OpenAlex can only find Authors by scopus using filters.
-            Ids::SCOPUS => OpenAlexAPI::authorFilterRequest($id, false, true)
-        };
-
-        if (!$author)
-            return;
-
-        if ((is_array($author) && sizeof($author) === 0))
-            return;
-
-        if (is_array($author))
-            $author = $author[0];
-
-        // Parse the ids of the author
-        $orc_id = Ids::parseOrcIdFromObj($author);
-        $scopus_id = Ids::parseScopusIdFromObj($author);
-        $open_alex_id = Ids::parseOAIdFromObj($author);
-
-        // Add all the parsed ids in an array
-        $ids = [Ids::SCOPUS_ID => $scopus_id, Ids::ORC_ID_ID => $orc_id, Ids::OPEN_ALEX_ID => $open_alex_id];
-
-        // If a user with the same openAlex id exists. return;
-        if (self::openAlex($open_alex_id)->exists())
-            return;
-
-        // Else create a new user.
-        self::newProfessorUser($professor, $ids);
-
-        AuthorUtils::createOAAuthor($author, $ids, true);
-    }
-
-    /**
-     * @param $professor
-     * A professor associative array from the hard-coded professors in the seeder.
-     * @param array $ids 'An associative array containing the orc_id, scopus_id, open_alex_id'
+     * @param $authenticatedUser
+     * An associative array with the properties of the authenticated user.
      * @return User
-     * The newly created user.
+     * The newly created or existing user.
      */
-    private static function newProfessorUser($professor, array $ids): User {
-        $new_user = new User;
+    public static function findOrUpdate(array $authenticatedUser): User {
         try {
-            $new_user->first_name = $professor['first'];
-            $new_user->last_name = $professor['last'];
-            $new_user->email = $professor['email'];
-            $new_user->orc_id = $ids[Ids::ORC_ID_ID];
-            $new_user->scopus_id = $ids[Ids::SCOPUS_ID];
-            $new_user->open_alex_id = $ids[Ids::OPEN_ALEX_ID];
-            $new_user->save();
-            ULog::log("User $new_user->last_name $new_user->first_name has been created");
+        $user = User::firstOrCreate(['id' => $authenticatedUser['uid']],[
+           'first_name' => $authenticatedUser['cn'],
+            'last_name' => $authenticatedUser['sn'],
+            'email' => $authenticatedUser['mail'],
+            'display_name' => $authenticatedUser['displayName'],
+            'is_staff' => $authenticatedUser['eduPersonAffiliation'] === self::STAFF_AFFILIATION_NAME,
+        ]);
+        dump($user);
+            ULog::log("User $user->last_name $user->first_name has been created");
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
-        return $new_user;
+        return $user;
     }
 
     public function scopeOrcId($query, $id) {

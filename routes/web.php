@@ -1,6 +1,7 @@
 <?php /** @noinspection ALL */
 
-use App\Http\Controllers\{AuthorController, GroupController, HomeController, SearchController, WorkController};
+use App\Http\Controllers\{AuthorController, Controller, GroupController, HomeController, SearchController, WorkController};
+use App\Http\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -52,5 +53,10 @@ Route::prefix('works')->group(function () {
 });
 
 Route::prefix('test')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Controller::class, 'testOrcIdAuthorRequest']);
+    Route::get('/', [Controller::class, 'testOrcIdAuthorRequest']);
+});
+
+Route::prefix('/auth')->group(function () {
+   Route::get('sign-in/iee', [AuthController::class, 'iee'])->name('Auth.Login');
+   Route::get('sign-in/iee/redirect', [AuthController::class, 'ieeRedirect'])->name('Auth.Login.Redirect');
 });
