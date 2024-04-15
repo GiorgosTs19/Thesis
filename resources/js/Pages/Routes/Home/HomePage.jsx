@@ -3,7 +3,8 @@ import { array, arrayOf, number, shape, string } from 'prop-types';
 import Search from '@/Components/Search/Search.jsx';
 import HomeBanner from '@/Pages/Routes/Home/HomeBanner/HomeBanner.jsx';
 
-const HomePage = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks, worksByType }) => {
+const HomePage = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks, worksByType, user }) => {
+    console.log('🚀 ~ HomePage.jsx 7', user);
     return (
         <div className={styles.container}>
             <div className={styles.innerContainer}>
@@ -13,12 +14,7 @@ const HomePage = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks, work
                         <Search isHomeScreen />
                     </div>
                 </div>
-                <HomeBanner
-                    worksByType={worksByType}
-                    mostCitationsUsers={mostCitationsUsers}
-                    mostWorksUsers={mostWorksUsers}
-                    mostCitationsWorks={mostCitationsWorks}
-                />
+                <HomeBanner worksByType={worksByType} mostCitationsUsers={mostCitationsUsers} mostWorksUsers={mostWorksUsers} mostCitationsWorks={mostCitationsWorks} />
             </div>
         </div>
     );

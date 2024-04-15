@@ -63,7 +63,8 @@ class Author extends Model {
         'works_count',
         'created_date',
         'last_updated_at',
-        'works_url'
+        'works_url',
+        'user_id'
     ];
 
     protected $casts = [

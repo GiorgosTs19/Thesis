@@ -1,13 +1,15 @@
 <?php namespace App\Http\Auth;
 
-use App\Models\User;
+use App\Utility\Auth;
 use App\Utility\Requests;
-use App\Utility\ULog;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\ProviderInterface;
+use Laravel\Socialite\Two\User;
+
 //use Str;
 
-class IeeProvider extends AbstractProvider implements ProviderInterface  {
+class IeeProvider extends AbstractProvider implements ProviderInterface {
+    const STAFF_AFFILIATION_NAME = 'staff';
     /**
      * Login Iee Ihu API endpoint
      *
@@ -25,11 +27,10 @@ class IeeProvider extends AbstractProvider implements ProviderInterface  {
     /**
      * Get the authentication URL for the provider.
      *
-     * @param  string $state
+     * @param string $state
      * @return string
      */
-    protected function getAuthUrl($state)
-    {
+    protected function getAuthUrl($state) {
         return $this->buildAuthUrlFromBase('https://login.iee.ihu.gr/authorization', $state);
     }
 
@@ -38,36 +39,37 @@ class IeeProvider extends AbstractProvider implements ProviderInterface  {
      *
      * @return string
      */
-    protected function getTokenUrl()
-    {
+    protected function getTokenUrl() {
         return 'https://login.iee.ihu.gr/token';
     }
 
     /**
      * Get the raw user for the given access token.
      *
-     * @param  string $token
+     * @param string $token
      * @return array
      */
-    protected function getUserByToken($token) {
-
+    protected function getUserByToken($token): array {
         $userUrl = 'https://api.iee.ihu.gr/profile?access_token=' . $token;
-        $response = Requests::getResponseBody(Requests::get($userUrl));
-//        dd($response,1);
+        $user = Requests::getResponseBody(Requests::get($userUrl));
 
-//        $user = $response;
-
-//        return $response;
+        return Auth::resourceToArray($user);
     }
 
     /**
      * Map the raw user array to a Socialite User instance.
      *
      * @param array $user
-     * @return \Laravel\Socialite\Two\User|User
+     * @return User
      */
-    protected function mapUserToObject(array $user): \Laravel\Socialite\Two\User|User{
-        dump($user);
-        return User::findOrUpdate($user);
+    protected function mapUserToObject(array $user): User {
+        return (new User())->setRaw($user)->map([
+            'id' => $user['id'],
+            'first_name' => $user['first_name'],
+            'last_name' => $user['last_name'],
+            'email' => $user['email'],
+            'display_name' => $user['display_name'],
+            'is_staff' => $user['role'] === self::STAFF_AFFILIATION_NAME,
+        ]);
     }
 }

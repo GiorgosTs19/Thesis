@@ -8,6 +8,7 @@ use App\Models\Author;
 use App\Models\Work;
 use App\Utility\WorkUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\{Inertia, Response};
 
 class HomeController extends Controller {
@@ -20,6 +21,6 @@ class HomeController extends Controller {
         $authors_count = Author::count();
         $works_by_type = [['type' => 'Author', 'count' => $authors_count], ...$works_by_type];
         return Inertia::render('Routes/Home/HomePage', ['mostCitationsUsers' => $most_cites_users,
-            'mostWorksUsers' => $most_works_users, 'mostCitationsWorks' => $most_cites_works, 'worksByType' => $works_by_type]);
+            'mostWorksUsers' => $most_works_users, 'mostCitationsWorks' => $most_cites_works, 'worksByType' => $works_by_type, 'user' => Auth::user()]);
     }
 }

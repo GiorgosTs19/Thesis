@@ -22,7 +22,6 @@ return new class extends Migration {
             $table->string(Ids::SCOPUS_ID)->nullable()->unique();
             $table->string(Ids::OPEN_ALEX_ID)->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->foreignId('author_id')->unique()->constrained();
             $table->rememberToken();
             $table->timestamps();
         });

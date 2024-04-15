@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\OpenAlexAPI;
-use App\Utility\AuthorUtils;
 use App\Utility\Ids;
 use App\Utility\ULog;
 use Exception;
@@ -42,15 +40,14 @@ class User extends Authenticatable {
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'first_name',
         'last_name',
         'display_name',
         'email',
-        'password',
         'orc_id',
         'scopus_id',
         'open_alex_id',
-        'author_id',
         'password'
     ];
 
@@ -100,14 +97,13 @@ class User extends Authenticatable {
      */
     public static function findOrUpdate(array $authenticatedUser): User {
         try {
-        $user = User::firstOrCreate(['id' => $authenticatedUser['uid']],[
-           'first_name' => $authenticatedUser['cn'],
-            'last_name' => $authenticatedUser['sn'],
-            'email' => $authenticatedUser['mail'],
-            'display_name' => $authenticatedUser['displayName'],
-            'is_staff' => $authenticatedUser['eduPersonAffiliation'] === self::STAFF_AFFILIATION_NAME,
-        ]);
-        dump($user);
+            $user = User::firstOrCreate(['id' => $authenticatedUser['id']], [
+                'first_name' => $authenticatedUser['first_name'],
+                'last_name' => $authenticatedUser['last_name'],
+                'email' => $authenticatedUser['email'],
+                'display_name' => $authenticatedUser['display_name'],
+                'is_staff' => $authenticatedUser['is_staff'],
+            ]);
             ULog::log("User $user->last_name $user->first_name has been created");
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());

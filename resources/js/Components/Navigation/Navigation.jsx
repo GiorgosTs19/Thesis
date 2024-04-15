@@ -3,8 +3,10 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline/inde
 import React, { Fragment } from 'react';
 import Search from '@/Components/Search/Search.jsx';
 import clsx from 'clsx';
+import useAPI from '@/Hooks/useAPI/useAPI.js';
 
 export function Navigation() {
+    const api = useAPI();
     // const user = {
     //     name: 'Tom Cook',
     //     email: 'tom@example.com',
@@ -51,10 +53,7 @@ export function Navigation() {
                                                         key={item.name}
                                                         href={item.href}
                                                         aria-current={item.current ? 'page' : undefined}
-                                                        className={clsx(
-                                                            styles.groupItem,
-                                                            item.current ? styles.activeGroupItem : styles.inactiveGroupItem,
-                                                        )}
+                                                        className={clsx(styles.groupItem, item.current ? styles.activeGroupItem : styles.inactiveGroupItem)}
                                                     >
                                                         {item.name}
                                                     </a>
@@ -77,6 +76,7 @@ export function Navigation() {
                                 <div className="ml-4 flex items-center md:ml-6">
                                     <div className={'flex gap-5'}>
                                         {searchVisible && <Search />}
+                                        <a href={route('Auth.Login')}>Login</a>
                                         {/*<button type="button" className={styles.notificationsButton}>*/}
                                         {/*    <span className="absolute -inset-1.5"/>*/}
                                         {/*    <span className="sr-only">View notifications</span>*/}
@@ -113,11 +113,7 @@ export function Navigation() {
                                 <Disclosure.Button className={styles.disclosureButton}>
                                     <span className="absolute -inset-0.5" />
                                     <span className="sr-only">Open main menu</span>
-                                    {open ? (
-                                        <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                                    ) : (
-                                        <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                                    )}
+                                    {open ? <XMarkIcon className="block h-6 w-6" aria-hidden="true" /> : <Bars3Icon className="block h-6 w-6" aria-hidden="true" />}
                                 </Disclosure.Button>
                             </div>
                         </div>
@@ -176,10 +172,7 @@ const styles = {
         ' hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800',
     navigationWrapper: 'space-y-1 px-2 pb-3 pt-2 sm:px-3',
     notificationsButton:
-        'relative ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-black focus:outline-none ' +
-        'focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800',
-    menuItemsList:
-        'absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
-    menuButton:
-        'relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800',
+        'relative ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-black focus:outline-none ' + 'focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800',
+    menuItemsList: 'absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+    menuButton: 'relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800',
 };

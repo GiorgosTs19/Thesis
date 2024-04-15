@@ -24,6 +24,7 @@ return new class extends Migration {
             $table->dateTime('created_date')->nullable();
             $table->dateTime('last_updated_date')->nullable();
             $table->enum('source', ['OrcId', 'OpenAlex']);
+            $table->foreignId('user_id')->unique()->constrained()->nullOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }
