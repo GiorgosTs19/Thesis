@@ -4,18 +4,7 @@ import { Link } from '@inertiajs/inertia-react';
 import { TbDots } from 'react-icons/tb';
 import { useClickAway } from '@uidotdev/usehooks';
 
-const DropdownMenu = ({
-    options = [],
-    onSelect,
-    className,
-    label,
-    defaultOption = null,
-    renderLinks = false,
-    dotsButton = false,
-    smallDots = false,
-    verticalDots = false,
-    position = 'left',
-}) => {
+const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption = null, renderLinks = false, dotsButton = false, smallDots = false, verticalDots = false, position = 'left' }) => {
     const [selectedOption, setSelectedOption] = useState(defaultOption);
     const [menuOpen, setMenuOpen] = useState(false);
     const ref = useClickAway(() => {
@@ -62,15 +51,13 @@ const DropdownMenu = ({
             {label && <div className={'mb-2 text-lg'}>{label}</div>}
             <div>
                 {dotsButton ? (
-                    <div className={'pt-2'}>
-                        <TbDots
-                            className={`${verticalDots ? 'rotate-90' : ''} cursor-pointer rounded-full hover:bg-gray-300`}
-                            size={smallDots ? 15 : 30}
-                            onClick={() => {
-                                setMenuOpen((prev) => !prev);
-                            }}
-                        />
-                    </div>
+                    <TbDots
+                        className={`${verticalDots ? 'rotate-90' : ''} cursor-pointer rounded-full hover:bg-gray-300`}
+                        size={smallDots ? 15 : 30}
+                        onClick={() => {
+                            setMenuOpen((prev) => !prev);
+                        }}
+                    />
                 ) : (
                     <button
                         type="button"
@@ -81,26 +68,15 @@ const DropdownMenu = ({
                         aria-expanded="true"
                     >
                         {selectedOption ? selectedOption.name : 'Select an option'}
-                        <svg
-                            className="-mr-1 ml-2 h-5 w-5"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M10 12a1 1 0 0 1-.707-.293l-4-4a1 1 0 1 1 1.414-1.414L10 9.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-.707.293z"
-                            />
+                        <svg className="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 12a1 1 0 0 1-.707-.293l-4-4a1 1 0 1 1 1.414-1.414L10 9.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-.707.293z" />
                         </svg>
                     </button>
                 )}
             </div>
 
             {menuOpen && (
-                <div
-                    className={`absolute ${position === 'left' ? 'left-0' : 'right-0'} mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5`}
-                >
+                <div className={`absolute ${position === 'left' ? 'left-0' : 'right-0'} mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5`}>
                     <div className="flex flex-col py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                         {options.map((option, index) => renderDropDownItem(option, index))}
                     </div>

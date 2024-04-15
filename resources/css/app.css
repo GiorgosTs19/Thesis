@@ -18,6 +18,10 @@ input, select {
     z-index: 9999;
 }
 
+.Mui-selected {
+    background-color: #c7c7c7;
+}
+
 @media (min-width: 1024px) {
     /* Adjust the min-width as needed for your lg-sized screen and above */
     .toast {

@@ -10,20 +10,20 @@ import Switch from '@/Components/Switch/Switch.jsx';
 import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart.jsx';
 import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
-import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
 import CompactGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/CompactGroupInfo/CompactGroupInfo.jsx';
 import ExpandedGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/ExpandedGroupInfo/ExpandedGroupInfo.jsx';
 import NewEmptyGroup from '@/Pages/Routes/Groups/ActiveGroup/NewEmptyGroup/NewEmptyGroup.jsx';
+import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
 
 const styles = {
-    groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white my-1',
+    groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white ',
     badge: 'text-lg cursor-pointer w-fit px-3 py-1 rounded-lg mb-2',
     groupDescription: 'font-normal text-gray-700 dark:text-gray-400 pb-3 mt-2 mb-4',
     listTitle: 'md:text-lg 2xl:text-xl font-semibold text-yellow-800 w-fit flex',
     button: 'hover:scale-110 cursor-pointer',
     container: 'flex flex-col py-5 px-8',
     chartContainer: 'flex flex-col',
-    chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-4',
+    chartDescription: 'text-gray-500 opacity-75 italic mx-auto my-3 w-full lg:w-7/12',
     chart: 'md:px-4 mb-4 max-w-full',
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
@@ -31,12 +31,14 @@ const styles = {
 export const ActiveGroup = ({ group, setSelectedGroup }) => {
     const api = useAPI();
     const [groupWorks, setGroupWorks] = useState({ data: [] });
-    const { button, filters } = useWorkFilters({ authors: group.members });
-    console.log('🚀 ~ ActiveGroup.jsx 35', filters);
+    const { filters, filtersHaveChanged, dispatch } = useWorkFilters({ authors: group.members });
+    // Cache the total amount of works, so it doesn't change when we filter out works.
+    const totalWorksRef = useRef(null);
     const handleFetchGroup = useCallback(() => {
         if (!group || !group.members.length) return;
         return api.works.filterWorks(filters).then((res) => {
             setGroupWorks(res.data);
+            if (!totalWorksRef.current) totalWorksRef.current = res.data.meta.total;
         });
     }, [group, filters]);
 
@@ -75,17 +77,14 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
     const properties = useMemo(
         () => [
             group.parent && { name: 'Parent Group', value: group.parent.name, onClick: () => setSelectedGroup(group.parent.id) },
-            { name: 'Total Number of Authors', value: group?.members.length },
-            { name: 'Total Number of Works', value: groupWorks?.meta?.total ?? 0 },
+            { name: 'Number of Authors', value: group?.members.length },
+            { name: 'Total Number of Works', value: totalWorksRef.current ?? 0 },
             {
                 name: 'Total Amount of Citations',
                 value: group?.members.reduce((accumulator, currentValue) => {
                     return accumulator + currentValue.citation_count;
                 }, 0),
             },
-            { name: 'OpenAlex Works', value: group.uniqueWorksCount.OpenAlex },
-            { name: 'Crossref Works', value: group.uniqueWorksCount.Crossref },
-            { name: 'ORCID Works', value: group.uniqueWorksCount.ORCID },
         ],
         [group, groupWorks],
     );
@@ -162,6 +161,11 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
     );
 
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
+    const doughnutProperties = [
+        { name: 'OpenAlex Works', value: group.uniqueWorksCount.OpenAlex },
+        { name: 'Crossref Works', value: group.uniqueWorksCount.Crossref },
+        { name: 'ORCID Works', value: group.uniqueWorksCount.ORCID },
+    ];
 
     const charts = group.members.length !== 0 && (
         <>
@@ -181,9 +185,12 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
                     <div className={styles.chartDisclaimer}>{activeChart.disclaimer}</div>
                 </div>
             </div>
-            <div className={'mb-5 mt-10 flex flex-col gap-10 border-t border-t-gray-300 pt-5'}>
-                <SimpleDoughnutChart dataSet={DOUGHNUT_CHART_DATA.dataSet} labels={DOUGHNUT_CHART_DATA.labels} title={DOUGHNUT_CHART_DATA.title} className={'mx-auto max-h-60'} />
-                <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
+            <div className={'mb-5 mt-10 flex gap-10 border-t border-t-gray-300 pt-5'}>
+                <div className={'flex flex-col'}>
+                    <SimpleDoughnutChart dataSet={DOUGHNUT_CHART_DATA.dataSet} labels={DOUGHNUT_CHART_DATA.labels} title={DOUGHNUT_CHART_DATA.title} className={'mx-auto max-h-60'} />
+                    <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
+                </div>
+                <RowOfProperties properties={doughnutProperties} vertical />
             </div>
         </>
     );
@@ -193,7 +200,7 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
     const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
 
     return (
-        <div className={`w-full px-8 py-5 ${group.members.length ? '' : 'flex'}`}>
+        <div className={`w-full px-5 py-5 ${group.members.length ? '' : 'flex'}`}>
             {group.members.length ? (
                 <>
                     <UtilityModal
@@ -210,24 +217,37 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
                         <DropDownMenu dotsButton options={dropDownOptions} position={'right'} />
                     </div>
                     <p className={styles.groupDescription}>{group.description}</p>
-                    <div className={'flex w-full'}>
-                        <div className={'w-full'}>
-                            <div>
-                                <RowOfProperties properties={properties} />
-                            </div>
-                            <CompactGroupInfo
-                                setSelectedGroup={setSelectedGroup}
-                                group={group}
-                                groupWorks={groupWorks}
-                                button={button}
-                                charts={charts}
-                                handleLinkClick={handleLinkClick}
-                                loading={loading}
-                                styles={styles}
-                                visibleWidth={1100}
-                            />
-                            <ExpandedGroupInfo groupWorks={groupWorks} button={button} charts={charts} visibleWidth={1100} loading={loading} handleLinkClick={handleLinkClick} />
+                    <div className={'flex w-full flex-col'}>
+                        <div className={'mb-3'}>
+                            <RowOfProperties properties={properties} />
                         </div>
+                        <CompactGroupInfo
+                            setSelectedGroup={setSelectedGroup}
+                            group={group}
+                            groupWorks={groupWorks}
+                            charts={charts}
+                            handleLinkClick={handleLinkClick}
+                            loading={loading}
+                            styles={styles}
+                            visibleWidth={1100}
+                            dispatch={dispatch}
+                            filters={filters}
+                            filtersHaveChanged={filtersHaveChanged}
+                            members={group.members}
+                            renderAuthorItem={renderAuthorItem}
+                        />
+                        <ExpandedGroupInfo
+                            groupWorks={groupWorks}
+                            charts={charts}
+                            visibleWidth={1100}
+                            loading={loading}
+                            handleLinkClick={handleLinkClick}
+                            dispatch={dispatch}
+                            filters={filters}
+                            filtersHaveChanged={filtersHaveChanged}
+                            group={group}
+                            renderAuthorItem={renderAuthorItem}
+                        />
                     </div>
                 </>
             ) : (

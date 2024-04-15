@@ -141,7 +141,7 @@ export class Work {
             versions: versions ? versions.map((work) => Work.parseResponseWork(work)) : [],
             source,
             isAggregated: is_aggregated,
-            authorsString: authors_string,
+            authorsString: authors_string?.replace(/, (?=$)/, ''),
             authorsAsString: authors_as_string,
         });
     }

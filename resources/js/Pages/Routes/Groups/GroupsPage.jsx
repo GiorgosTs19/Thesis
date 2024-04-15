@@ -8,6 +8,7 @@ import { useGroupCreatedEventListener, useGroupDeletedEventListener, useGroupUpd
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
 import GroupsList from '@/Pages/Routes/Groups/GroupsList/GroupsList.jsx';
+import NewGroupModal from '@/Components/Modal/NewGroupModal.jsx';
 
 /**
  * @component
@@ -77,8 +78,11 @@ const GroupsPage = () => {
     const showCurrentGroup = !loading && !!groupToShow;
 
     return (
-        <div className={'flex min-h-[calc(100vh-4rem)] flex-col md:flex-row'}>
-            <GroupsList setSelectedGroup={setSelectedGroup} />
+        <div className={'flex min-h-[calc(100vh-4rem)] flex-col'}>
+            <div className={'flex w-full justify-between'}>
+                <GroupsList setSelectedGroup={setSelectedGroup} />
+                <NewGroupModal />
+            </div>
             {loading && (
                 <div className={'m-auto'}>
                     <Spinner size="xl" />

@@ -1,7 +1,7 @@
 import { Button, Modal } from 'flowbite-react';
 import List from '@/Components/List/List.jsx';
 import { Author } from '@/Models/Author/Author.js';
-import GroupUsersSearch from '@/Components/Search/AdminSearch/GroupUsersSearch.jsx';
+import AddGroupMembers from '@/Components/Search/AdminSearch/AddGroupMembers.jsx';
 import React, { useState } from 'react';
 import { renderAuthorItem } from '@/Models/Author/Utils.jsx';
 import { arrayOf, number, object, shape, string } from 'prop-types';
@@ -37,7 +37,7 @@ const GroupMembers = ({ group }) => {
                             parser={Author.parseResponseAuthor}
                             emptyListPlaceholder={'This group has no members'}
                         >
-                            <GroupUsersSearch group={group} />
+                            <AddGroupMembers group={group} />
                         </List>
                     </Modal.Body>
                 </div>

@@ -1,6 +1,6 @@
 import { Button, Card } from 'flowbite-react';
 import React, { useState } from 'react';
-import GroupUsersSearch from '@/Components/Search/AdminSearch/GroupUsersSearch.jsx';
+import AddGroupMembers from '@/Components/Search/AdminSearch/AddGroupMembers.jsx';
 import { object } from 'prop-types';
 import { FaArrowRightLong } from 'react-icons/fa6';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
@@ -15,7 +15,7 @@ const NewEmptyGroup = ({ group }) => {
             <AiOutlineUsergroupAdd className={'mx-auto my-2'} size={42} />
             {open ? (
                 <div className={''}>
-                    <GroupUsersSearch group={group} noModal />
+                    <AddGroupMembers group={group} noModal />
                 </div>
             ) : (
                 <Button color={'gray'} className={'m-auto'} onClick={() => setOpen(true)}>

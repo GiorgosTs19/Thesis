@@ -33,7 +33,7 @@ const styles = {
     worksListContainer: 'w-full flex flex-col',
     listTitle: '2xl:text-xl font-semibold mb-4 text-yellow-800',
     listText: 'mx-2 text-xs sm:text-sm text-gray-600 opacity-50',
-    biographyMissing: 'text-gray-700 opacity-75 italic m-auto text-center pb-5 sm:pb-0 text-lg xl:text-2xl border-b border-b-gray-400 sm:border-b-0',
+    biographyMissing: 'text-gray-700 opacity-75 italic m-auto text-center pb-5 sm:pb-0 text-lg xl:text-2xl border-b border-b-gray-400 sm:border-b-0 ',
     biographyWrapper: 'w-full mb-7 pr-7 xl:border-r xl:border-r-gray-300',
     biographyText: 'text-gray-500 flex-wrap whitespace-pre-wrap 2xl:text-lg cursor-pointer text-left',
     biographyTitle: 'my-3 text-yellow-800 2xl:text-lg',
@@ -47,6 +47,7 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
         INCOMPLETE: `${name} is not a registered user, thus their list of works and information might be incomplete and not always up to date.`,
         REGISTERED: `${name} is a registered user, their info and works are regularly updated.`,
     };
+
     const { width } = useWindowSize();
     const authorStatistics = authorObject.statistics;
     const yearsArray = authorStatistics
@@ -159,12 +160,9 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
                 </div>
             </div>
             <div className={'line mb-4 flex flex-col border-y border-y-gray-200 py-3 xl:flex-row'}>
-                <div className={`my-auto flex flex-col ${biographyPresent ? 'w-full xl:w-6/12' : ''}`}>
+                <div className={`my-auto flex flex-col xl:w-6/12 ${biographyPresent ? 'w-full ' : ''}`}>
                     {biographyPresent ? (
-                        <div
-                            className={clsx(styles.biographyWrapper, !showWholeBio ? styles.partialAbstract : '')}
-                            onClick={() => setShowWholeBio((prev) => !prev)}
-                        >
+                        <div className={clsx(styles.biographyWrapper, !showWholeBio ? styles.partialAbstract : '')} onClick={() => setShowWholeBio((prev) => !prev)}>
                             <div className={styles.biographyTitle}>
                                 Biography <span className={'text-left text-sm text-gray-400 opacity-80'}>( Source: OrcId )</span>
                             </div>
@@ -174,17 +172,12 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
                         <div className={styles.biographyMissing}>Biography for this author is not available</div>
                     )}
                 </div>
-                <div className={`my-auto flex w-full flex-col gap-3 px-5 xl:w-6/12`}>
+                <div className={`my-3 ml-auto flex w-full flex-col gap-3 px-5 xl:w-6/12`}>
                     <h4 className={styles.chartTitle}>Work Source Distribution</h4>
                     {width < 800 && <RowOfProperties properties={workSources} />}
                     <div className={'flex'}>
                         <div className={'w-full'}>
-                            <SimpleDoughnutChart
-                                dataSet={DOUGHNUT_CHART_DATA.dataSet}
-                                labels={DOUGHNUT_CHART_DATA.labels}
-                                title={DOUGHNUT_CHART_DATA.title}
-                                className={'mx-auto max-h-52'}
-                            />
+                            <SimpleDoughnutChart dataSet={DOUGHNUT_CHART_DATA.dataSet} labels={DOUGHNUT_CHART_DATA.labels} title={DOUGHNUT_CHART_DATA.title} className={'mx-auto max-h-52'} />
                             <div className={styles.chartDisclaimer}>{DOUGHNUT_CHART_DATA.disclaimer}</div>
                             <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
                         </div>

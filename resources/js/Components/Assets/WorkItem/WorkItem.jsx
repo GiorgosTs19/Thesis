@@ -38,6 +38,8 @@ export const PROPERTIES = {
 };
 
 export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, highlightUserAuthors }) => {
+    console.log('🚀 ~ WorkItem.jsx 41', hiddenProperties);
+    console.log('🚀 ~ WorkItem.jsx 41', work);
     const { doi, title, authors, type, isOA, publicationYear, referencedByCount, language, localUrl, versions } = work;
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [showAllAuthors, setShowAllAuthors] = useState(false);
@@ -48,20 +50,24 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
         setVersionsOpen(false);
     });
 
-    const authorElements = filteredAuthors.map((author, index) => {
-        return (
-            <React.Fragment key={index}>
-                {author.localUrl ? (
-                    <a href={author.localUrl} className={clsx(styles.authorElementLink, author.isUser && highlightUserAuthors ? 'font-bold' : '')}>
-                        {author.name}
-                    </a>
-                ) : (
-                    <span className={clsx(styles.authorElement, author.isUser && highlightUserAuthors ? 'font-bold' : '')}>{author.name}</span>
-                )}
-                {index < filteredAuthors.length - 1 && ', '}
-            </React.Fragment>
-        );
-    });
+    const authorElements = work.authorsAsString ? (
+        <div>{work.authorsString}</div>
+    ) : (
+        filteredAuthors.map((author, index) => {
+            return (
+                <React.Fragment key={index}>
+                    {author.localUrl ? (
+                        <a href={author.localUrl} className={clsx(styles.authorElementLink, author.isUser ? 'font-bold' : '')}>
+                            {author.name}
+                        </a>
+                    ) : (
+                        <span className={clsx(styles.authorElement, author.isUser && highlightUserAuthors ? 'font-bold' : '')}>{author.name}</span>
+                    )}
+                    {index < filteredAuthors.length - 1 && ', '}
+                </React.Fragment>
+            );
+        })
+    );
 
     const remainingAuthors = authors.length - MAX_VISIBLE_AUTHORS;
 
@@ -93,19 +99,19 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
         switch (work.source) {
             case SOURCES.OPENALEX:
                 return (
-                    <Tooltip content="All the information about this work version, was retrieved from Open Alex">
+                    <Tooltip content="All the information about this work version was retrieved from Open Alex">
                         <OpenAlexSVG className={'mx-2'} />
                     </Tooltip>
                 );
             case SOURCES.ORCID:
                 return (
-                    <Tooltip content="All the iInformation about this work version, was retrieved from ORCIDx">
+                    <Tooltip content="All the information about this work version was retrieved from ORCID">
                         <OrcidSVG className={'mx-2'} />
                     </Tooltip>
                 );
             case SOURCES.CROSSREF:
                 return (
-                    <Tooltip content="All the information about this work version, was retrieved from CROSSREF">
+                    <Tooltip content="All the information about this work version was retrieved from CROSSREF">
                         <DoiSVG className={'mx-2'} />
                     </Tooltip>
                 );
@@ -115,7 +121,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
     const [multipleSources, sources] = work.getSources();
     return (
         <li className={styles.li}>
-            <Modal show={versionsOpen} onClose={() => setVersionsOpen(false)} ref={modalRef}>
+            <Modal show={versionsOpen} onClose={() => setVersionsOpen(false)} ref={modalRef} style={{ zIndex: 9999 }}>
                 <Modal.Header>{title} Versions</Modal.Header>
                 <Modal.Body>
                     <div className={'mb-5 text-center text-gray-400 opacity-85'}>

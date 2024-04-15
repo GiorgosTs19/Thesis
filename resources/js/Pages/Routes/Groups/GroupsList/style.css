@@ -1,3 +1,15 @@
 .MuiTreeItem-groupTransition {
     border-left: 1px solid lightgray;
 }
+
+.MuiTreeItem-label {
+    word-wrap: break-word;
+}
+
+.MuiTreeItem-content {
+    padding: 4px 8px 4px 1px !important;
+}
+
+.MuiTreeItem-iconContainer {
+    width: 2em !important;
+}

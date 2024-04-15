@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\WorkFilterRequest;
 use App\Http\Resources\PaginatedWorkCollection;
 use App\Http\Resources\WorkResource;
+use App\Models\Type;
 use App\Models\Work;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -36,7 +37,7 @@ class WorkController extends Controller {
         $per_page = array_key_exists('per_page', $params) ? $params['per_page'] : 10;
         $authors_ids = array_key_exists('author_ids', $params) ? $params['author_ids'] : [];
         $sources = array_key_exists('sources', $params) && sizeof($params['sources']) ? $params['sources'] : [Work::$aggregateSource];
-        $type_filters = array_key_exists('type_filters', $params) ? $params['type_filters'] : [];
+        $type_filter = array_key_exists('type_filter', $params) ? $params['type_filter'] : null;
         $work_types = array_key_exists('work_types', $params) ? $params['work_types'] : [];
         $from_pub_year = array_key_exists('from_pub_year', $params) ? $params['from_pub_year'] : null;
         $to_pub_year = array_key_exists('to_pub_year', $params) ? $params['to_pub_year'] : null;
@@ -60,13 +61,19 @@ class WorkController extends Controller {
             });
 
         $works_query = $works_query->minCitations($min_citations)->maxCitations($max_citations)->fromPublicationYear($from_pub_year)
-            ->toPublicationYear($to_pub_year)->sources($sources)->types($work_types)->customTypes($type_filters)->order($sort_by, $sort_direction);
+            ->toPublicationYear($to_pub_year)->sources($sources)->types($work_types)->customType($type_filter)->order($sort_by, $sort_direction);
 
         return new PaginatedWorkCollection($works_query->paginate($per_page)->appends(request()->query()), $with_versions);
     }
 
     public function getMetadata(Request $request) {
+        $work_Types = array_map(function ($string) {
+            return ucwords(str_replace('-', ' ', $string));
+        }, Work::distinct()->pluck('type')->toArray());
+
         return ['minYear' => Work::min('publication_year'), 'maxYear' => Work::max('publication_year'),
-            'minCitations' => Work::min('is_referenced_by_count'), 'maxCitations' => Work::max('is_referenced_by_count')];
+            'minCitations' => Work::min('is_referenced_by_count'), 'maxCitations' => Work::max('is_referenced_by_count'),
+            'customTypes' => Type::all(['name', 'id']),
+            'workTypes' => $work_Types];
     }
 }

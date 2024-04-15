@@ -57,14 +57,18 @@ const WorkPage = ({ work, workVersions }) => {
             <div className="mb-4 flex flex-col gap-2">
                 <h3 className={styles.title}>{title}</h3>
                 <div className={'mx-auto text-center'}>
-                    {authors.map((author, index) => (
-                        <React.Fragment key={index}>
-                            <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser ? 'font-bold' : '')}>
-                                {author.name}
-                            </a>
-                            {index < authors.length - 1 && ', '}
-                        </React.Fragment>
-                    ))}
+                    {workObject.authorsAsString ? (
+                        <div>{workObject.authorsString.replace('/.$,/', '')}</div>
+                    ) : (
+                        authors.map((author, index) => (
+                            <React.Fragment key={index}>
+                                <a href={author.localUrl} className={clsx(styles.authorElement, author.isUser ? 'font-bold' : '')}>
+                                    {author.name}
+                                </a>
+                                {index < authors.length - 1 && ', '}
+                            </React.Fragment>
+                        ))
+                    )}
                 </div>
                 <div className={'flex flex-col'}>
                     <RowOfProperties properties={workObject.getProperties()} className={'my-auto'} />

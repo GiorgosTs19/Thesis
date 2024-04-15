@@ -41,6 +41,9 @@ use Illuminate\Support\Facades\Auth;
  * @method static find(int $int)
  * @method static doi(string|null $work_doi)
  * @method static source(string $source)
+ * @method static min(string $string)
+ * @method static max(string $string)
+ * @method static distinct()
  */
 class Work extends Model {
     use HasFactory;
@@ -286,10 +289,10 @@ class Work extends Model {
         return $query->whereIn('type', $types);
     }
 
-    public function scopeCustomTypes($query, $custom_types) {
-        if (!$custom_types || sizeof($custom_types) === 0)
+    public function scopeCustomType($query, $custom_type) {
+        if (!$custom_type)
             return $query;
-        return $query->whereIn('type_id', $custom_types);
+        return $query->where('type_id', $custom_type);
     }
 
     public function scopeOrder($query, $col, $direction) {

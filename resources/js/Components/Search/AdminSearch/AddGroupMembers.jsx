@@ -21,7 +21,7 @@ import useAPI from '@/Hooks/useAPI/useAPI.js';
  * @param {boolean} noModal - Whether the component should be rendered inside a modal.
  * @returns The rendered GroupUsersSearch component.
  */
-const GroupUsersSearch = ({ group, noModal }) => {
+const AddGroupMembers = ({ group, noModal }) => {
     const [openModal, setOpenModal] = useState(false);
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const authorsToAdd = selectedAuthors.map((author) => author.id);
@@ -78,7 +78,20 @@ const GroupUsersSearch = ({ group, noModal }) => {
 
     const isAuthorSelected = (author) => selectedAuthors.findIndex((item) => item.id === author.id) !== -1;
 
-    const content = noResultsFound && <h4 className={styles.noResults}>No results meet the specified criteria</h4>;
+    const content = () => {
+        let message = '';
+        switch (true) {
+            case noResultsFound:
+                message = 'No results meet the specified criteria';
+                break;
+            case query === '' && !authors.length:
+                message = 'No available authors to add to this group';
+                break;
+            default:
+                message = 'No available authors to add to this group';
+        }
+        return <h4 className={styles.noResults}>{message}</h4>;
+    };
 
     const handleClearSelections = () => {
         if (!selectedAuthors.length) return;
@@ -155,7 +168,7 @@ const GroupUsersSearch = ({ group, noModal }) => {
                         selected={isAuthorSelected}
                     />
                 )}
-                {content}
+                {content()}
             </div>
         </div>
     );
@@ -168,22 +181,10 @@ const GroupUsersSearch = ({ group, noModal }) => {
         <>
             <div className={styles.addIcon} onClick={() => setOpenModal(true)}>
                 <RiUserAddLine className={'m-auto text-lg'} />
+                <span className={'hidden md:block'}>Add Members</span>
             </div>
             <Modal show={openModal} onClose={handleSearchModalClose} dismissible position={'top-center'}>
                 <div ref={modalRef}>
-                    <ExtendedInput
-                        onChange={handleQueryChange}
-                        name={'Search'}
-                        value={query}
-                        placeholder={`Search authors to add to ${group.name}`}
-                        inputClassName={styles.extendedInput}
-                        containerClassName={'top-0 bg-white rounded-t-xl'}
-                        type={'search'}
-                        autoFocus
-                        leadingElement={'children'}
-                    >
-                        <SearchSVG className={'max-h-80 bg-transparent'} />
-                    </ExtendedInput>
                     <Modal.Body className={styles.modalBody}>{searchBody}</Modal.Body>
                 </div>
             </Modal>
@@ -201,7 +202,7 @@ const styles = {
     belowMinChars: 'mx-auto text-sm text-red-400 opacity-75 mt-2',
     deleteIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow ml-3 cursor-pointer',
     saveChangesIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full shadow  mx-auto cursor-pointer',
-    addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded-full ml-4 shadow cursor-pointer flex',
+    addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-1 px-4 border border-gray-400 rounded-full shadow cursor-pointer flex w-fit gap-3 mx-auto',
     modalBody: 'p-3 bg-white rounded-b-2xl',
     searchResultList: 'max-h-[22rem] overflow-y-auto',
     selectedAuthorBadges: 'flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto',
@@ -209,9 +210,9 @@ const styles = {
     authorSearchTip: 'text-sm opacity-80 text-gray-700 text-center',
 };
 
-GroupUsersSearch.propTypes = {
+AddGroupMembers.propTypes = {
     group: object.isRequired,
     noModal: bool,
 };
 
-export default GroupUsersSearch;
+export default AddGroupMembers;

@@ -37,7 +37,6 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
             work,
             index + 1,
             {
-                authors: true,
                 type: true,
                 oa: true,
                 language: true,

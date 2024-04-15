@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { arrayOf, bool, func, node, number, oneOfType, string } from 'prop-types';
 import Drawer from '@mui/material/Drawer';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid/index.js';
 import { useClickAway } from '@uidotdev/usehooks';
+import { AiOutlineClose } from 'react-icons/ai';
 
-const OffCanvas = ({ isOpen, position, onClose = () => {}, children, width = 240, header = '' }) => {
-    const ref = useClickAway(() => {
+const OffCanvas = forwardRef(function OffCanvas({ isOpen, position, onClose = () => {}, children, canvasWidth = 240, header = '', clickAwayClosable = false }, ref) {
+    const drawerRef = useClickAway(() => {
+        if (!clickAwayClosable) return;
         onClose();
     });
 
@@ -31,32 +32,34 @@ const OffCanvas = ({ isOpen, position, onClose = () => {}, children, width = 240
     return (
         <>
             <Drawer
-                ref={ref}
+                ref={drawerRef}
                 hideBackdrop={true}
                 sx={{
-                    width: position === 'bottom' ? '100%' : width,
+                    width: position === 'bottom' ? '100%' : canvasWidth,
                     flexShrink: 0,
                     '& .MuiDrawer-paper': {
-                        width: position === 'bottom' ? '100%' : width,
+                        width: position === 'bottom' ? '100%' : canvasWidth,
                         boxSizing: 'border-box',
                         maxHeight: position === 'bottom' || position === 'top' ? '75%' : '100%',
                         borderRadius: getBorderRadius(),
                         zIndex: 9999,
                     },
                 }}
-                variant="temporary"
+                variant={'temporary'}
                 anchor={position}
                 open={isOpen}
             >
-                <div className={'align-items-center flex justify-between p-2'}>
-                    <div className={'font-bold'}>{header}</div>
-                    <div onClick={handleDrawerClose}>{position === 'left' ? <ChevronLeftIcon /> : <ChevronRightIcon />}</div>
+                <div className={'align-items-center flex justify-between p-3'}>
+                    <div className={'my-auto font-bold'}>{header}</div>
+                    <AiOutlineClose size={32} className={'my-auto rotate-90 cursor-pointer'} onClick={handleDrawerClose} />
                 </div>
-                <div className={'mt-5 border-t border-t-gray-100'}>{children}</div>
+                <div className={'border-t border-t-gray-100 px-3'} ref={ref}>
+                    {children}
+                </div>
             </Drawer>
         </>
     );
-};
+});
 const styles = {
     backDrop: 'fixed top-0 left-0 z-20 w-full h-full bg-black opacity-50',
     closeButton: 'w-24 py-1 bg-gray-200 rounded-3xl mx-auto mt-5',
@@ -70,6 +73,7 @@ OffCanvas.propTypes = {
     onClose: func.isRequired,
     isOpen: bool.isRequired,
     children: oneOfType([node, arrayOf(node)]),
-    width: number,
+    canvasWidth: number,
+    clickAwayClosable: bool,
 };
 export default OffCanvas;
