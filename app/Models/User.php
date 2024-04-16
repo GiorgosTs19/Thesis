@@ -40,7 +40,7 @@ class User extends Authenticatable {
      * @var array<int, string>
      */
     protected $fillable = [
-        'id',
+        'external_id',
         'first_name',
         'last_name',
         'display_name',
@@ -97,7 +97,7 @@ class User extends Authenticatable {
      */
     public static function findOrUpdate(array $authenticatedUser): User {
         try {
-            $user = User::firstOrCreate(['id' => $authenticatedUser['id']], [
+            $user = User::firstOrCreate(['external_id' => $authenticatedUser['id']], [
                 'first_name' => $authenticatedUser['first_name'],
                 'last_name' => $authenticatedUser['last_name'],
                 'email' => $authenticatedUser['email'],
