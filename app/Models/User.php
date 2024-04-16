@@ -24,6 +24,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property mixed orc_id
  * @property mixed is_admin
  * @property mixed is_staff
+ * @property mixed external_id
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)
  * @method static openAlex(string|null $open_alex_id)
@@ -51,6 +52,8 @@ class User extends Authenticatable {
         'password'
     ];
 
+    protected $primaryKey = 'id';
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -69,7 +72,8 @@ class User extends Authenticatable {
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'isAdmin' => 'boolean'
+        'is_admin' => 'boolean',
+        'is_staff' => 'boolean'
     ];
 
     public function isAdmin(): bool {

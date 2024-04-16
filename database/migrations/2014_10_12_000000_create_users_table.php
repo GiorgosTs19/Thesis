@@ -11,11 +11,12 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::create('users', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->id()->primary();
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('display_name');
+            $table->string('external_id')->unique();
             $table->string('is_admin')->default(false);
             $table->string('is_staff')->default(true);
             $table->string(Ids::ORC_ID_ID)->nullable()->unique();

@@ -23,7 +23,8 @@ class AuthController extends Controller {
         return to_route('Home.Page');
     }
 
-    public function login(array $socialiteUser) {
+    public function login(array $socialiteUser):void {
+        $user = null;
         try {
             // Get user and then try to log in and sent notification
             $user = User::findOrUpdate($socialiteUser);
@@ -32,14 +33,6 @@ class AuthController extends Controller {
         } catch (BadResponseException $e) {
             // If an error occurs log user out and clear the session
             Auth::logout();
-            // Depending on the error code sent the appropriate message
-            if ($e->getCode() === 400) {
-                return response()->json('Invalid request', $e->getCode());
-            } else if ($e->getCode() === 401) {
-                return response()->json('Invalid credentials', 401);
-            }
-
-            return response()->json('Something went wrong on the server.', $e->getCode());
         }
     }
 }
