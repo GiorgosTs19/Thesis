@@ -8,14 +8,15 @@ use App\Models\Author;
 use App\Models\Work;
 use App\Utility\WorkUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Inertia\{Inertia, Response};
 
 class HomeController extends Controller {
 
     public function showHomePage(Request $request): Response {
-        $session_id = Session::all();
-//        dump($request->session());
+        dump(Auth::user());
+        dump(Auth::check());
         $most_cites_users = AuthorResource::collection(Author::mostCitations(5)->user()->get());
         $most_works_users = AuthorResource::collection(Author::mostWorks(5)->user()->get());
         $most_cites_works = new WorkCollection(Work::with('authors')->source(Work::$openAlexSource)->mostCitations(5));

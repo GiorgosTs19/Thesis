@@ -11,14 +11,14 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::create('users', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('display_name');
             $table->string('external_id')->unique();
-            $table->string('is_admin')->default(false);
-            $table->string('is_staff')->default(true);
+            $table->boolean('is_admin')->default(false);
+            $table->boolean('is_staff')->default(true);
             $table->string(Ids::ORC_ID_ID)->nullable()->unique();
             $table->string(Ids::SCOPUS_ID)->nullable()->unique();
             $table->string(Ids::OPEN_ALEX_ID)->nullable()->unique();
