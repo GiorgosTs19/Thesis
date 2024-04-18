@@ -51,6 +51,11 @@ Route::prefix('works')->group(function () {
     Route::get('/metadata', [WorkController::class, 'getMetadata'])->name('Works.Metadata');
 });
 
+Route::prefix('/auth')->group(function () {
+    Route::get('/iee', [\App\Http\Controllers\AuthenticationController::class, 'toIEELogin'])->name('Auth.Login');
+    Route::get('/sign-in/iee/redirect', [\App\Http\Controllers\AuthenticationController::class, 'handleIEECallback'])->name('Auth.Callback');
+});
+
 Route::prefix('test')->group(function () {
     Route::get('/', [\App\Http\Controllers\Controller::class, 'testOrcIdAuthorRequest']);
 });

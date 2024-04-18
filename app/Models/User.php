@@ -28,6 +28,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static where(string $string, $orc_id)
  * @method static openAlex(string|null $open_alex_id)
  * @method static searchOpenAlex(mixed $query)
+ * @method static firstOrCreate(array $array, array $array1)
  */
 class User extends Authenticatable {
     use HasApiTokens, HasFactory, Notifiable;
@@ -38,14 +39,14 @@ class User extends Authenticatable {
      * @var array<int, string>
      */
     protected $fillable = [
+        'external_id',
         'first_name',
         'last_name',
+        'display_name',
         'email',
-        'password',
         'orc_id',
         'scopus_id',
         'open_alex_id',
-        'password'
     ];
 
     /**
@@ -215,5 +216,27 @@ class User extends Authenticatable {
 
     public function groups(): BelongsToMany {
         return $this->belongsToMany(Group::class);
+    }
+
+    /**
+     * @param $authenticatedUser
+     * An associative array with the properties of the authenticated user.
+     * @return User
+     * The newly created or existing user.
+     */
+    public static function findOrUpdate(array $authenticatedUser): User {
+        $user = null;
+        try {
+            $user = User::firstOrCreate(['external_id' => $authenticatedUser['id']], [
+                'first_name' => $authenticatedUser['first_name'],
+                'last_name' => $authenticatedUser['last_name'],
+                'email' => $authenticatedUser['email'],
+                'display_name' => $authenticatedUser['display_name'],
+                'is_staff' => $authenticatedUser['is_staff'],
+            ]);
+        } catch (Exception $error) {
+            dump($error);
+        }
+        return $user;
     }
 }
