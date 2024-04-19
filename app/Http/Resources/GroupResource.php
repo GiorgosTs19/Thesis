@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property string $description
  * @property array|mixed $additionalParameters
  * @property mixed $childrenRecursive
+ * @property mixed $members_count
  */
 class GroupResource extends JsonResource {
     private mixed $additionalParameters;
@@ -33,6 +34,7 @@ class GroupResource extends JsonResource {
             'name' => $this->name,
             'description' => $this->description,
             'members' => AuthorResource::collection($this->whenLoaded('members')),
+            'numberOfMembers' => $this->whenCounted('members', $this->members_count),
             'parent' => new GroupResource($this->whenLoaded('parent')),
             'works' => new PaginatedWorkCollection($this->whenLoaded('works')),
             'children' => $this->whenLoaded('childrenRecursive', GroupResource::collection($this->childrenRecursive)),

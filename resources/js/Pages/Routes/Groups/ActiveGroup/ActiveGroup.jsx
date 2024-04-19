@@ -14,6 +14,8 @@ import CompactGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/CompactGroupInfo
 import ExpandedGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/ExpandedGroupInfo/ExpandedGroupInfo.jsx';
 import NewEmptyGroup from '@/Pages/Routes/Groups/ActiveGroup/NewEmptyGroup/NewEmptyGroup.jsx';
 import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
+import { Modal, Table, Tabs } from 'flowbite-react';
+import { useClickAway } from '@uidotdev/usehooks';
 
 const styles = {
     groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white ',
@@ -23,17 +25,22 @@ const styles = {
     button: 'hover:scale-110 cursor-pointer',
     container: 'flex flex-col py-5 px-8',
     chartContainer: 'flex flex-col',
-    chartDescription: 'text-gray-500 opacity-75 italic mx-auto my-3 w-full lg:w-7/12',
+    chartDescription: 'text-gray-500 opacity-75 italic mx-auto my-3 w-full lg:w-7/12 text-center',
     chart: 'md:px-4 mb-4 max-w-full',
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
 };
-export const ActiveGroup = ({ group, setSelectedGroup }) => {
+export const ActiveGroup = ({ groupObject, setSelectedGroup }) => {
+    const { group, countsPerAuthor, typeStatistics } = groupObject;
     const api = useAPI();
     const [groupWorks, setGroupWorks] = useState({ data: [] });
     const { filters, filtersHaveChanged, dispatch } = useWorkFilters({ authors: group.members });
     // Cache the total amount of works, so it doesn't change when we filter out works.
     const totalWorksRef = useRef(null);
+    const [statisticsModalOpen, setStatisticsModalOpen] = useState(false);
+    const statisticsModalRef = useClickAway(() => {
+        setStatisticsModalOpen(false);
+    });
     const handleFetchGroup = useCallback(() => {
         if (!group || !group.members.length) return;
         return api.works.filterWorks(filters).then((res) => {
@@ -85,8 +92,9 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
                     return accumulator + currentValue.citation_count;
                 }, 0),
             },
+            { name: 'Click for more Statistics', value: 'OMEA, Authors', onClick: () => handleOpenStatisticsModal() },
         ],
-        [group, groupWorks],
+        [groupObject, groupWorks],
     );
 
     const DOUGHNUT_CHART_DATA = {
@@ -169,7 +177,7 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
 
     const charts = group.members.length !== 0 && (
         <>
-            <div>
+            <div className={'my-5 gap-10 border-t border-t-gray-300 pt-5'}>
                 <Switch
                     checkedLabel={CHART_DATA.WORKS.title}
                     uncheckedLabel={CHART_DATA.CITATIONS.title}
@@ -186,7 +194,7 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
                 </div>
             </div>
             <div className={'mb-5 mt-10 flex gap-10 border-t border-t-gray-300 pt-5'}>
-                <div className={'flex flex-col'}>
+                <div className={'flex flex-grow flex-col'}>
                     <SimpleDoughnutChart dataSet={DOUGHNUT_CHART_DATA.dataSet} labels={DOUGHNUT_CHART_DATA.labels} title={DOUGHNUT_CHART_DATA.title} className={'mx-auto max-h-60'} />
                     <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
                 </div>
@@ -196,6 +204,8 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
     );
 
     const handleDelete = async () => api.groups.deleteGroup(group);
+    const handleOpenStatisticsModal = () => setStatisticsModalOpen(true);
+    const handleCloseStatisticsModal = () => setStatisticsModalOpen(false);
 
     const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
 
@@ -217,9 +227,58 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
                         <DropDownMenu dotsButton options={dropDownOptions} position={'right'} />
                     </div>
                     <p className={styles.groupDescription}>{group.description}</p>
+                    <Modal onClose={handleCloseStatisticsModal} show={statisticsModalOpen}>
+                        <Modal.Header>More Statistics</Modal.Header>
+                        <Modal.Body>
+                            <div ref={statisticsModalRef}>
+                                <Tabs style={'fullWidth'} className={'max-h-96'}>
+                                    <Tabs.Item active title="Works per Author">
+                                        <div className={'overflow-x-auto'}>
+                                            <Table>
+                                                <Table.Head>
+                                                    <Table.HeadCell>Author</Table.HeadCell>
+                                                    <Table.HeadCell>OpenAlex</Table.HeadCell>
+                                                    <Table.HeadCell>ORCID</Table.HeadCell>
+                                                    <Table.HeadCell>Crossref</Table.HeadCell>
+                                                </Table.Head>
+                                                <Table.Body>
+                                                    {countsPerAuthor.map((t) => (
+                                                        <Table.Row key={t.name}>
+                                                            <Table.Cell>{t.name}</Table.Cell>
+                                                            <Table.Cell className={'text-center'}>{t.counts.OpenAlex ?? '-'}</Table.Cell>
+                                                            <Table.Cell className={'text-center'}>{t.counts.ORCID ?? '-'}</Table.Cell>
+                                                            <Table.Cell className={'text-center'}>{t.counts.Crossref ?? '-'}</Table.Cell>
+                                                        </Table.Row>
+                                                    ))}
+                                                </Table.Body>
+                                            </Table>
+                                        </div>
+                                    </Tabs.Item>
+                                    <Tabs.Item active title="Works per OMEA Type">
+                                        <div className={'overflow-x-auto'}>
+                                            <Table>
+                                                <Table.Head>
+                                                    <Table.HeadCell>Type</Table.HeadCell>
+                                                    <Table.HeadCell>Count</Table.HeadCell>
+                                                </Table.Head>
+                                                <Table.Body>
+                                                    {Object.entries(typeStatistics).map(([type, count]) => (
+                                                        <Table.Row key={type}>
+                                                            <Table.Cell>{type}</Table.Cell>
+                                                            <Table.Cell className={'text-center'}>{count}</Table.Cell>
+                                                        </Table.Row>
+                                                    ))}
+                                                </Table.Body>
+                                            </Table>
+                                        </div>
+                                    </Tabs.Item>
+                                </Tabs>
+                            </div>
+                        </Modal.Body>
+                    </Modal>
                     <div className={'flex w-full flex-col'}>
-                        <div className={'mb-3'}>
-                            <RowOfProperties properties={properties} />
+                        <div className={'mb-3 flex justify-center'}>
+                            <RowOfProperties properties={properties} grow={false} />
                         </div>
                         <CompactGroupInfo
                             setSelectedGroup={setSelectedGroup}
@@ -258,13 +317,17 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
 };
 
 ActiveGroup.propTypes = {
-    group: shape({
-        name: string.isRequired,
-        parent: object,
-        description: string.isRequired,
-        members: arrayOf(object),
-        children: arrayOf(object),
-        uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref: number }),
+    groupObject: shape({
+        group: shape({
+            name: string.isRequired,
+            parent: object,
+            description: string.isRequired,
+            members: arrayOf(object),
+            children: arrayOf(object),
+            uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref: number }),
+        }),
+        countsPerAuthor: arrayOf(shape({ name: string, counts: shape({ OpenAlex: number, ORCID: number, Crossref: number }) })),
+        typeStatistics: object,
     }),
     setSelectedGroup: func.isRequired,
 };

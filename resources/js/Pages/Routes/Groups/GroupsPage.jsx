@@ -21,8 +21,7 @@ import NewGroupModal from '@/Components/Modal/NewGroupModal.jsx';
  * @returns The rendered GroupsPage component.
  */
 const GroupsPage = () => {
-    const [groupToShow, setGroupToShow] = useState(null);
-
+    const [groupObject, setGroupObject] = useState(null);
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [worksShouldRefresh, setWorksShouldRefresh] = useState(false);
     const activeGroupBadgeRef = useRef(null);
@@ -58,7 +57,7 @@ const GroupsPage = () => {
             showToast(e.data.action, e.data.toastType, e.success);
             setWorksShouldRefresh((prev) => !prev);
             // * Remove the group from the list of groups.
-            setGroupToShow(null);
+            setGroupObject(null);
         } else if (e.error) {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);
         }
@@ -68,14 +67,13 @@ const GroupsPage = () => {
     const handleFetchGroup = useCallback(() => {
         if (!selectedGroup) return;
         return api.groups.getGroup(selectedGroup).then((data) => {
-            setGroupToShow(data.data.group);
-            // setWorksPaginationInfo(data.data.works);
+            setGroupObject(data.data);
         });
     }, [selectedGroup]);
 
     const { loading } = useAsync(handleFetchGroup, !!selectedGroup, [worksShouldRefresh]);
 
-    const showCurrentGroup = !loading && !!groupToShow;
+    const showCurrentGroup = !loading && !!groupObject;
 
     return (
         <div className={'flex min-h-[calc(100vh-4rem)] flex-col'}>
@@ -88,8 +86,8 @@ const GroupsPage = () => {
                     <Spinner size="xl" />
                 </div>
             )}
-            {!loading && !groupToShow && <h4 className={'m-auto text-center  text-2xl'}>Select a group to see more details</h4>}
-            {showCurrentGroup && <ActiveGroup group={groupToShow} setSelectedGroup={setSelectedGroup} />}
+            {!loading && !groupObject && <h4 className={'m-auto text-center  text-2xl'}>Select a group to see more details</h4>}
+            {showCurrentGroup && <ActiveGroup groupObject={groupObject} setSelectedGroup={setSelectedGroup} />}
         </div>
     );
 };

@@ -120,13 +120,7 @@ const CompactGroupInfo = ({ visibleWidth = 1100, group, groupWorks, charts, load
                                 <Tabs.Item title="Sub-Groups" icon={VscGroupByRefType} disabled={activeTab === 2}>
                                     <div className={'w-full'}>
                                         {group.children.map((group) => (
-                                            <GroupItem
-                                                key={group.id}
-                                                group={group}
-                                                className={'mx-auto my-5 w-full text-center underline'}
-                                                onClick={() => setSelectedGroup(group.id)}
-                                                isSelected={false}
-                                            />
+                                            <GroupItem key={group.id} group={group} className={'mx-auto my-5 w-full'} onClick={() => setSelectedGroup(group.id)} isSelected={false} />
                                         ))}
                                     </div>
                                 </Tabs.Item>

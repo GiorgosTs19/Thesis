@@ -9,7 +9,7 @@ const styles = {
     title: 'text-xl lg:text-3xl mb-2 p-1 text-center',
     header: 'mb-2 p-1 text-left font-bold text-gray-700 flex gap-3',
     propertiesWrapper: 'flex flex-wrap gap-8 px-6 py-2',
-    propertyWrapper: 'mb-4 w-fit flex',
+    propertyWrapper: 'mb-4 w-fit flex flex-col',
     propertyValue: 'text-black border-l-2 border-l-blue-600 pl-3 font-bold text-sm',
     propertyName: 'text-gray-600 border-l-2 border-l-blue-600 pl-3 text-xs',
 };
@@ -39,18 +39,16 @@ const RowOfProperties = ({ properties, title, vertical = false, header, grow = t
                     return (
                         <div
                             key={property.name}
-                            className={clsx(styles.propertyWrapper, property.onClick ? 'cursor-pointer' : '', grow ? 'flex-grow' : '')}
+                            className={clsx(styles.propertyWrapper, property.onClick ? 'cursor-pointer hover:bg-gray-100 hover:underline' : '', grow ? 'flex-grow' : '')}
                             onClick={() => {
                                 property.onClick && property.onClick();
                             }}
                         >
-                            <div>
-                                <div className={'flex'}>
-                                    <p className={styles.propertyValue}>{property.value}</p>
-                                    <span className={'mx-4 my-auto'}>{getIcon(property.name)}</span>
-                                </div>
-                                <p className={styles.propertyName}>{property.name}</p>
+                            <div className={'flex'}>
+                                <p className={styles.propertyValue}>{property.value}</p>
+                                <span className={'mx-4 my-auto'}>{getIcon(property.name)}</span>
                             </div>
+                            <p className={styles.propertyName}>{property.name}</p>
                         </div>
                     );
                 })}

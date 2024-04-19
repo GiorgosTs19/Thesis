@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import clsx from 'clsx';
 
 const styles = {
-    badge: 'rounded-md hover:scale-110 transition-transform duration-200 cursor-pointer text-center py-2',
+    badge: 'cursor-pointer text-center py-2 hover:bg-gray-100 px-3 py-1 ',
     color: 'gray',
 };
 
@@ -24,13 +24,9 @@ const styles = {
 const GroupItem = forwardRef(({ group, onClick, isSelected, className }, ref) => {
     return (
         <>
-            <div
-                key={group.id}
-                onClick={onClick}
-                className={clsx(styles.badge, className ?? 'w-full', isSelected ? 'text-sky-400' : 'text-accent')}
-                ref={isSelected ? ref : null}
-            >
-                {group.name}
+            <div key={group.id} onClick={onClick} className={clsx(styles.badge, className ?? 'w-full', isSelected ? 'text-sky-400' : 'text-accent')} ref={isSelected ? ref : null}>
+                <div className={'text-left text-lg'}>{group.name}</div>
+                <div className={'text-left text-sm text-gray-400'}>{group.description}</div>
             </div>
         </>
     );

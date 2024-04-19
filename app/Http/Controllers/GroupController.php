@@ -58,7 +58,7 @@ class GroupController extends Controller {
             return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
         }
 
-        $group = Group::with('members', 'parent', 'members.statistics')->find($id);
+        $group = Group::with('members', 'parent', 'members.statistics')->withCount('members')->find($id);
 
         if (!$group) {
             return response()->json(Requests::clientError('A group with this id does not exist', 200));
@@ -82,12 +82,30 @@ class GroupController extends Controller {
             $query->whereIn('author_id', $authors_ids);
         })->source(Work::$crossRefSource)->count();
 
+        $type_counts = Type::withCount(['works' => function ($query) use ($authors_ids) {
+            // Add further constraints to the works query
+            $query->whereHas('authors', function ($query) use ($authors_ids) {
+                $query->whereIn('author_id', $authors_ids);
+            })->where('source', Work::$aggregateSource);
+        }])->pluck('works_count', 'name')->toArray();
+
+        $source_author_counts = $group->members->map(function (Author $author) {
+            return ['name' => $author->display_name, 'counts' => Work::whereHas('authors', function ($query) use ($author) {
+                $query->whereIn('author_id', [$author->id]);
+            })->whereNotIn('source', [Work::$aggregateSource])
+                ->selectRaw('source, COUNT(*) as source_count')
+                ->groupBy('source')
+                ->pluck('source_count', 'source')
+                ->toArray()];
+        });
+
         return $success ? response()->json(Requests::success('Group retrieved successfully',
             ['group' => new GroupResource($group, [
                 'orcid_works' => $orc_id_works,
                 'open_alex_works' => $open_alex_works,
                 'crossref_works' => $crossref_works
-            ])]))
+            ]), 'typeStatistics' => $type_counts,
+                'countsPerAuthor' => $source_author_counts]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 
