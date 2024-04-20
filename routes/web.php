@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
 Route::get('/', [HomeController::class, 'showHomePage'])->name('Home.Page');
 Route::get('/author/{id}', [AuthorController::class, 'showAuthorPage'])->name('Author.Page');
 Route::get('/work/{id}', [WorkController::class, 'showWorkPage'])->name('Work.Page');
@@ -49,6 +48,16 @@ Route::prefix('/groups')->group(function () {
 Route::prefix('works')->group(function () {
     Route::get('/filter', [WorkController::class, 'filterWorks'])->name('Works.Filter');
     Route::get('/metadata', [WorkController::class, 'getMetadata'])->name('Works.Metadata');
+});
+
+Route::prefix('/auth')->group(function () {
+    Route::get('/iee', [\App\Http\Controllers\AuthenticationController::class, 'toIEELogin'])->name('Auth.Login');
+    Route::get('/sign-in/iee/redirect', [\App\Http\Controllers\AuthenticationController::class, 'handleIEECallback'])->name('Auth.Callback');
+    Route::get('/check', [\App\Http\Controllers\AuthenticationController::class, 'check'])->name('Auth.Check');
+});
+
+Route::prefix('/success')->group(function () {
+    Route::get('/authenticated', [\App\Http\Controllers\AuthenticationController::class, 'success'])->name('Success.Authentication');
 });
 
 Route::prefix('test')->group(function () {

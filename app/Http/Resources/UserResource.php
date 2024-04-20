@@ -15,6 +15,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed last_name
  * @property mixed first_name
  * @property mixed $id
+ * @property mixed $is_admin
+ * @property mixed $is_staff
+ * @property mixed $display_name
  */
 class UserResource extends JsonResource {
     /**
@@ -23,17 +26,15 @@ class UserResource extends JsonResource {
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array {
-        // TODO: Add isAdmin ( when roles are implemented in THESIS-5 ), localUrl ( when the user page is implemented in THESIS-6 )
         return [
             'id' => $this->id,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
+            'displayName' => $this->display_name,
+            'admin' => $this->is_admin,
+            'staff' => $this->is_staff,
             'email' => $this->email,
-            'orc_id' => $this->orc_id,
-            'scopus_id' => $this->scopus_id,
-            'open_alex_id' => $this->open_alex_id,
-            'updated_at' => $this->updated_at,
-            'created_at' => $this->created_at
+            'orcId' => $this->orc_id,
+            'scopus' => $this->scopus_id,
+            'openAlex' => $this->open_alex_id,
         ];
     }
 }
