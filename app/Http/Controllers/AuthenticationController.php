@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -23,15 +26,15 @@ class AuthenticationController extends Controller {
     }
 
     public function success(Request $request) {
-        return Inertia::render('Routes/SuccessfulLogin/SuccessfulLogin', ['authenticatedUser' => Auth::user()]);
+        return Inertia::render('Routes/SuccessfulLogin/SuccessfulLogin', ['authenticatedUser' => new UserResource(Auth::user())]);
     }
 
     public function logout(Request $request): RedirectResponse {
         Auth::logout();
-        return to_route('Home.Page')->withCookie(cookie()->forget('user'));
+        return to_route('Home.Page');
     }
 
-    public function check(Request $request) {
-        return response(['check' => Auth::check(), 'user' => Auth::user()]);
+    public function check(Request $request): \Illuminate\Foundation\Application|Response|Application|ResponseFactory {
+        return response(['check' => Auth::check(), 'user' => new UserResource(Auth::user())]);
     }
 }

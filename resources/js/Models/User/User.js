@@ -14,56 +14,40 @@
 const className = 'User';
 
 export class User {
-    constructor({
-                    firstName,
-                    lastName,
-                    isAdmin = false,
-                    openAlexId,
-                    scopusId,
-                    orcId,
-                    email,
-                    updatedAt,
-                    id,
-                    localUrl
-                }) {
+    constructor({ displayName, admin = false, openAlex, scopus, orcId, email, staff, id, localUrl }) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.isAdmin = isAdmin;
-        this.openAlexId = openAlexId;
-        this.scopusId = scopusId;
+        this.displayName = displayName;
+        this.isAdmin = admin;
+        this.openAlex = openAlex;
+        this.scopus = scopus;
         this.orcId = orcId;
         this.email = email;
-        this.updatedAt = updatedAt;
+        this.isStaff = staff;
         this.className = className;
         this.localUrl = localUrl;
     }
 
     // TODO: Remove local_url empty string initialization ( when the user page is implemented in THESIS-6 )
-    static parseResponseAuthor({
-                                   first_name, last_name, is_admin, email, open_alex_id,
-                                   scopus_id, orc_id, updated_at, id, local_url = ''
-                               }) {
+    static parseUserResponse({ displayName, admin, email, openAlex, scopus, orcId, staff, id, local_url = '' }) {
         return new User({
             id,
             email,
-            firstName: first_name,
-            lastName: last_name,
-            openAlexId: open_alex_id,
-            scopusId: scopus_id,
-            orcId: orc_id,
-            isAdmin: is_admin,
-            updatedAt: updated_at,
-            localUrl: local_url
+            displayName,
+            openAlex,
+            scopus,
+            orcId,
+            isAdmin: admin,
+            isStaff: staff,
+            localUrl: local_url,
         });
     }
 
     getProperties() {
         return [
-            {name: 'Email', value: this.email},
-            {name: 'Open Alex', value: this.openAlexId ?? '-'},
-            {name: 'Scopus', value: this.scopusId ?? '-'},
-            {name: 'OrcId', value: this.orcId ?? '-'}
+            { name: 'Email', value: this.email },
+            { name: 'Open Alex', value: this.openAlex ?? '-' },
+            { name: 'Scopus', value: this.scopus ?? '-' },
+            { name: 'OrcId', value: this.orcId ?? '-' },
         ];
     }
 }

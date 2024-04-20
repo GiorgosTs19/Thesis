@@ -2,20 +2,23 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { object } from 'prop-types';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
+import { User } from '@/Models/User/User.js';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [pendingCheck, setPendingCheck] = useState(true);
 
     const api = useAPI();
 
     useEffect(() => {
         api.auth.check().then(({ check, user }) => {
+            setPendingCheck(false);
             setIsLoggedIn(check);
             if (!check) return;
-            setUser(user);
+            setUser(User.parseUserResponse(user));
         });
     }, []);
 
@@ -29,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    return <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ pendingCheck, isLoggedIn, user, login, logout }}>{children}</AuthContext.Provider>;
 };
 
 AuthProvider.propTypes = {
