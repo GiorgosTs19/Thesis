@@ -38,8 +38,6 @@ export const PROPERTIES = {
 };
 
 export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, highlightUserAuthors }) => {
-    console.log('🚀 ~ WorkItem.jsx 41', hiddenProperties);
-    console.log('🚀 ~ WorkItem.jsx 41', work);
     const { doi, title, authors, type, isOA, publicationYear, referencedByCount, language, localUrl, versions } = work;
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [showAllAuthors, setShowAllAuthors] = useState(false);

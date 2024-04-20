@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthenticationController extends Controller {
@@ -16,8 +17,21 @@ class AuthenticationController extends Controller {
     }
 
     public function handleIEECallback(): \Illuminate\Foundation\Application|Redirector|RedirectResponse|Application {
-        Auth::login(User::findOrUpdate(Socialite::driver('iee')->user()->attributes));
-        Session::save();
-        return redirect(route('Home.Page'))->with(['user' => 'rtrw']);
+        $user = User::findOrUpdate(Socialite::driver('iee')->user()->attributes);
+        Auth::login($user, true);
+        return redirect(route('Success.Authentication'));
+    }
+
+    public function success(Request $request) {
+        return Inertia::render('Routes/SuccessfulLogin/SuccessfulLogin', ['authenticatedUser' => Auth::user()]);
+    }
+
+    public function logout(Request $request): RedirectResponse {
+        Auth::logout();
+        return to_route('Home.Page')->withCookie(cookie()->forget('user'));
+    }
+
+    public function check(Request $request) {
+        return response(['check' => Auth::check(), 'user' => Auth::user()]);
     }
 }

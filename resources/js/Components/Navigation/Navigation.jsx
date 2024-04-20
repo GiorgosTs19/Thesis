@@ -3,14 +3,10 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline/inde
 import React, { Fragment } from 'react';
 import Search from '@/Components/Search/Search.jsx';
 import clsx from 'clsx';
+import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 
 export function Navigation() {
-    // const user = {
-    //     name: 'Tom Cook',
-    //     email: 'tom@example.com',
-    //     imageUrl:
-    //         'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    // };
+    const { isLoggedIn, user } = useAuth();
 
     const navigation = [
         { name: 'Authors', href: '#', current: false, disabled: true },
@@ -74,7 +70,13 @@ export function Navigation() {
                                 <div className="ml-4 flex items-center md:ml-6">
                                     <div className={'flex gap-5'}>
                                         {searchVisible && <Search />}
-                                        <a href={route('Auth.Login')}>Login</a>
+                                        {isLoggedIn ? (
+                                            <span className={'align-items-center my-auto text-center'}>{user.display_name}</span>
+                                        ) : (
+                                            <a href={route('Auth.Login')} className={'align-items-center my-auto text-center'}>
+                                                Login
+                                            </a>
+                                        )}
                                         {/*<button type="button" className={styles.notificationsButton}>*/}
                                         {/*    <span className="absolute -inset-1.5"/>*/}
                                         {/*    <span className="sr-only">View notifications</span>*/}

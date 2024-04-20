@@ -15,7 +15,7 @@ class ULog {
     static function log(object|string|array|null $message): void {
         if (is_string($message)) {
             Log::info($message);
-            dump("🚀 ~ $message");
+//            dump("🚀 ~ $message");
         } else dump("🚀 ~ ", $message);
     }
 
@@ -36,6 +36,6 @@ class ULog {
      */
     public static function error(string $error): void {
         Log::error($error);
-        dump("🚀 ~ $error");
+//        dump("🚀 ~ $error");
     }
 }

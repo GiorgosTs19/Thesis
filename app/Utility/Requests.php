@@ -19,7 +19,6 @@ class Requests {
     public static function get($url, $headers = []): PromiseInterface|Response {
         $calls = ++self::$callCount;
 
-        ULog::log("Times called : $calls,Requests.php, 21");
         if (env('APP_ENV') === 'production')
             return Http::withHeaders($headers)->get($url);
         return Http::withoutVerifying()->withHeaders($headers)->get($url);
