@@ -42,7 +42,14 @@ Route::prefix('/groups')->group(function () {
     Route::post('/delete', [GroupController::class, 'destroy'])->name('Group.Delete');
     Route::post('/add/member', [GroupController::class, 'addMember'])->name('Group.Add.Member');
     Route::post('/remove/member', [GroupController::class, 'removeMember'])->name('Group.Remove.Member');
-    Route::get('/get/all/info', [GroupController::class, 'getGroupMinInfo'])->name('Group.Minimal.Info');
+    Route::get('/get/all/info/minimal', [GroupController::class, 'getGroupMinInfo'])->name('Group.Minimal.Info');
+
+    Route::prefix('/omea')->group(function () {
+        Route::prefix('/stats')->group(function () {
+            Route::get('/authors/{id}', [GroupController::class, 'getOmeaAuthorStats'])->name('Group.Omea.Author.Stats');
+            Route::get('/types/{id}/{min?}/{max?}', [GroupController::class, 'getOmeaTypeStats'])->name('Group.Omea.Type.Stats');
+        });
+    });
 });
 
 Route::prefix('works')->group(function () {
@@ -54,6 +61,7 @@ Route::prefix('/auth')->group(function () {
     Route::get('/iee', [\App\Http\Controllers\AuthenticationController::class, 'toIEELogin'])->name('Auth.Login');
     Route::get('/sign-in/iee/redirect', [\App\Http\Controllers\AuthenticationController::class, 'handleIEECallback'])->name('Auth.Callback');
     Route::get('/check', [\App\Http\Controllers\AuthenticationController::class, 'check'])->name('Auth.Check');
+    Route::post('/logout', [\App\Http\Controllers\AuthenticationController::class, 'logout'])->name('Auth.Logout');
 });
 
 Route::prefix('/success')->group(function () {

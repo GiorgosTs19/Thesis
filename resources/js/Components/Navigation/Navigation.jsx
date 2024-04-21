@@ -1,9 +1,10 @@
-import { Disclosure } from '@headlessui/react';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline/index.js';
 import React, { Fragment } from 'react';
 import Search from '@/Components/Search/Search.jsx';
 import clsx from 'clsx';
 import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
+import { Button } from 'flowbite-react';
 
 export function Navigation() {
     const { pendingCheck, isLoggedIn, user } = useAuth();
@@ -60,7 +61,6 @@ export function Navigation() {
                             </div>
                             <div className="ml-auto hidden md:block">
                                 <div className={'flex gap-5'}>
-                                    {}
                                     {pendingCheck ? (
                                         <div role="status" className="flex animate-pulse items-center justify-center align-middle">
                                             <div className="me-3 h-2.5 w-20 rounded-full bg-gray-200 dark:bg-gray-700"></div>
@@ -86,29 +86,29 @@ export function Navigation() {
                                     {/*    <BellIcon className="h-6 w-6" aria-hidden="true"/>*/}
                                     {/*</button>*/}
                                 </div>
-                                {/*<Menu as="div" className="relative ml-3">*/}
-                                {/*    <Menu.Button*/}
-                                {/*        className={styles.menuButton}>*/}
-                                {/*        <span className="absolute -inset-1.5"/>*/}
-                                {/*        <span className="sr-only">Open user menu</span>*/}
-                                {/*        <img className="h-8 w-8 rounded-full" src={user.imageUrl} alt=""/>*/}
-                                {/*    </Menu.Button>*/}
-                                {/*    <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100"*/}
-                                {/*                leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">*/}
-                                {/*        <Menu.Items*/}
-                                {/*            className={styles.menuItemsList}>*/}
-                                {/*            {userNavigation.map((item) => (*/}
-                                {/*                <Menu.Item key={item.name}>*/}
-                                {/*                    {({active}) => (*/}
-                                {/*                        <a href={item.href} className={clsx(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>*/}
-                                {/*                            {item.name}*/}
-                                {/*                        </a>*/}
-                                {/*                    )}*/}
-                                {/*                </Menu.Item>*/}
-                                {/*            ))}*/}
-                                {/*        </Menu.Items>*/}
-                                {/*    </Transition>*/}
-                                {/*</Menu>*/}
+                                <Menu as="div" className="relative ml-3">
+                                    <Menu.Button className={styles.menuButton}>
+                                        <span className="absolute -inset-1.5" />
+                                        <span className="sr-only">Open user menu</span>
+                                    </Menu.Button>
+                                    <Transition
+                                        as={Fragment}
+                                        enter="transition ease-out duration-100"
+                                        enterFrom="transform opacity-0 scale-95"
+                                        enterTo="transform opacity-100 scale-100"
+                                        leave="transition ease-in duration-75"
+                                        leaveFrom="transform opacity-100 scale-100"
+                                        leaveTo="transform opacity-0 scale-95"
+                                    >
+                                        <Menu.Items className={styles.menuItemsList}>
+                                            <Menu.Item>
+                                                <Button size={'sm'} color={'gray'}>
+                                                    Logout
+                                                </Button>
+                                            </Menu.Item>
+                                        </Menu.Items>
+                                    </Transition>
+                                </Menu>
                             </div>
                             <div className="-mr-2 flex md:hidden">
                                 {searchVisible && <Search />}

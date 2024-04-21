@@ -14,8 +14,9 @@ import CompactGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/CompactGroupInfo
 import ExpandedGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/ExpandedGroupInfo/ExpandedGroupInfo.jsx';
 import NewEmptyGroup from '@/Pages/Routes/Groups/ActiveGroup/NewEmptyGroup/NewEmptyGroup.jsx';
 import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
-import { Modal, Table, Tabs } from 'flowbite-react';
-import { useClickAway } from '@uidotdev/usehooks';
+import OmeaStats from '@/Pages/Routes/Groups/ActiveGroup/OmeaStats/OmeaStats.jsx';
+import { useWindowSize } from '@uidotdev/usehooks';
+import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 
 const styles = {
     groupName: 'text-2xl font-bold tracking-tight text-gray-900 dark:text-white ',
@@ -30,17 +31,16 @@ const styles = {
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
 };
-export const ActiveGroup = ({ groupObject, setSelectedGroup }) => {
-    const { group, countsPerAuthor, typeStatistics } = groupObject;
+export const ActiveGroup = ({ group, setSelectedGroup }) => {
     const api = useAPI();
+    const { width } = useWindowSize();
     const [groupWorks, setGroupWorks] = useState({ data: [] });
     const { filters, filtersHaveChanged, dispatch } = useWorkFilters({ authors: group.members });
     // Cache the total amount of works, so it doesn't change when we filter out works.
     const totalWorksRef = useRef(null);
     const [statisticsModalOpen, setStatisticsModalOpen] = useState(false);
-    const statisticsModalRef = useClickAway(() => {
-        setStatisticsModalOpen(false);
-    });
+    const { isAdmin } = useAuth();
+
     const handleFetchGroup = useCallback(() => {
         if (!group || !group.members.length) return;
         return api.works.filterWorks(filters).then((res) => {
@@ -71,9 +71,11 @@ export const ActiveGroup = ({ groupObject, setSelectedGroup }) => {
                         message={`Are you sure you want to remove ${item.name} from ${group.name}?`}
                         declineText={'Cancel'}
                     >
-                        <div className={styles.deleteIcon}>
-                            <AiOutlineDelete />
-                        </div>
+                        {isAdmin && (
+                            <div className={styles.deleteIcon}>
+                                <AiOutlineDelete />
+                            </div>
+                        )}
                     </UtilityModal>
                 </AuthorItem>
             );
@@ -94,7 +96,7 @@ export const ActiveGroup = ({ groupObject, setSelectedGroup }) => {
             },
             { name: 'Click for more Statistics', value: 'OMEA, Authors', onClick: () => handleOpenStatisticsModal() },
         ],
-        [groupObject, groupWorks],
+        [group, groupWorks],
     );
 
     const DOUGHNUT_CHART_DATA = {
@@ -193,12 +195,12 @@ export const ActiveGroup = ({ groupObject, setSelectedGroup }) => {
                     <div className={styles.chartDisclaimer}>{activeChart.disclaimer}</div>
                 </div>
             </div>
-            <div className={'mb-5 mt-10 flex gap-10 border-t border-t-gray-300 pt-5'}>
+            <div className={'mb-5 mt-10 flex flex-col gap-10 border-t border-t-gray-300 pt-5 md:flex-row'}>
                 <div className={'flex flex-grow flex-col'}>
                     <SimpleDoughnutChart dataSet={DOUGHNUT_CHART_DATA.dataSet} labels={DOUGHNUT_CHART_DATA.labels} title={DOUGHNUT_CHART_DATA.title} className={'mx-auto max-h-60'} />
                     <div className={styles.chartDescription}>{DOUGHNUT_CHART_DATA.description}</div>
                 </div>
-                <RowOfProperties properties={doughnutProperties} vertical />
+                <RowOfProperties properties={doughnutProperties} vertical={width >= 768} />
             </div>
         </>
     );
@@ -224,58 +226,10 @@ export const ActiveGroup = ({ groupObject, setSelectedGroup }) => {
                     ></UtilityModal>
                     <div className={'flex w-full justify-between gap-5'}>
                         <h5 className={styles.groupName}>{group.name}</h5>
-                        <DropDownMenu dotsButton options={dropDownOptions} position={'right'} />
+                        {isAdmin && <DropDownMenu dotsButton options={dropDownOptions} position={'right'} />}
                     </div>
                     <p className={styles.groupDescription}>{group.description}</p>
-                    <Modal onClose={handleCloseStatisticsModal} show={statisticsModalOpen}>
-                        <Modal.Header>More Statistics</Modal.Header>
-                        <Modal.Body>
-                            <div ref={statisticsModalRef}>
-                                <Tabs style={'fullWidth'} className={'max-h-96'}>
-                                    <Tabs.Item active title="Works per Author">
-                                        <div className={'overflow-x-auto'}>
-                                            <Table>
-                                                <Table.Head>
-                                                    <Table.HeadCell>Author</Table.HeadCell>
-                                                    <Table.HeadCell>OpenAlex</Table.HeadCell>
-                                                    <Table.HeadCell>ORCID</Table.HeadCell>
-                                                    <Table.HeadCell>Crossref</Table.HeadCell>
-                                                </Table.Head>
-                                                <Table.Body>
-                                                    {countsPerAuthor.map((t) => (
-                                                        <Table.Row key={t.name}>
-                                                            <Table.Cell>{t.name}</Table.Cell>
-                                                            <Table.Cell className={'text-center'}>{t.counts.OpenAlex ?? '-'}</Table.Cell>
-                                                            <Table.Cell className={'text-center'}>{t.counts.ORCID ?? '-'}</Table.Cell>
-                                                            <Table.Cell className={'text-center'}>{t.counts.Crossref ?? '-'}</Table.Cell>
-                                                        </Table.Row>
-                                                    ))}
-                                                </Table.Body>
-                                            </Table>
-                                        </div>
-                                    </Tabs.Item>
-                                    <Tabs.Item active title="Works per OMEA Type">
-                                        <div className={'overflow-x-auto'}>
-                                            <Table>
-                                                <Table.Head>
-                                                    <Table.HeadCell>Type</Table.HeadCell>
-                                                    <Table.HeadCell>Count</Table.HeadCell>
-                                                </Table.Head>
-                                                <Table.Body>
-                                                    {Object.entries(typeStatistics).map(([type, count]) => (
-                                                        <Table.Row key={type}>
-                                                            <Table.Cell>{type}</Table.Cell>
-                                                            <Table.Cell className={'text-center'}>{count}</Table.Cell>
-                                                        </Table.Row>
-                                                    ))}
-                                                </Table.Body>
-                                            </Table>
-                                        </div>
-                                    </Tabs.Item>
-                                </Tabs>
-                            </div>
-                        </Modal.Body>
-                    </Modal>
+                    <OmeaStats statisticsModalOpen={statisticsModalOpen} handleCloseStatisticsModal={handleCloseStatisticsModal} group={group.id} />
                     <div className={'flex w-full flex-col'}>
                         <div className={'mb-3 flex justify-center'}>
                             <RowOfProperties properties={properties} grow={false} />
@@ -317,17 +271,13 @@ export const ActiveGroup = ({ groupObject, setSelectedGroup }) => {
 };
 
 ActiveGroup.propTypes = {
-    groupObject: shape({
-        group: shape({
-            name: string.isRequired,
-            parent: object,
-            description: string.isRequired,
-            members: arrayOf(object),
-            children: arrayOf(object),
-            uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref: number }),
-        }),
-        countsPerAuthor: arrayOf(shape({ name: string, counts: shape({ OpenAlex: number, ORCID: number, Crossref: number }) })),
-        typeStatistics: object,
+    group: shape({
+        name: string.isRequired,
+        parent: object,
+        description: string.isRequired,
+        members: arrayOf(object),
+        children: arrayOf(object),
+        uniqueWorksCount: shape({ OpenAlex: number, ORCID: number, Crossref: number }),
     }),
     setSelectedGroup: func.isRequired,
 };

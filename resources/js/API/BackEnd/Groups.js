@@ -122,4 +122,20 @@ export class Groups extends AbstractAPI {
     async getAllGroups() {
         return this.get(route('Group.All'));
     }
+
+    async getOmeaAuthorStats(id) {
+        if (!id) {
+            throw new Error('id parameter is marked as required for getOmeaAuthorStats()');
+        }
+        const url = route('Group.Omea.Author.Stats', id);
+        return this.get(url);
+    }
+
+    async getOmeaTypeStats(id, minYear, maxYear) {
+        if (!id) {
+            throw new Error('id parameter is marked as required for getOmeaTypeStats()');
+        }
+        const url = route('Group.Omea.Type.Stats', { id, min: minYear, max: maxYear });
+        return this.get(url);
+    }
 }

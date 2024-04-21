@@ -1,48 +1,43 @@
-import { Work } from '@/Models/Work/Work.js';
 import { Author } from '@/Models/Author/Author.js';
 import Switch from '@/Components/Switch/Switch.jsx';
 import React, { useCallback, useMemo, useState } from 'react';
 import { WorkItem } from '@/Components/Assets/WorkItem/WorkItem.jsx';
-import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
-import PropTypes, { arrayOf, bool, number, object, shape, string } from 'prop-types';
+import { array, number, object, shape } from 'prop-types';
 import RowOfProperties from '@/Components/RowOfProperties/RowOfProperties.jsx';
 import SimpleStatisticsChart from '@/Charts/SimpleStatisticsChart/SimpleBarChart.jsx';
-import { getTopCoAuthors } from '@/Utility/Arrays/Utils.js';
-import { AuthorItem } from '@/Components/Assets/AuthorItem/AuthorItem.jsx';
-import List from '@/Components/List/List.jsx';
 import { useWindowSize } from '@uidotdev/usehooks';
 import clsx from 'clsx';
 import SimpleDoughnutChart from '@/Charts/DoughnutChart/SimpleDoughnutChart.jsx';
+import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
+import useAPI from '@/Hooks/useAPI/useAPI.js';
+import { Work } from '@/Models/Work/Work.js';
+import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
+import Filters from '@/Components/Filters/Filters.jsx';
+import useAsync from '@/Hooks/useAsync/useAsync.js';
 
-const styles = {
-    infoContainer: 'flex flex-col lg:flex-row pb-4 w-full',
-    properties: 'w-full lg:w-5/12 flex flex-col',
-    statusWrapper: 'rounded-lg p-3 my-auto',
-    statusHeader: 'font-semibold mb-2 text-sm lg:text-lg',
-    status: 'text-gray-700 italic text-xs lg:text-base',
-    lastUpdated: 'mt-2 text-gray-500 opacity-80 text-xs lg:text-sm',
-    chartsContainer: 'w-full lg:7/12 flex flex-col h-full my-auto',
-    chartContainer: 'flex flex-col h-full',
-    chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-3 max-w-3xl overflow-visible text-center text-sm',
-    chartTitle: 'text-black mx-auto mb-2 text-center',
-    chartSource: 'text-gray-500 opacity-75 italic mx-auto text-center',
-    chartDisclaimer: 'text-gray-500 opacity-75 italic mx-auto mt-3 text-center text-sm',
-    chart: 'md:px-4 mb-4 max-w-full',
-    listsContainer: 'flex flex-col xl:flex-row gap-4',
-    authorsListContainer: 'w-full flex flex-col ',
-    worksListContainer: 'w-full flex flex-col',
-    listTitle: '2xl:text-xl font-semibold mb-4 text-yellow-800',
-    listText: 'mx-2 text-xs sm:text-sm text-gray-600 opacity-50',
-    biographyMissing: 'text-gray-700 opacity-75 italic m-auto text-center pb-5 sm:pb-0 text-lg xl:text-2xl border-b border-b-gray-400 sm:border-b-0 ',
-    biographyWrapper: 'w-full mb-7 pr-7 xl:border-r xl:border-r-gray-300',
-    biographyText: 'text-gray-500 flex-wrap whitespace-pre-wrap 2xl:text-lg cursor-pointer text-left',
-    biographyTitle: 'my-3 text-yellow-800 2xl:text-lg',
-    partialAbstract: 'line-clamp-6 xl:line-clamp-13 leading-relaxed overflow-ellipsis',
-};
-const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWorksCounts }) => {
+const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
     const { name, isUser, updatedAt } = authorObject;
     const [showWholeBio, setShowWholeBio] = useState(false);
+    const [authorWorks, setAuthorWorks] = useState({ data: [] });
+    const authors = useMemo(() => [authorObject], [authorObject]);
+    const { filters, dispatch } = useWorkFilters({ authors: authors });
+    const api = useAPI();
+
+    const handleFetchWorks = useCallback(() => {
+        return api.works.filterWorks(filters).then((res) => {
+            setAuthorWorks(res.data);
+        });
+    }, [filters]);
+
+    const { loading } = useAsync(handleFetchWorks);
+
+    const handleGetPage = (url) => {
+        api.pagination.getPage(url).then((res) => {
+            setAuthorWorks(res.data);
+        });
+    };
+
     const PROFILE_STATUS = {
         INCOMPLETE: `${name} is not a registered user, thus their list of works and information might be incomplete and not always up to date.`,
         REGISTERED: `${name} is a registered user, their info and works are regularly updated.`,
@@ -96,7 +91,6 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
             "It offers insights into the relative contribution of each platform to the collection of the author's works.",
         disclaimer: "The majority of the author's works are sourced from a combination of the platforms listed above.",
     };
-    const topCoAuthors = useMemo(() => getTopCoAuthors(authorObject.works, 5, authorObject), [authorObject.works]);
 
     const [activeChart, setActiveChart] = useState(CHART_DATA.CITATIONS);
 
@@ -104,21 +98,7 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
         (work, index) => {
             return <WorkItem work={work} key={work.id} index={index} />;
         },
-        [works],
-    );
-
-    const renderAuthorItem = (item, index) => (
-        <AuthorItem
-            key={item.value.id}
-            author={item.value}
-            index={index}
-            extraProperties={[
-                {
-                    name: 'Works Co-Authored',
-                    value: item.occurrences,
-                },
-            ]}
-        />
+        [authorWorks],
     );
 
     const authorGeneralProperties = [...authorObject.getProperties()];
@@ -186,47 +166,52 @@ const AuthorPage = ({ author, works, sortingOptions, currentSortOption, uniqueWo
                 </div>
             </div>
             <div className={styles.listsContainer}>
+                <Filters authors={[authorObject]} filters={filters} dispatch={dispatch} />
                 <PaginatedList
-                    response={works}
+                    response={authorWorks}
                     renderFn={renderWorkItem}
                     parser={Work.parseResponseWork}
                     collapsable={width <= 765}
-                    sortingOptions={sortingOptions}
-                    currentSortOption={currentSortOption}
-                    useInertia
                     className={'order-2 w-full xl:order-none xl:border-r xl:border-r-gray-300'}
                     title={`Works`}
                     header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}
                     gap={7}
-                />
-                <List
-                    data={topCoAuthors}
-                    renderFn={renderAuthorItem}
-                    wrapperClassName={'h-full xl:max-w-fit'}
-                    title={'Top Co-Authors'}
-                    vertical
-                    header={`Top authors who have collaborated with ${authorObject.name} on various works`}
-                    footer={'( Based on the works list in this page )'}
-                    collapsable={width <= 765}
+                    loading={loading}
+                    onLinkClick={handleGetPage}
+                    perPage={filters.per_page ?? 10}
                 />
             </div>
         </div>
     );
 };
 
-const SortingOptionPropTypes = PropTypes.shape({
-    name: string.isRequired,
-    value: number.isRequired,
-    url: string.isRequired,
-    default: bool.isRequired,
-});
-
 AuthorPage.propTypes = {
     author: object,
-    works: shape({}),
     uniqueWorksCounts: shape({ ORCID: number, OpenAlex: number, Crossref: number }).isRequired,
-    sortingOptions: arrayOf(SortingOptionPropTypes).isRequired,
-    currentSortOption: number.isRequired,
+    topCoAuthors: array,
 };
 
+const styles = {
+    infoContainer: 'flex flex-col lg:flex-row pb-4 w-full',
+    properties: 'w-full lg:w-5/12 flex flex-col',
+    statusWrapper: 'rounded-lg p-3 my-auto',
+    statusHeader: 'font-semibold mb-2 text-sm lg:text-lg',
+    status: 'text-gray-700 italic text-xs lg:text-base',
+    lastUpdated: 'mt-2 text-gray-500 opacity-80 text-xs lg:text-sm',
+    chartsContainer: 'w-full lg:7/12 flex flex-col h-full my-auto',
+    chartContainer: 'flex flex-col h-full',
+    chartDescription: 'text-gray-500 opacity-75 italic mx-auto mb-3 max-w-3xl overflow-visible text-center text-sm',
+    chartTitle: 'text-black mx-auto mb-2 text-center',
+    chartSource: 'text-gray-500 opacity-75 italic mx-auto text-center',
+    chartDisclaimer: 'text-gray-500 opacity-75 italic mx-auto mt-3 text-center text-sm',
+    chart: 'md:px-4 mb-4 max-w-full',
+    listsContainer: 'flex flex-col gap-4',
+    listTitle: '2xl:text-xl font-semibold mb-4 text-yellow-800',
+    listText: 'mx-2 text-xs sm:text-sm text-gray-600 opacity-50',
+    biographyMissing: 'text-gray-700 opacity-75 italic m-auto text-center pb-5 sm:pb-0 text-lg xl:text-2xl border-b border-b-gray-400 sm:border-b-0 ',
+    biographyWrapper: 'w-full mb-7 pr-7 xl:border-r xl:border-r-gray-300',
+    biographyText: 'text-gray-500 flex-wrap whitespace-pre-wrap 2xl:text-lg cursor-pointer text-left',
+    biographyTitle: 'my-3 text-yellow-800 2xl:text-lg',
+    partialAbstract: 'line-clamp-6 xl:line-clamp-13 leading-relaxed overflow-ellipsis',
+};
 export default AuthorPage;

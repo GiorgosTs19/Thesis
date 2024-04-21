@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [pendingCheck, setPendingCheck] = useState(true);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const api = useAPI();
 
@@ -18,7 +19,9 @@ export const AuthProvider = ({ children }) => {
             setPendingCheck(false);
             setIsLoggedIn(check);
             if (!check) return;
-            setUser(User.parseUserResponse(user));
+            const userInstance = User.parseUserResponse(user);
+            setUser(userInstance);
+            setIsAdmin(userInstance.isAdmin);
         });
     }, []);
 
@@ -32,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    return <AuthContext.Provider value={{ pendingCheck, isLoggedIn, user, login, logout }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ pendingCheck, isLoggedIn, user, isAdmin, login, logout }}>{children}</AuthContext.Provider>;
 };
 
 AuthProvider.propTypes = {

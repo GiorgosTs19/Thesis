@@ -9,6 +9,7 @@ import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
 import GroupsList from '@/Pages/Routes/Groups/GroupsList/GroupsList.jsx';
 import NewGroupModal from '@/Components/Modal/NewGroupModal.jsx';
+import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 
 /**
  * @component
@@ -27,6 +28,7 @@ const GroupsPage = () => {
     const activeGroupBadgeRef = useRef(null);
     const api = useAPI();
     const { showToast } = useToast();
+    const { isAdmin } = useAuth();
     useScrollIntoView(activeGroupBadgeRef);
 
     // Listen for Group Updated Events
@@ -67,7 +69,7 @@ const GroupsPage = () => {
     const handleFetchGroup = useCallback(() => {
         if (!selectedGroup) return;
         return api.groups.getGroup(selectedGroup).then((data) => {
-            setGroupObject(data.data);
+            setGroupObject(data.data.group);
         });
     }, [selectedGroup]);
 
@@ -79,7 +81,7 @@ const GroupsPage = () => {
         <div className={'flex min-h-[calc(100vh-4rem)] flex-col'}>
             <div className={'flex w-full justify-between'}>
                 <GroupsList setSelectedGroup={setSelectedGroup} />
-                <NewGroupModal />
+                {isAdmin && <NewGroupModal />}
             </div>
             {loading && (
                 <div className={'m-auto'}>
@@ -87,7 +89,7 @@ const GroupsPage = () => {
                 </div>
             )}
             {!loading && !groupObject && <h4 className={'m-auto text-center  text-2xl'}>Select a group to see more details</h4>}
-            {showCurrentGroup && <ActiveGroup groupObject={groupObject} setSelectedGroup={setSelectedGroup} />}
+            {showCurrentGroup && <ActiveGroup group={groupObject} setSelectedGroup={setSelectedGroup} />}
         </div>
     );
 };

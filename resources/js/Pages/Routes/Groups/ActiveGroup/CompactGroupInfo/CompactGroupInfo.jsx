@@ -21,7 +21,6 @@ const CompactGroupInfo = ({ visibleWidth = 1100, group, groupWorks, charts, load
     const [canvasOpen, setCanvasOpen] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const [showFilters, setShowFilters] = useState(false);
-
     const handleShowFilters = () => setShowFilters(true);
     const handleHideFilters = () => setShowFilters(false);
 
@@ -30,7 +29,7 @@ const CompactGroupInfo = ({ visibleWidth = 1100, group, groupWorks, charts, load
     };
 
     // Handles the closing of the off-canvas
-    const handleOnClose = (e, r) => {
+    const handleOnClose = () => {
         setCanvasOpen(false);
     };
 

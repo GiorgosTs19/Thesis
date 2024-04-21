@@ -87,7 +87,7 @@ const Filters = ({ onOpen, filters, dispatch, authors, noModal = false }) => {
                 <div className="mb-2 block">
                     <Label htmlFor="workTypes" value="Work Types" />
                 </div>
-                <div className={'max-h-52 overflow-y-scroll'}>
+                <div className={'max-h-52 overflow-y-scroll p-2'}>
                     {workTypes.map((workType) => (
                         <div className="flex items-center gap-2" key={workType} onClick={() => handleSelectWorkType(workType)}>
                             <Checkbox id="accept" checked={filters.work_types.includes(workType)} onChange={() => {}} />
@@ -168,27 +168,29 @@ const Filters = ({ onOpen, filters, dispatch, authors, noModal = false }) => {
                     ))}
                 </div>
             </div>
-            <div className={'flex flex-col border-b border-b-gray-300 p-1'}>
-                <div className={'mb-2 ml-3 flex gap-3 text-left'}>
-                    <div>Authors</div>
-                    <Button disabled={filters.author_ids.length === authors.length} onClick={handleSelectAll} size={'xs'} color={'gray'}>
-                        All
-                    </Button>
-                    <Button disabled={!filters.author_ids.length} onClick={handleClearSelections} size={'xs'} color={'gray'}>
-                        None
-                    </Button>
+            {authors.length > 1 && (
+                <div className={'flex flex-col border-b border-b-gray-300 p-1'}>
+                    <div className={'mb-2 ml-3 flex gap-3 text-left'}>
+                        <div>Authors</div>
+                        <Button disabled={filters.author_ids.length === authors.length} onClick={handleSelectAll} size={'xs'} color={'gray'}>
+                            All
+                        </Button>
+                        <Button disabled={!filters.author_ids.length || authors.length === 1} onClick={handleClearSelections} size={'xs'} color={'gray'}>
+                            None
+                        </Button>
+                    </div>
+                    <div className={'grid-col-1 grid max-h-52 gap-3 overflow-y-auto p-3 md:grid-cols-2'}>
+                        {authors.map((author) => (
+                            <div className="col-span-2 flex items-center gap-2 md:col-span-1" key={author.id}>
+                                <Checkbox id={`Author${author.id}`} checked={filters.author_ids.includes(author.id)} onChange={() => handleSelectAuthor(author.id)} disabled={authors.length === 1} />
+                                <Label htmlFor={`Author${author.id}`} className="flex">
+                                    {author.name}
+                                </Label>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div className={'grid-col-1 grid max-h-52 gap-3 overflow-y-auto p-3 md:grid-cols-2'}>
-                    {authors.map((author) => (
-                        <div className="col-span-2 flex items-center gap-2 md:col-span-1" key={author.id}>
-                            <Checkbox id={`Author${author.id}`} checked={filters.author_ids.includes(author.id)} onChange={() => handleSelectAuthor(author.id)} />
-                            <Label htmlFor={`Author${author.id}`} className="flex">
-                                {author.name}
-                            </Label>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            )}
             <div className={'my-5 flex gap-5'}>
                 <div className={'mr-auto'}>
                     <div className={'mb-2 text-center'}>Publication Year</div>

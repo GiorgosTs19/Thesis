@@ -5,6 +5,7 @@ import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 import clsx from 'clsx';
 import { BsChevronDown, BsChevronRight } from 'react-icons/bs';
 import { themeStyles } from '@/Theme/Theme.js';
+import WorkSkeleton from '@/Components/Skeletons/WorkSkeleton/WorkSkeleton.jsx';
 
 /**
  * PaginatedList Component.
@@ -54,16 +55,19 @@ const PaginatedList = ({
     collapsable = false,
     initiallyCollapsed = false,
     gap = 6,
+    loading,
+    perPage,
 }) => {
     const items = (parser ? response.data.map((item) => parser(item)) : response.data).filter(filterFn ? (item) => filterFn(item) : () => true);
     const [listCollapsed, setListCollapsed] = useState(collapsable && initiallyCollapsed);
+    const skeletonsArray = new Array(perPage).fill(null);
 
     useEffect(() => {
         if (!collapsable) setListCollapsed(false);
     }, [collapsable]);
 
     return (
-        <div className={clsx(`${rounded ? 'rounded-lg' : ''} flex h-full flex-col p-4`, className)}>
+        <div className={clsx(`${rounded ? 'rounded-lg' : ''} flex h-full flex-col p-2`, className)}>
             <div className={'mb-3 flex justify-between'}>
                 <div className={clsx(` ${collapsable ? 'cursor-pointer' : ''}`, styles.title)} onClick={() => collapsable && setListCollapsed((prev) => !prev)}>
                     {title}
@@ -81,11 +85,13 @@ const PaginatedList = ({
                     {items?.length ? (
                         <ul className={`flex h-full list-disc flex-col gap-${gap}`}>
                             {items?.length ? (
-                                items?.map((item, index) => renderFn(item, index + (response.meta.from ?? 0)))
+                                items?.map((item, index) => (loading ? <WorkSkeleton key={index} /> : renderFn(item, index + (response.meta.from ?? 0))))
                             ) : (
                                 <h4 className={'col-span-full m-auto text-center text-xl'}>{emptyListPlaceholder}</h4>
                             )}
                         </ul>
+                    ) : loading ? (
+                        skeletonsArray.map((t, i) => <WorkSkeleton key={i} />)
                     ) : (
                         <h4 className={'m-auto text-xl'}>{emptyListPlaceholder}</h4>
                     )}
@@ -112,6 +118,7 @@ const styles = {
 };
 
 PaginatedList.propTypes = {
+    loading: bool,
     title: string,
     className: string,
     renderFn: func.isRequired,

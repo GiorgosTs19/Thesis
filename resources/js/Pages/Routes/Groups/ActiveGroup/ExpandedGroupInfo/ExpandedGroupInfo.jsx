@@ -10,12 +10,14 @@ import List from '@/Components/List/List.jsx';
 import { Author } from '@/Models/Author/Author.js';
 import OffCanvas from '@/Components/OffCanvas/OffCanvas.jsx';
 import AddGroupMembers from '@/Components/Search/AdminSearch/AddGroupMembers.jsx';
+import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 
 const ExpandedGroupInfo = ({ visibleWidth = 1100, charts, loading, groupWorks, handleLinkClick, dispatch, filtersHaveChanged, filters, group, renderAuthorItem }) => {
     const { width } = useWindowSize();
     const [authorsOpen, setAuthorsOpen] = useState(false);
     const handleDrawerOpen = () => setAuthorsOpen(true);
     const handleDrawerClose = () => setAuthorsOpen(false);
+    const { isAdmin } = useAuth();
 
     return (
         width > visibleWidth && (
@@ -24,7 +26,7 @@ const ExpandedGroupInfo = ({ visibleWidth = 1100, charts, loading, groupWorks, h
                     <Button onClick={handleDrawerOpen} size={'sm'} color={'gray'}>
                         Group Members
                     </Button>
-                    <AddGroupMembers group={group} />
+                    {isAdmin && <AddGroupMembers group={group} />}
                 </div>
                 {charts}
                 <OffCanvas isOpen={authorsOpen} position={'right'} onClose={handleDrawerClose} header={'Group Members'} clickAwayClosable canvasWidth={400}>

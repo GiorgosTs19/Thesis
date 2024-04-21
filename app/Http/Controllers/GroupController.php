@@ -13,12 +13,15 @@ use App\Models\Group;
 use App\Models\Type;
 use App\Models\Work;
 use App\Utility\Requests;
+use App\Utility\ULog;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Inertia\Inertia;
 use Inertia\Response;
+use stdClass;
 
 class GroupController extends Controller {
     private function retrieveAllGroups(): AnonymousResourceCollection {
@@ -82,30 +85,103 @@ class GroupController extends Controller {
             $query->whereIn('author_id', $authors_ids);
         })->source(Work::$crossRefSource)->count();
 
-        $type_counts = Type::withCount(['works' => function ($query) use ($authors_ids) {
-            // Add further constraints to the works query
-            $query->whereHas('authors', function ($query) use ($authors_ids) {
-                $query->whereIn('author_id', $authors_ids);
-            })->where('source', Work::$aggregateSource);
-        }])->pluck('works_count', 'name')->toArray();
-
-        $source_author_counts = $group->members->map(function (Author $author) {
-            return ['name' => $author->display_name, 'counts' => Work::whereHas('authors', function ($query) use ($author) {
-                $query->whereIn('author_id', [$author->id]);
-            })->whereNotIn('source', [Work::$aggregateSource])
-                ->selectRaw('source, COUNT(*) as source_count')
-                ->groupBy('source')
-                ->pluck('source_count', 'source')
-                ->toArray()];
-        });
 
         return $success ? response()->json(Requests::success('Group retrieved successfully',
             ['group' => new GroupResource($group, [
                 'orcid_works' => $orc_id_works,
                 'open_alex_works' => $open_alex_works,
                 'crossref_works' => $crossref_works
-            ]), 'typeStatistics' => $type_counts,
-                'countsPerAuthor' => $source_author_counts]))
+            ])]))
+            : response()->json(Requests::serverError("Something went wrong"), 500);
+    }
+
+    public function getOmeaAuthorStats(Request $request, $id): JsonResponse {
+        if (!isset($id)) {
+            return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
+        }
+
+        $group = Group::with('members', 'parent', 'members.statistics')->withCount('members')->find($id);
+
+        if (!$group) {
+            return response()->json(Requests::clientError('A group with this id does not exist', 200));
+        }
+
+        $success = false;
+        $source_counts = new stdClass();
+
+        try {
+            $source_counts = $group->members->map(function (Author $author) {
+                return ['name' => $author->display_name, 'counts' => Work::whereHas('authors', function ($query) use ($author) {
+                    $query->whereIn('author_id', [$author->id]);
+                })->whereNotIn('source', [Work::$aggregateSource])
+                    ->selectRaw('source, COUNT(*) as source_count')
+                    ->groupBy('source')
+                    ->pluck('source_count', 'source')
+                    ->toArray()];
+            });
+            $success = true;
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+        }
+
+        return $success ? response()->json(Requests::success('Group author stats retrieved successfully',
+            ['countsPerAuthor' => $source_counts]))
+            : response()->json(Requests::serverError("Something went wrong"), 500);
+    }
+
+    public function getOmeaTypeStats(Request $request, $id, $min = null, $max = null): JsonResponse {
+        if (!isset($id)) {
+            return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
+        }
+
+        $group = Group::with('members', 'parent', 'members.statistics')->withCount('members')->find($id);
+
+        if (!$group) {
+            return response()->json(Requests::clientError('A group with this id does not exist', 200));
+        }
+
+        $type_counts = new stdClass();
+
+        try {
+            $authors_ids = $group->members->map(function (Author $author) {
+                return $author->id;
+            });
+
+            $max_allowed = Work::max('publication_year');
+            $min_allowed = $max_allowed - 5;
+
+            $min_pub_year = !is_null($min) ? max($min, $min_allowed) : $min_allowed;
+            $max_pub_year = !is_null($max) ? min($max, $max_allowed) : $max_allowed;
+
+            // Retrieve types with works filtered by authors and source
+            $type_counts = Type::with(['works' => function ($query) use ($authors_ids) {
+                $query->whereHas('authors', function ($query) use ($authors_ids) {
+                    $query->whereIn('author_id', $authors_ids);
+                })->where('source', Work::$aggregateSource);
+            }])->get()->map(function ($type) use ($min_pub_year, $max_pub_year) {
+                $works_per_year = $type->works->groupBy('publication_year')->map->count();
+
+                // Generate counts for all years within the range
+                $counts = [];
+                for ($year = $min_pub_year; $year <= $max_pub_year; $year++) {
+                    $counts[$year] = $works_per_year[$year] ?? 0;
+                }
+
+                return [
+                    'name' => $type->name,
+                    'worksPerYear' => $counts,
+                ];
+            })->toArray();
+
+            $success = true;
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            $success = false;
+        }
+
+        return $success ? response()->json(Requests::success('Group type stats retrieved successfully',
+            ['typeStatistics' => $type_counts, 'minAllowedYear' => $min_allowed, 'maxAllowedYear' => $max_allowed, 'requestedMin' => $min_pub_year,
+                'requestedMax' => $max_pub_year]))
             : response()->json(Requests::serverError("Something went wrong"), 500);
     }
 

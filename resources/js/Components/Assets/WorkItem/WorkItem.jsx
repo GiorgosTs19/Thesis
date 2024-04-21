@@ -37,7 +37,7 @@ export const PROPERTIES = {
     CITATIONS: 'citations',
 };
 
-export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, highlightUserAuthors }) => {
+export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, highlightUserAuthors, showUserOptions = false }) => {
     const { doi, title, authors, type, isOA, publicationYear, referencedByCount, language, localUrl, versions } = work;
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [showAllAuthors, setShowAllAuthors] = useState(false);
@@ -133,7 +133,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 </Modal.Body>
             </Modal>
             <div className={'mb-5 flex h-fit flex-grow list-none '}>
-                <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />
+                {showUserOptions && <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />}
                 <div className={styles.index}>
                     {index}
                     {getSourceIcon()}
@@ -183,4 +183,5 @@ WorkItem.propTypes = {
         lang: bool,
         versions: bool,
     }),
+    showUserOptions: bool,
 };
