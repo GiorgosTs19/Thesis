@@ -35,6 +35,6 @@ class AuthenticationController extends Controller {
     }
 
     public function check(Request $request): \Illuminate\Foundation\Application|Response|Application|ResponseFactory {
-        return response(['check' => Auth::check(), 'user' => new UserResource(Auth::user())]);
+        return response(['check' => Auth::check(), 'user' => Auth::check() ? new UserResource(Auth::user()) : null]);
     }
 }

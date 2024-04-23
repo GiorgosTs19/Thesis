@@ -235,7 +235,7 @@ class User extends Authenticatable {
                 'is_staff' => $authenticatedUser['is_staff'],
             ]);
         } catch (Exception $error) {
-            dump($error);
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
         return $user;
     }

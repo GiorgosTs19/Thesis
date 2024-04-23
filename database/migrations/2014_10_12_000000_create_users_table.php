@@ -14,13 +14,15 @@ return new class extends Migration {
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('display_name');
+            $table->string('external_id');
             $table->string('email')->unique();
-            $table->string('isAdmin')->default(false);
+            $table->string('is_admin')->default(false);
+            $table->string('is_staff')->default(false);
             $table->string(Ids::ORC_ID_ID)->nullable()->unique();
             $table->string(Ids::SCOPUS_ID)->nullable()->unique();
             $table->string(Ids::OPEN_ALEX_ID)->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password')->default('');
             $table->rememberToken();
             $table->timestamps();
         });
