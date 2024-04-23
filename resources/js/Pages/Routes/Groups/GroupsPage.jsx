@@ -1,6 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Spinner } from 'flowbite-react';
-import { arrayOf, number, object, oneOfType, shape, string } from 'prop-types';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
 import { ActiveGroup } from '@/Pages/Routes/Groups/ActiveGroup/ActiveGroup.jsx';
 import { useScrollIntoView } from '@/Hooks/useScrollIntoView/useScrollIntoView.js';
@@ -104,8 +103,5 @@ const styles = {
     selectedGroupCol: 'w-full flex',
 };
 
-GroupsPage.propTypes = {
-    groups: oneOfType([object, arrayOf(object)]),
-    customTypes: arrayOf(shape({ id: number.isRequired, name: string.isRequired })).isRequired,
-};
+GroupsPage.propTypes = {};
 export default GroupsPage;

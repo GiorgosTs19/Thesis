@@ -23,7 +23,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property mixed scopus_id
  * @property mixed email
  * @property mixed orc_id
- * @property mixed isAdmin
+ * @property mixed $is_admin
+ * @property mixed $is_staff
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)
  * @method static openAlex(string|null $open_alex_id)
@@ -47,6 +48,7 @@ class User extends Authenticatable {
         'orc_id',
         'scopus_id',
         'open_alex_id',
+        'is_staff',
     ];
 
     /**
@@ -67,11 +69,16 @@ class User extends Authenticatable {
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'isAdmin' => 'boolean'
+        'is_admin' => 'boolean',
+        'is_staff' => 'boolean'
     ];
 
     public function isAdmin(): bool {
-        return $this->isAdmin === 1;
+        return $this->is_admin;
+    }
+
+    public function isStaff(): bool {
+        return $this->is_staff;
     }
 
     /**

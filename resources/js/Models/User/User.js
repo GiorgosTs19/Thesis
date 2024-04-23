@@ -36,8 +36,8 @@ export class User {
             openAlex,
             scopus,
             orcId,
-            isAdmin: admin,
-            isStaff: staff,
+            admin,
+            staff,
             localUrl: local_url,
         });
     }

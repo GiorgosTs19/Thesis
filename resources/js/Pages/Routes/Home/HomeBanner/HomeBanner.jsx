@@ -1,7 +1,7 @@
 import React from 'react';
 import { WorksSVG } from '@/SVGS/WorksSVG.jsx';
 import { AuthorSVG } from '@/SVGS/AuthorSVG.jsx';
-import { arrayOf, number, object, shape, string } from 'prop-types';
+import { arrayOf, object } from 'prop-types';
 import clsx from 'clsx';
 import { Banner, Card } from 'flowbite-react';
 import { ScopusSVG } from '@/SVGS/ScopusSVG.jsx';
@@ -184,12 +184,6 @@ const styles = {
 };
 
 HomeBanner.propTypes = {
-    worksByType: arrayOf(
-        shape({
-            type: string.isRequired,
-            count: number.isRequired,
-        }),
-    ),
     mostCitationsUsers: arrayOf(object),
     mostWorksUsers: arrayOf(object),
     mostCitationsWorks: arrayOf(object),

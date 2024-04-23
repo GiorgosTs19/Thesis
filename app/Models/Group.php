@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\{Factories\HasFactory,
     Relations\BelongsTo,
     Relations\BelongsToMany,
     Relations\HasMany};
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property int $id
@@ -36,16 +37,19 @@ class Group extends Model {
     }
 
     public function childrenRecursive(): HasMany {
-        return $this->children()->with(['childrenRecursive']);
+        return $this->children()->with(['childrenRecursive'])->noMembers();
+    }
+
+    public function scopeNoMembers($query) {
+        if (!Auth::check() || !Auth::user()?->isAdmin()) {
+            return $query->has('members');
+        }
+        return $query;
     }
 
     public function scopeNoParent($query) {
         return $query->whereNull('parent_id');
     }
-    //    public function membersRecursive(): BelongsToMany {
-    //        return $this->members()->with('membersRecursive');
-    //    }
-
 
     public function scopeName($query, $name) {
         return $query->where('name', $name);

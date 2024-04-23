@@ -33,7 +33,7 @@ class GroupController extends Controller {
     }
 
     public function getAllGroups(Request $request): AnonymousResourceCollection {
-        return GroupResource::collection(Group::noParent()->with(['childrenRecursive'])->get());
+        return GroupResource::collection(Group::noParent()->noMembers()->with(['childrenRecursive'])->get());
     }
 
 
@@ -43,9 +43,7 @@ class GroupController extends Controller {
      * @return Response - Renders the groups page.
      */
     public function show(): Response {
-        $groups = GroupResource::collection(Group::noParent()->with(['childrenRecursive'])->get());
-        $custom_types = Type::all();
-        return Inertia::render('Routes/Groups/GroupsPage', ['groups' => GroupResource::collection($groups), 'customTypes' => $custom_types]);
+        return Inertia::render('Routes/Groups/GroupsPage');
     }
 
     /**

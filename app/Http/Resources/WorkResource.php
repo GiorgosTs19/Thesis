@@ -77,7 +77,7 @@ class WorkResource extends JsonResource {
             'local_url' => route('Work.Page', ['id' => $this->id]),
             'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
             'source' => self::getSources(),
-            'versions' => $this->when($this->loadVersions, new WorkCollection($this->versions, false), null),
+            'versions' => $this->when($this->loadVersions, new WorkCollection($this->versions, false), []),
             'is_aggregated' => $this->source === Work::$aggregateSource,
             'authors_string' => $this->authors_string,
             'authors_as_string' => !!$this->authors_string
