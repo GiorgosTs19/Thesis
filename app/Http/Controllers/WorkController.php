@@ -47,7 +47,7 @@ class WorkController extends Controller {
         $sort_by = array_key_exists('sort_by', $params) ? $params['sort_by'] : 'id';
         $sort_direction = array_key_exists('sort_direction', $params) ? $params['sort_direction'] : 'asc';
         // For now, always load the versions
-        $with_versions = in_array('versions', $with) || in_array(Work::$aggregateSource, $sources) || true;
+        $with_versions = in_array('versions', $with) || in_array(Work::$aggregateSource, $sources);
 
         $relationships = in_array('versions', $with) ? array_diff($with, ['versions']) : $with;
 

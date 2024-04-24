@@ -33,6 +33,7 @@ class WorkResource extends JsonResource {
     private function getSources(): string {
         if ($this->source !== Work::$aggregateSource)
             return $this->source;
+
         $sources = [];
         foreach ($this->versions as $version) {
             $sources[] = $version->source;
@@ -43,7 +44,7 @@ class WorkResource extends JsonResource {
     protected bool $loadVersions;
     private $versions;
 
-    public function __construct($resource, $loadVersions = true) {
+    public function __construct($resource, bool $loadVersions = true) {
         parent::__construct($resource);
         $this->loadVersions = $loadVersions;
         $this->versions = $this->versions();
@@ -80,7 +81,8 @@ class WorkResource extends JsonResource {
             'versions' => $this->when($this->loadVersions, new WorkCollection($this->versions, false), []),
             'is_aggregated' => $this->source === Work::$aggregateSource,
             'authors_string' => $this->authors_string,
-            'authors_as_string' => !!$this->authors_string
+            'authors_as_string' => !!$this->authors_string,
+//            'editable' =>
         ];
     }
 }

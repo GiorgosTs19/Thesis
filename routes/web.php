@@ -59,6 +59,7 @@ Route::prefix('works')->group(function () {
 
 Route::prefix('/auth')->group(function () {
     Route::get('/iee', [\App\Http\Controllers\AuthenticationController::class, 'toIEELogin'])->name('Auth.Login');
+    Route::get('/verify/link-author', [\App\Http\Controllers\AuthenticationController::class, 'showUserIdentifiers'])->name('Auth.Verify.Author');
     Route::get('/sign-in/iee/redirect', [\App\Http\Controllers\AuthenticationController::class, 'handleIEECallback'])->name('Auth.Callback');
     Route::get('/check', [\App\Http\Controllers\AuthenticationController::class, 'check'])->name('Auth.Check');
     Route::post('/logout', [\App\Http\Controllers\AuthenticationController::class, 'logout'])->name('Auth.Logout');

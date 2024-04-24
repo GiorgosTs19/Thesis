@@ -37,4 +37,8 @@ class AuthenticationController extends Controller {
     public function check(Request $request): \Illuminate\Foundation\Application|Response|Application|ResponseFactory {
         return response(['check' => Auth::check(), 'user' => Auth::check() ? new UserResource(Auth::user()) : null]);
     }
+
+    public function showUserIdentifiers(Request $request) {
+        return Inertia::render('Routes/SuccessfulLogin/VerifyAuthorIdentifiers');
+    }
 }
