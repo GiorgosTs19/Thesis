@@ -26,7 +26,6 @@ const VerifyAuthorIdentifiers = ({}) => {
         }
     });
 
-    console.log('🚀 ~ ',ids)
     const handleChangeOpenAlex = (e) => {
         setIds({
             ...ids, OPENALEX: {
