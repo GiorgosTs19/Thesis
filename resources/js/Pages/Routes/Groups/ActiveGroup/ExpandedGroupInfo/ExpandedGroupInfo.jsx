@@ -1,4 +1,4 @@
-import { Button, Card, Spinner } from 'flowbite-react';
+import { Button, Card } from 'flowbite-react';
 import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
 import { renderWorkItem } from '@/Models/Work/Utils.jsx';
 import { Work } from '@/Models/Work/Work.js';
@@ -43,21 +43,17 @@ const ExpandedGroupInfo = ({ visibleWidth = 1100, charts, loading, groupWorks, h
                 <div className={'flex min-h-96 flex-col gap-10 lg:flex-row'}>
                     <Card className={`flex w-full`}>
                         <Filters dispatch={dispatch} filtersHaveChanged={filtersHaveChanged} filters={filters} authors={group.members} />
-                        {!loading ? (
-                            <PaginatedList
-                                response={groupWorks}
-                                renderFn={renderWorkItem}
-                                parser={Work.parseResponseWork}
-                                emptyListPlaceholder={'This list is empty'}
-                                onLinkClick={handleLinkClick}
-                                title={`Group Works ( ${groupWorks?.meta?.total ?? 0} )`}
-                                gap={6}
-                            ></PaginatedList>
-                        ) : (
-                            <div className={'m-auto'}>
-                                <Spinner size="xl" />
-                            </div>
-                        )}
+                        <PaginatedList
+                            response={groupWorks}
+                            renderFn={renderWorkItem}
+                            parser={Work.parseResponseWork}
+                            emptyListPlaceholder={'This list is empty'}
+                            onLinkClick={handleLinkClick}
+                            title={`Group Works ( ${groupWorks?.meta?.total ?? 0} )`}
+                            gap={6}
+                            loading={loading}
+                            perPage={filters.per_page ?? 10}
+                        ></PaginatedList>
                     </Card>
                 </div>
             </>

@@ -120,6 +120,7 @@ const styles = {
 PaginatedList.propTypes = {
     loading: bool,
     title: string,
+    perPage: number,
     className: string,
     renderFn: func.isRequired,
     filterFn: func,

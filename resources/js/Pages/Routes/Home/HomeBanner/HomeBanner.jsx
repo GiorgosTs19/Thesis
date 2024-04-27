@@ -3,7 +3,7 @@ import { WorksSVG } from '@/SVGS/WorksSVG.jsx';
 import { AuthorSVG } from '@/SVGS/AuthorSVG.jsx';
 import { arrayOf, object } from 'prop-types';
 import clsx from 'clsx';
-import { Banner, Card } from 'flowbite-react';
+import { Card } from 'flowbite-react';
 import { ScopusSVG } from '@/SVGS/ScopusSVG.jsx';
 import { OpenAlexSVG } from '@/SVGS/OpenAlexSVG.jsx';
 import { OrcidSVG } from '@/SVGS/OrcidSVG.jsx.jsx';
@@ -108,25 +108,11 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                     </div>
                 </div>
             </div>
-            <Banner className={styles.banner}>
-                <div className={styles.bannerInnerContainer}>
-                    <div className={styles.bannerTextContainer}>
-                        <p className={styles.bannerText}>
-                            Advance your scholarly presence effortlessly with our platform. Follow these streamlined steps to create your account and showcase your work seamlessly.
-                        </p>
-                    </div>
-                    {/*<div className={styles.bannerButtonContainer}>*/}
-                    {/*    <Button href="#" className={'mx-auto cursor-pointer'}>*/}
-                    {/*        Create an account*/}
-                    {/*    </Button>*/}
-                    {/*</div>*/}
-                </div>
-            </Banner>
             <div className={styles.timelineWrapper}>
                 <Card className={styles.timeLineCard}>
                     <div className={styles.timeLineCardInnerContainer}>
                         <RiNumber1 className={styles.timelineStepNumber} />
-                        <div className={styles.timelineText}>Kickstart your journey by creating an account on our platform.</div>
+                        <div className={styles.timelineText}>Kickstart your journey by logging in to our platform.</div>
                     </div>
                 </Card>
                 <Card className={styles.timeLineCard}>
