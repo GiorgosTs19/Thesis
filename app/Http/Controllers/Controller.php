@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\AuthorResource;
-use App\Http\Resources\WorkResource;
-use App\Models\Author;
-use App\Models\Work;
+use App\Models\Group;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
@@ -26,7 +23,7 @@ class Controller extends BaseController {
 //            $work->source = $work->orc_id_put_code !== null ? Work::$orcIdSource : Work::$openAlexSource;
 //            $work->save();
 //        }
-        return new AuthorResource(Author::with(['statistics'])->find(9));
+        return Group::find(1)->works();
     }
 
 

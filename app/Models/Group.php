@@ -62,4 +62,25 @@ class Group extends Model {
         ]);
         return $newMember->save();
     }
+
+    public function works($source = 'Aggregate') {
+        return Work::whereHas('authors', function ($query) {
+            $members = $this->members->map(function (Author $author) {
+                return $author->id;
+            });
+            $query->whereIn('author_id', $members);
+        })->source($source)->get();
+    }
+
+    public function countWorkSources() {
+        return Work::whereHas('authors', function ($query) {
+            $members = $this->members->map(function (Author $author) {
+                return $author->id;
+            });
+            $query->whereIn('author_id', $members);
+        })
+            ->groupBy('source')
+            ->selectRaw('source, count(*) as count')
+            ->get();
+    }
 }
