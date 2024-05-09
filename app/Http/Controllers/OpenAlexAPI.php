@@ -114,7 +114,7 @@ class OpenAlexAPI {
         $base_url = match ($id_type) {
             Ids::ORC_ID => self::$AUTHOR_BASE_URL . Ids::ORC_ID_FILTER_PREFIX . $id . self::$MAIL_TO,
             Ids::OPEN_ALEX => self::$AUTHOR_BASE_URL . $id . self::$MAIL_TO,
-            Ids::SCOPUS => self::$AUTHOR_BASE_FILTER_URL . Ids::SCOPUS_FILTER_PREFIX . $id . self::$MAIL_TO
+//            Ids::SCOPUS => self::$AUTHOR_BASE_FILTER_URL . Ids::SCOPUS_FILTER_PREFIX . $id . self::$MAIL_TO
         };
         $url = $base_url . (!$ignore_field_selection ? self::getFieldsToFetch(Author::class) : '');
         $author_response = Requests::get($url);
@@ -128,7 +128,7 @@ class OpenAlexAPI {
      * @param bool $ignore_field_selection
      * A boolean to indicate whether the fields ( specified in openAlex.php config file ) should be ignored.
      * !This will cause the query to return all the fields of the associated assets.
-     * @param bool $singleEntity
+     * @param bool $single_entity
      *  A boolean indicating whether to only return the first entity of the result ( when targeting a single asset, or the whole results array )
      *  defaults to false
      * @param array $additional_filters
@@ -137,7 +137,7 @@ class OpenAlexAPI {
      * The author asset ( if the id provided is valid and present in openAlex's database )
      */
     public static function authorFilterRequest($id,
-                                               bool $ignore_field_selection = false, bool $singleEntity = false, array $additional_filters = []): mixed {
+                                               bool $ignore_field_selection = false, bool $single_entity = false, array $additional_filters = []): mixed {
         $id_type = Ids::getIdType($id);
         // Retrieve all the author's data from the OpenAlex api
         $base_url = match ($id_type) {
@@ -147,7 +147,7 @@ class OpenAlexAPI {
         $url = $base_url . (!$ignore_field_selection ? self::getFieldsToFetch(Author::class) : '');
         $author_response = Requests::get($url);
 
-        return Requests::getFilterResponseBody($author_response, $singleEntity);
+        return Requests::getFilterResponseBody($author_response, $single_entity);
     }
 
     /**

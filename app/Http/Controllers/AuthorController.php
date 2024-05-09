@@ -8,8 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\{Inertia, Response};
 
 class AuthorController extends Controller {
-
-    public function showAuthorPage(Request $request, $id): Response {
+    public function index(Request $request, $id): Response {
         $author = Author::with(['statistics'])->openAlex($id)->firstOrFail();
 
         $orc_id_works = $author->works()->where('source', '=', Work::$orcIdSource)->count();

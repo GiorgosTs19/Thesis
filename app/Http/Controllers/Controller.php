@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuthorWork;
 use App\Models\Group;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -10,7 +11,7 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController {
     use AuthorizesRequests, ValidatesRequests;
 
-    public function testOrcIdAuthorRequest() {
+    public function test() {
 //        return OrcIdAPI::authorRequest('0000-0003-2366-1365');
 //        return Author::find(9)->syncWithOrcId();
 //        return Work::find(1)->syncWithDOI();
@@ -23,7 +24,7 @@ class Controller extends BaseController {
 //            $work->source = $work->orc_id_put_code !== null ? Work::$orcIdSource : Work::$openAlexSource;
 //            $work->save();
 //        }
-        return Group::find(1)->works();
+        return AuthorWork::isAuthor(2, 6);
     }
 
 

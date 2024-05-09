@@ -209,7 +209,7 @@ class WorkUtils {
      * @return Work|null - The newly created work if doi was defined and the work was successfully created, otherwise null.
      */
     public static function createDOIWork(string $doi, int $author_id): ?Work {
-        $doi_object = DOIAPI::doiRequest($doi);
+        $doi_object = DOIAPI::workRequest($doi);
 
         if (!$doi_object)
             return null;

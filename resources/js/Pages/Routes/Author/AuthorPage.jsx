@@ -140,7 +140,7 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
                 </div>
             </div>
             <div className={'line mb-4 flex flex-col border-y border-y-gray-200 py-3 xl:flex-row'}>
-                <div className={`my-auto flex flex-col xl:w-6/12 ${biographyPresent ? 'w-full ' : ''}`}>
+                <div className={`my-auto flex flex-col xl:w-6/12 ${biographyPresent ? `w-full overflow-y-auto ${showWholeBio ? 'sm:max-h-[400px]' : ''}` : ''}`}>
                     {biographyPresent ? (
                         <div className={clsx(styles.biographyWrapper, !showWholeBio ? styles.partialAbstract : '')} onClick={() => setShowWholeBio((prev) => !prev)}>
                             <div className={styles.biographyTitle}>

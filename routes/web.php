@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/', [HomeController::class, 'showHomePage'])->name('Home.Page');
-Route::get('/author/{id}', [AuthorController::class, 'showAuthorPage'])->name('Author.Page');
-Route::get('/work/{id}', [WorkController::class, 'showWorkPage'])->name('Work.Page');
+Route::get('/', [HomeController::class, 'index'])->name('Home.Page');
+Route::get('/author/{id}', [AuthorController::class, 'index'])->name('Author.Page');
+Route::get('/work/{id}', [WorkController::class, 'index'])->name('Work.Page');
 
 Route::prefix('search')->group(function () {
     Route::get('/', [SearchController::class, 'search'])->name('Search');
@@ -35,7 +35,7 @@ Route::prefix('search')->group(function () {
 
 // TODO Make sure only admins can access these routes ( when roles are implemented in THESIS-5 )
 Route::prefix('/groups')->group(function () {
-    Route::get('/', [GroupController::class, 'show'])->name('Groups.Page');
+    Route::get('/', [GroupController::class, 'index'])->name('Groups.Page');
     Route::get('/all', [GroupController::class, 'getAllGroups'])->name('Group.All');
     Route::get('/{id}', [GroupController::class, 'getGroup'])->name('Groups.Get.Group');
     Route::post('/create', [GroupController::class, 'create'])->name('Group.Create');
@@ -55,6 +55,7 @@ Route::prefix('/groups')->group(function () {
 Route::prefix('works')->group(function () {
     Route::get('/filter', [WorkController::class, 'filterWorks'])->name('Works.Filter');
     Route::get('/metadata', [WorkController::class, 'getMetadata'])->name('Works.Metadata');
+    Route::post('/hide', [WorkController::class, 'hideWork'])->name('Work.Hide');
 });
 
 Route::prefix('/auth')->group(function () {
@@ -69,6 +70,6 @@ Route::prefix('/success')->group(function () {
     Route::get('/authenticated', [\App\Http\Controllers\AuthenticationController::class, 'success'])->name('Success.Authentication');
 });
 
-Route::prefix('test')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Controller::class, 'testOrcIdAuthorRequest']);
+Route::prefix('/test')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Controller::class, 'test']);
 });

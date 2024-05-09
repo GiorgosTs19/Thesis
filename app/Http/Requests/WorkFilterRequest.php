@@ -26,7 +26,7 @@ class WorkFilterRequest extends FormRequest {
             'type_filter' => $this->query('type_filter'),
             'work_types' => $this->query('work_types'),
             'with' => $this->query('with', ['authors']),
-            'sort_by' => $this->query('sort_by', 'id'),
+            'sort_by' => $this->query('sort_by', 'title'),
             'sort_direction' => $this->query('sort_direction', 'asc')]);
     }
 

@@ -21,12 +21,12 @@ class OrcIdAPI {
     }
 
     /**
-     * @param $orcId_id - The OrcId id of the author
+     * @param $id - The OrcId id of the author
      * @return stdClass|null
      * The author's works assets ( if the id provided is valid and present in OrcId's database )
      */
-    public static function authorRequest($orcId_id): ?stdClass {
-        $url = self::$BASE_URL . $orcId_id;
+    public static function authorRequest($id): ?stdClass {
+        $url = self::$BASE_URL . $id;
         return self::extractFields(Requests::getResponseBody(Requests::get($url, ['Accept' => self::$ACCEPT_JSON])),
             self::AUTHOR_ASSET);
     }

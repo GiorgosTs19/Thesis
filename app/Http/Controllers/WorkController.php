@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\WorkFilterRequest;
 use App\Http\Resources\PaginatedWorkCollection;
 use App\Http\Resources\WorkResource;
+use App\Models\AuthorWork;
 use App\Models\Type;
 use App\Models\Work;
+use App\Utility\Auth;
+use App\Utility\Requests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class WorkController extends Controller {
-    public function showWorkPage(Request $request, $id): Response {
+    public function index(Request $request, $id): Response {
         $work = Work::with(['authors', 'statistics'])->find($id);
 
         return Inertia::render('Routes/Work/WorkPage', [
@@ -44,7 +47,7 @@ class WorkController extends Controller {
         $min_citations = array_key_exists('min_citations', $params) ? $params['min_citations'] : null;
         $max_citations = array_key_exists('max_citations', $params) ? $params['max_citations'] : null;
         $with = array_key_exists('with', $params) ? $params['with'] : [];
-        $sort_by = array_key_exists('sort_by', $params) ? $params['sort_by'] : 'id';
+        $sort_by = array_key_exists('sort_by', $params) ? $params['sort_by'] : 'title';
         $sort_direction = array_key_exists('sort_direction', $params) ? $params['sort_direction'] : 'asc';
         // For now, always load the versions
         $with_versions = in_array('versions', $with) || in_array(Work::$aggregateSource, $sources);
@@ -76,4 +79,30 @@ class WorkController extends Controller {
             'customTypes' => Type::all(['name', 'id']),
             'workTypes' => $work_Types];
     }
+
+    public function hideWork(Request $request): \Illuminate\Http\JsonResponse {
+
+        if(!$request->has('id'))
+            return Requests::missingParameterError('id');
+
+        $id = $request->only(['id'])['id'];
+
+        if(!$id) {
+            return Requests::missingParameterError('id');
+        }
+
+        if(!\Illuminate\Support\Facades\Auth::check())
+            return Requests::authenticationError();
+
+
+        if (!AuthorWork::isAuthor($author_id, $work_id))
+            return Requests::authorizationError();
+
+        if(AuthorWork::hideWork($author_id, $work_id))
+            return Requests::success('Work hidden successfully');
+
+        return Requests::serverError('Something went wrong');
+    }
+
+
 }

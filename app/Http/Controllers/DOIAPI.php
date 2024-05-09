@@ -18,7 +18,7 @@ class DOIAPI {
      * @param $doi - The DOI url of the work to be retrieved.
      * @return mixed|null
      */
-    public static function doiRequest($doi): mixed {
+    public static function workRequest($doi): mixed {
         return Requests::getResponseBody(Requests::get(Ids::toDxDoiUrl($doi), ['Accept' => self::$acceptJson]));
     }
 }

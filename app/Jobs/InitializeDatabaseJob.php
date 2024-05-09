@@ -71,14 +71,14 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
             $started_time = date("H:i:s");
             ULog::log("Database Initialization started at $started_time");
 
-            SystemManager::enableMaintenanceMode();
+//            SystemManager::enableMaintenanceMode();
 
             DB::transaction(function () {
                 WorkUtils::createTypes();
                 foreach ($this->professors as $professor) User::createProfUser($professor);
 
                 // Retrieve all the authors that are also users.
-                $user_authors = Author::user()->get();
+                $user_authors = Author::users()->get();
 
                 // Loop through all the authors, retrieve their works and parse them.
                 foreach ($user_authors as $user_author) {
@@ -93,7 +93,7 @@ class InitializeDatabaseJob implements ShouldQueue, ShouldBeUnique {
         } finally {
             $ended_time = date("H:i:s");
             ULog::log("Database Initialization ended at $ended_time");
-            SystemManager::disableMaintenanceMode();
+//            SystemManager::disableMaintenanceMode();
         }
     }
 

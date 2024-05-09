@@ -25,6 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property mixed orc_id
  * @property mixed $is_admin
  * @property mixed $is_staff
+ * @property mixed author_id
  * @method static orcId(string|null $orc_id)
  * @method static where(string $string, $orc_id)
  * @method static openAlex(string|null $open_alex_id)
@@ -49,6 +50,7 @@ class User extends Authenticatable {
         'scopus_id',
         'open_alex_id',
         'is_staff',
+        'author_id'
     ];
 
     /**
@@ -107,14 +109,8 @@ class User extends Authenticatable {
      */
     public static function createProfUser(array $professor): void {
         $id = $professor['id'];
-        // Check what type of id is used to fetch the author's info from OpenAlex api.
-        $id_type = Ids::getIdType($id);
 
-        $author = match ($id_type) {
-            Ids::ORC_ID, Ids::OPEN_ALEX => OpenAlexAPI::authorRequest($id),
-            // Using a filter request since OpenAlex can only find Authors by scopus using filters.
-            Ids::SCOPUS => OpenAlexAPI::authorFilterRequest($id, false, true)
-        };
+        $author = Ids::matchIdentifierToEndPoint($id);
 
         if (!$author)
             return;
@@ -133,15 +129,16 @@ class User extends Authenticatable {
         // Add all the parsed ids in an array
         $ids = [Ids::SCOPUS_ID => $scopus_id, Ids::ORC_ID_ID => $orc_id, Ids::OPEN_ALEX_ID => $open_alex_id];
 
-        // If a user with the same openAlex id exists. return;
-        if (self::openAlex($open_alex_id)->exists())
-            return;
-
-        // Else create a new user.
-        self::newProfessorUser($professor, $ids);
+//        // If a user with the same openAlex id exists. return;
+//        if (self::openAlex($open_alex_id)->exists())
+//            return;
+//
+//        // Else create a new user.
+//        self::newProfessorUser($professor, $ids);
 
         AuthorUtils::createOAAuthor($author, $ids, true);
     }
+
 
     /**
      * @param $professor
@@ -231,7 +228,7 @@ class User extends Authenticatable {
      * @return User
      * The newly created or existing user.
      */
-    public static function findOrUpdate(array $authenticatedUser): User {
+    public static function createOrUpdate(array $authenticatedUser): User {
         $user = null;
         try {
             $user = User::firstOrCreate(['external_id' => $authenticatedUser['id']], [
@@ -245,5 +242,15 @@ class User extends Authenticatable {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
         return $user;
+    }
+
+    public function author(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
+        return $this->belongsTo('author');
+    }
+
+    public function missingAllIdentifiers(): bool {
+        if($this->is_admin || !$this->is_staff)
+            return false;
+        return is_null($this->orc_id) && is_null($this->open_alex_id) && is_null($this->scopus_id);
     }
 }

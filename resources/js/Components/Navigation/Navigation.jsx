@@ -4,15 +4,15 @@ import React, { Fragment } from 'react';
 import Search from '@/Components/Search/Search.jsx';
 import clsx from 'clsx';
 import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
-import { Button } from 'flowbite-react';
+import {Button, Dropdown} from 'flowbite-react';
 
 export function Navigation() {
-    const { pendingCheck, isLoggedIn, user } = useAuth();
+    const { pendingCheck, isLoggedIn, user, logout } = useAuth();
 
     const navigation = [
-        { name: 'Authors', href: '#', current: false, disabled: true },
-        { name: 'Works', href: '#', current: false, disabled: true },
-        { name: 'Groups', href: route('Groups.Page'), current: window.location.href === route('Groups.Page'), disabled: false },
+        { name: 'Authors', href: '#', current: false, disabled: true, visible:false },
+        { name: 'Works', href: '#', current: false, disabled: true, visible:false },
+        { name: 'Groups', href: route('Groups.Page'), current: window.location.href === route('Groups.Page'), disabled: false, visible: isLoggedIn },
     ];
 
     const logo = (
@@ -36,7 +36,7 @@ export function Navigation() {
                                     {logo}
                                     {navigation.map(
                                         (item) =>
-                                            !item.disabled && (
+                                            !item.disabled && item.visible && (
                                                 <a
                                                     key={item.name}
                                                     href={item.href}
@@ -72,7 +72,10 @@ export function Navigation() {
                                         <>
                                             <>{searchVisible && <Search />}</>
                                             {isLoggedIn ? (
-                                                <span className={'align-items-center my-auto text-center'}>{user.displayName}</span>
+                                                    <Dropdown label="" dismissOnClick={false} renderTrigger={() => <span
+                                                        className={'align-items-center my-auto text-center cursor-pointer'}>{user.displayName}</span>}>
+                                                        <Dropdown.Item onClick={()=>logout()}>Logout</Dropdown.Item>
+                                                    </Dropdown>
                                             ) : (
                                                 <a href={route('Auth.Login')} className={'align-items-center my-auto text-center'}>
                                                     Login
@@ -80,11 +83,6 @@ export function Navigation() {
                                             )}
                                         </>
                                     )}
-                                    {/*<button type="button" className={styles.notificationsButton}>*/}
-                                    {/*    <span className="absolute -inset-1.5"/>*/}
-                                    {/*    <span className="sr-only">View notifications</span>*/}
-                                    {/*    <BellIcon className="h-6 w-6" aria-hidden="true"/>*/}
-                                    {/*</button>*/}
                                 </div>
                                 <Menu as="div" className="relative ml-3">
                                     <Menu.Button className={styles.menuButton}>
@@ -111,7 +109,7 @@ export function Navigation() {
                                 </Menu>
                             </div>
                             <div className="-mr-2 flex md:hidden">
-                                {searchVisible && <Search />}
+                                    {searchVisible && <Search />}
                                 <Disclosure.Button className={styles.disclosureButton}>
                                     <span className="absolute -inset-0.5" />
                                     <span className="sr-only">Open main menu</span>
@@ -139,22 +137,23 @@ export function Navigation() {
                                     ),
                             )}
                         </div>
-                        {/*<div className="border-t border-gray-700 pb-3 pt-2">*/}
-                        {/*    <div className="mt-2 space-y-1 px-2">*/}
-                        {/*        <div className="ml-3">*/}
-                        {/*            <div*/}
-                        {/*                className="text-base font-medium leading-none text-white">{user.name}</div>*/}
-                        {/*            <div*/}
-                        {/*                className="text-sm font-medium leading-none text-gray-400">{user.email}</div>*/}
-                        {/*        </div>*/}
-                        {/*        {userNavigation.map((item) => (*/}
-                        {/*            <Disclosure.Button key={item.name} as="a" href={item.href}*/}
-                        {/*                               className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">*/}
-                        {/*                {item.name}*/}
-                        {/*            </Disclosure.Button>*/}
-                        {/*        ))}*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
+                        <div className="border-t border-gray-700 pb-3 pt-2">
+                            <div className="mt-2 space-y-1 px-2">
+                                <div className="ml-3">
+                                    {isLoggedIn ? (
+                                        <span className={'align-items-center my-auto text-center'}>{user.displayName}</span>
+                                    ) : (
+                                        <a href={route('Auth.Login')} className={'align-items-center my-auto text-center'}>
+                                            Login
+                                        </a>
+                                    )}
+                                </div>
+                                    <Disclosure.Button key={'logout'} as="button" onClick={()=>console.log('Logout pressed')}
+                                                       className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">
+                                        Logout
+                                    </Disclosure.Button>
+                            </div>
+                        </div>
                     </Disclosure.Panel>
                 </>
             )}

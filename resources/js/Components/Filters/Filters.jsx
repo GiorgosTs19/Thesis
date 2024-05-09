@@ -112,8 +112,7 @@ const Filters = ({ onOpen, filters, dispatch, authors, noModal = false }) => {
                     <div className="mb-2 block">
                         <Label htmlFor="sortBy" value="Sort By" />
                     </div>
-                    <Select id="sortBy" required onChange={handleSelectSortBy} value={filters.sort_by ?? 'id'}>
-                        <option value={'id'}>ID</option>
+                    <Select id="sortBy" required onChange={handleSelectSortBy} value={filters.sort_by ?? 'title'}>
                         <option value={'doi'}>DOI</option>
                         <option value={'title'}>Title</option>
                         <option value={'publication_year'}>Publication Year</option>

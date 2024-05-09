@@ -4,6 +4,7 @@ namespace App\Utility;
 
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
 class Requests {
@@ -24,17 +25,34 @@ class Requests {
         return Http::withoutVerifying()->withHeaders($headers)->get($url);
     }
 
-    public static function success($message, $data = [], $code = 200): array {
-        return ['ok' => true, 'success' => $message, 'code' => $code, 'data' => $data];
+    public static function success($message, $data = [], $code = 200): JsonResponse {
+        return response()->json(['ok' => true, 'success' => $message, 'code' => $code, 'data' => $data], $code);
     }
 
-    public static function clientError($message, $code = 400, $data = []): array {
-        return ['ok' => false, 'error' => $message, 'code' => $code, 'data' => $data];
+    public static function clientError($message, $code = 400, $data = []): JsonResponse {
+        return response()->json(['ok' => false, 'error' => $message, 'code' => $code, 'data' => $data], $code);
     }
 
-    public static function serverError($message, $code = 500, $data = []): array {
-        return ['ok' => false, 'error' => $message, 'code' => $code, 'data' => $data];
+    public static function serverError($message, $code = 500, $data = []): JsonResponse {
+        return response()->json(['ok' => false, 'error' => $message, 'code' => $code, 'data' => $data], $code);
     }
+
+    public static function missingParameterError($parameter): JsonResponse {
+        return response()->json(['ok' => false, 'error' => "Parameter $parameter is marked as required", 'code' => 401, 'data' => []],401);
+    }
+
+    /**
+     * Returns an Authentication Error response.
+     * @return JsonResponse.
+     */
+    public static function authenticationError(): JsonResponse {
+        return response()->json(['ok' => false, 'error' => 'You need to be logged in to perform this action.', 'code' => 401, 'data' => []],401);
+    }
+
+    public static function authorizationError(): JsonResponse {
+        return response()->json(['ok' => false, 'error' => 'You are not authorized to perform this action.', 'code' => 403, 'data' => []],403);
+    }
+
 
     public static function getResponseBody($response) {
         return $response ? json_decode($response->body()) : null;

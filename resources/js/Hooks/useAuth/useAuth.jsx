@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [pendingCheck, setPendingCheck] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
-
+    
     const api = useAPI();
 
     useEffect(() => {
@@ -31,8 +31,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        // Logic for user logout
-        setUser(null);
+        api.auth.logout().then(()=> {
+            setUser(null);
+            setIsLoggedIn(false)
+        });
     };
 
     return <AuthContext.Provider value={{ pendingCheck, isLoggedIn, user, isAdmin, login, logout }}>{children}</AuthContext.Provider>;

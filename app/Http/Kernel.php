@@ -10,6 +10,7 @@ use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\ValidateSignature;
+use App\Http\Middleware\VerifyAuthorIdentifiers;
 use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
@@ -56,6 +57,7 @@ class Kernel extends HttpKernel {
             StartSession::class,
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
+            VerifyAuthorIdentifiers::class,
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,

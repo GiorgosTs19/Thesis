@@ -36,13 +36,12 @@ class GroupController extends Controller {
         return GroupResource::collection(Group::noParent()->noMembers()->with(['childrenRecursive'])->get());
     }
 
-
     /**
      *  Handles the request to show the groups page.
      * Retrieves all the groups ( with minimal info for each of them and no relationships loaded )
      * @return Response - Renders the groups page.
      */
-    public function show(): Response {
+    public function index(): Response {
         return Inertia::render('Routes/Groups/GroupsPage');
     }
 
@@ -56,13 +55,13 @@ class GroupController extends Controller {
      */
     public function getGroup(Request $request, $id): JsonResponse {
         if (!isset($id)) {
-            return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
+            return Requests::missingParameterError('id');
         }
 
         $group = Group::with('members', 'parent', 'members.statistics')->withCount('members')->find($id);
 
         if (!$group) {
-            return response()->json(Requests::clientError('A group with this id does not exist', 200));
+            return Requests::clientError('A group with this id does not exist', 200);
         }
 
         $success = !!$group;
@@ -84,24 +83,24 @@ class GroupController extends Controller {
         })->source(Work::$crossRefSource)->count();
 
 
-        return $success ? response()->json(Requests::success('Group retrieved successfully',
+        return $success ? Requests::success('Group retrieved successfully',
             ['group' => new GroupResource($group, [
                 'orcid_works' => $orc_id_works,
                 'open_alex_works' => $open_alex_works,
                 'crossref_works' => $crossref_works
-            ])]))
-            : response()->json(Requests::serverError("Something went wrong"), 500);
+            ])])
+            : Requests::serverError("Something went wrong");
     }
 
     public function getOmeaAuthorStats(Request $request, $id): JsonResponse {
         if (!isset($id)) {
-            return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
+            return Requests::missingParameterError('id');
         }
 
         $group = Group::with('members', 'parent', 'members.statistics')->withCount('members')->find($id);
 
         if (!$group) {
-            return response()->json(Requests::clientError('A group with this id does not exist', 200));
+            return Requests::clientError('A group with this id does not exist', 200);
         }
 
         $success = false;
@@ -122,20 +121,20 @@ class GroupController extends Controller {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
 
-        return $success ? response()->json(Requests::success('Group author stats retrieved successfully',
-            ['countsPerAuthor' => $source_counts]))
-            : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? Requests::success('Group author stats retrieved successfully',
+            ['countsPerAuthor' => $source_counts])
+            : Requests::serverError("Something went wrong");
     }
 
     public function getOmeaTypeStats(Request $request, $id, $min = null, $max = null): JsonResponse {
         if (!isset($id)) {
-            return response()->json(Requests::clientError('The id parameter is marked as required'), 400);
+            return Requests::clientError('The id parameter is marked as required');
         }
 
         $group = Group::with('members', 'parent', 'members.statistics')->withCount('members')->find($id);
 
         if (!$group) {
-            return response()->json(Requests::clientError('A group with this id does not exist', 200));
+            return Requests::clientError('A group with this id does not exist', 200);
         }
 
         $type_counts = new stdClass();
@@ -177,10 +176,10 @@ class GroupController extends Controller {
             $success = false;
         }
 
-        return $success ? response()->json(Requests::success('Group type stats retrieved successfully',
+        return $success ? Requests::success('Group type stats retrieved successfully',
             ['typeStatistics' => $type_counts, 'minAllowedYear' => $min_allowed, 'maxAllowedYear' => $max_allowed, 'requestedMin' => $min_pub_year,
-                'requestedMax' => $max_pub_year]))
-            : response()->json(Requests::serverError("Something went wrong"), 500);
+                'requestedMax' => $max_pub_year])
+            : Requests::serverError("Something went wrong");
     }
 
     /**
@@ -199,8 +198,8 @@ class GroupController extends Controller {
         ]);
 
         $success = $new_group->save();
-        return $success ? response()->json(Requests::success('Group created successfully', ['group' => new GroupResource($new_group->load(['members', 'parent']))]))
-            : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? Requests::success('Group created successfully', ['group' => new GroupResource($new_group->load(['members', 'parent']))])
+            : Requests::serverError("Something went wrong");
     }
 
     /**
@@ -214,8 +213,8 @@ class GroupController extends Controller {
 
         $success = $Group->delete();
 
-        return $success ? response()->json(Requests::success('Group deleted successfully'))
-            : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? Requests::success('Group deleted successfully')
+            : Requests::serverError("Something went wrong");
     }
 
     /**
@@ -242,8 +241,8 @@ class GroupController extends Controller {
             $success = $Group->addMember($author);
         }
 
-        return $success ? response()->json(Requests::success((sizeof($authors) === 1 ? 'Member' : 'Members') . ' added successfully'))
-            : response()->json(Requests::serverError("Something went wrong"), 500);
+        return $success ? Requests::success((sizeof($authors) === 1 ? 'Member' : 'Members') . ' added successfully')
+            : Requests::serverError("Something went wrong");
     }
 
     /**
@@ -259,6 +258,6 @@ class GroupController extends Controller {
         $existing_member = AuthorGroup::entry($request->safe()->only(['group_id'])['group_id'], $request->safe()->only(['author_id'])['author_id'])->first();
 
         $success = $existing_member->delete();
-        return $success ? response()->json(Requests::success('Member removed successfully')) : response()->json(Requests::clientError('Something went wrong'), 400);
+        return $success ? Requests::success('Member removed successfully') : Requests::clientError('Something went wrong');
     }
 }

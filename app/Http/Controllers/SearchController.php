@@ -47,7 +47,8 @@ class SearchController extends Controller {
             'error' => null
         ];
 
-        return redirect()->back()->with(['searchResults' => $results]);
+        return Requests::success('Success',
+            ['searchResults' => $results]);
     }
 
     public function searchUsers(Request $request): RedirectResponse {
@@ -68,7 +69,7 @@ class SearchController extends Controller {
     public function searchAuthorUsers(Request $request): RedirectResponse {
         $query = $request->input('query');
 
-        $authorResults = Author::user()->searchName($query)
+        $authorResults = Author::users()->searchName($query)
             ->searchOpenAlex($query)
             ->searchScopus($query)
             ->searchOrcId($query)->limit(5)
@@ -91,16 +92,16 @@ class SearchController extends Controller {
 
         // If there's no valid group id just return an empty array.
         if (!$group_id) {
-            return response()->json(Requests::clientError('The group_id parameter is marked as required', 200));
+            return Requests::missingParameterError('group_id');
         }
 
         // Make sure to exclude the authors who are already members of that group
         $authors_to_exclude = Group::find($group_id)->members()->pluck('author_id');
 
         if (!$query) {
-            $author_results = Author::user()->whereNotIn('id', $authors_to_exclude)->get();
+            $author_results = Author::users()->whereNotIn('id', $authors_to_exclude)->get();
         } else {
-            $author_results = Author::user()->whereNotIn('id', $authors_to_exclude)->searchName($query)
+            $author_results = Author::users()->whereNotIn('id', $authors_to_exclude)->searchName($query)
                 ->searchOpenAlex($query)
                 ->searchScopus($query)
                 ->searchOrcId($query)->limit(5)
@@ -108,12 +109,12 @@ class SearchController extends Controller {
         }
 
         return
-            response()->json(Requests::success('Group retrieved successfully',
+            Requests::success('Group retrieved successfully',
                 ['searchResults' => [
                     'query' => $query,
                     'authors' => AuthorResource::collection($author_results),
                     'error' => null
                 ]
-                ]));
+                ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Utility;
 
+use App\Http\Controllers\OpenAlexAPI;
 use Illuminate\Support\Facades\Config;
 
 class Ids {
@@ -216,5 +217,20 @@ class Ids {
      */
     public static function formOrcIdUrl(string $path, bool $removeTrailingSlash = true): string {
         return ($removeTrailingSlash ? rtrim(self:: $orcIdBaseUrl, '/') : self:: $orcIdBaseUrl) . $path;
+    }
+
+    /**
+     * @param $id - The id provided for the staff entry.
+     * @return mixed - The response from the request to the OpenAlex repository.
+     */
+    public static function matchIdentifierToEndPoint($id): mixed {
+        // Check what type of id is used to fetch the author's info from OpenAlex api.
+        $id_type = Ids::getIdType($id);
+
+        return match ($id_type) {
+            Ids::ORC_ID, Ids::OPEN_ALEX => OpenAlexAPI::authorRequest($id),
+            // Using a filter request since OpenAlex can only find Authors by scopus using filters.
+            Ids::SCOPUS => OpenAlexAPI::authorFilterRequest($id, false, true)
+        };
     }
 }

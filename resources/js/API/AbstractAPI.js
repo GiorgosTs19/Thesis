@@ -13,7 +13,7 @@ export class AbstractAPI {
     }
 
     async get(endpoint) {
-        return fetch(endpoint, { method: 'GET', headers }).then((response) => {
+        return fetch(endpoint, { method: 'GET', headers, credentials:'include' }).then((response) => {
             // * Check if the request was unsuccessful and raise the appropriate error.
             if (!response.ok && response.status !== 422) {
                 return handleAPIError(response);
@@ -28,6 +28,7 @@ export class AbstractAPI {
         return fetch(endpoint, {
             method: 'POST',
             headers,
+            credentials:'include',
             body: JSON.stringify(data),
         }).then((response) => {
             // * Check if the request was unsuccessful and raise the appropriate error.
@@ -44,6 +45,7 @@ export class AbstractAPI {
         return fetch(endpoint, {
             method: 'PATCH',
             headers,
+            credentials:'include',
             body: JSON.stringify(data),
         }).then((response) => {
             // * Check if the request was unsuccessful and raise the appropriate error.
@@ -59,6 +61,7 @@ export class AbstractAPI {
     async delete(endpoint) {
         return fetch(endpoint, {
             method: 'DELETE',
+            credentials:'include',
         }).then((response) => {
             // * Check if the request was unsuccessful and raise the appropriate error.
             if (!response.ok && response.status !== 422) {

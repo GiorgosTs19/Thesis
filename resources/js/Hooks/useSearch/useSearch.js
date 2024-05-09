@@ -39,14 +39,6 @@ const useSearch = (params = {}) => {
 
         let url = route('Search');
 
-        // TODO: Uncomment when THESIS-7 is done
-        // if (onlyWorks) {
-        //     url = route('Search.Users');
-        // }
-        // if (onlyUsers) {
-        //     url = route('Search.Users');
-        // }
-
         if (onlyUserAuthors) {
             url = route('Search.Authors.Users.Group');
         }

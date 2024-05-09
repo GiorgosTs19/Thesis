@@ -120,7 +120,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
     return (
         <li className={styles.li}>
             <Modal show={versionsOpen} onClose={() => setVersionsOpen(false)} ref={modalRef} style={{ zIndex: 9999 }}>
-                <Modal.Header>{title} Versions</Modal.Header>
+                <Modal.Header>{title}</Modal.Header>
                 <Modal.Body>
                     <div className={'mb-5 text-center text-gray-400 opacity-85'}>
                         {versions.length} more {versions.length < 2 ? 'version' : 'versions'} of this work
@@ -150,7 +150,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                         </div>
                         {!containsKey(hiddenProperties, PROPERTIES.VERSIONS) && versions.length > 0 && (
                             <div className={'cursor-pointer pl-3 text-xs text-blue-500 hover:underline md:text-sm'} onClick={handleOpenVersions}>
-                                ( + {versions.length} {versions.length < 2 ? 'version' : 'versions'} )
+                                (+{versions.length} {versions.length < 2 ? 'version' : 'versions'})
                             </div>
                         )}
                     </div>

@@ -22,6 +22,7 @@ use Illuminate\Support\{Facades\Auth, Facades\Config};
  * @method static mostCitations(int $int)
  * @method static where(string $external_id_name, $external_id)
  * @method static count()
+ * @method static users()
  *
  * @property int id
  * @property string orc_id
@@ -94,7 +95,7 @@ class Author extends Model {
      * "1" for authors that are also users and "0" for those who are not.
      * @return mixed
      */
-    public function scopeUser($query, int $is_user = 1): mixed {
+    public function scopeUsers($query, int $is_user = 1): mixed {
         return $query->where('is_user', $is_user);
     }
 
@@ -151,7 +152,6 @@ class Author extends Model {
      * @return void
      */
     public function updateSelf(): void {
-
         $request_author = OpenAlexAPI::authorUpdateRequest($this->open_alex_id);
 
         if ($request_author->works_count !== $this->works_count) {
@@ -173,7 +173,6 @@ class Author extends Model {
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
-
 
         $year_to_update = date('Y');
         $db_statistic = $this->statistics()
@@ -331,5 +330,9 @@ class Author extends Model {
      */
     public function works(): BelongsToMany {
         return $this->belongsToMany(Work::class, 'author_work');
+    }
+
+    public function user(): \Illuminate\Database\Eloquent\Relations\HasOne {
+       return $this->hasOne('user');
     }
 }

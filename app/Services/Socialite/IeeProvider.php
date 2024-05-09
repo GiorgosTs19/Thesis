@@ -13,15 +13,15 @@ class IeeProvider extends AbstractProvider implements ProviderInterface {
     protected $scopes = ['profile']; // Define the scopes required by your OAuth provider
 
     protected function getAuthUrl($state): string {
-        return $this->buildAuthUrlFromBase('https://login.iee.ihu.gr/authorization', $state);
+        return $this->buildAuthUrlFromBase(env('AUTHORIZATION_URL'), $state);
     }
 
     protected function getTokenUrl(): string {
-        return 'https://login.iee.ihu.gr/token';
+        return env('TOKEN_BASE_URL');
     }
 
     protected function getUserByToken($token): array {
-        $user_url = 'https://api.iee.ihu.gr/profile?access_token=' . $token;
+        $user_url = env('IEE_PROFILE_URL') . $token;
         $user = Requests::getResponseBody(Requests::get($user_url));
         return Auth::resourceToArray($user);
     }
