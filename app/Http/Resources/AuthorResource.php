@@ -22,7 +22,7 @@ use Illuminate\Support\Carbon;
  * @property mixed $id
  * @property mixed $biography
  */
-class AuthorResource extends JsonResource {
+class  AuthorResource extends JsonResource {
     /**
      * Transform the resource into an array.
      *

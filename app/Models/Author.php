@@ -8,6 +8,7 @@ use App\Utility\{Ids, ULog, WorkUtils};
 use Exception;
 use Illuminate\Database\{Eloquent\Factories\HasFactory,
     Eloquent\Model,
+    Eloquent\Relations\BelongsTo,
     Eloquent\Relations\BelongsToMany,
     Eloquent\Relations\MorphMany};
 use Illuminate\Support\{Facades\Auth, Facades\Config};
@@ -332,7 +333,7 @@ class Author extends Model {
         return $this->belongsToMany(Work::class, 'author_work');
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\HasOne {
-       return $this->hasOne('user');
+    public function user(): BelongsTo {
+        return $this->belongsTo(User::class);
     }
 }

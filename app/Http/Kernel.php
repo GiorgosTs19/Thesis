@@ -57,7 +57,6 @@ class Kernel extends HttpKernel {
             StartSession::class,
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
-            VerifyAuthorIdentifiers::class,
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
@@ -90,5 +89,6 @@ class Kernel extends HttpKernel {
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,
+        'identified' => VerifyAuthorIdentifiers::class
     ];
 }

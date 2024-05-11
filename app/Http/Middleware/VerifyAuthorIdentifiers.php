@@ -11,15 +11,19 @@ class VerifyAuthorIdentifiers {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response {
-//        if(!Auth::user()->isStaff())
+        if (!Auth::check() || !Auth::user()->isStaff())
             return $next($request);
 
-//        if(Auth::user()->missingAllIdentifiers())
-//            return to_route('Auth.Verify.Author');
+        // Get the current route name
+        $currentRoute = $request->route()->getName();
 
-//        return $next($request);
+        // Check if the user is missing all identifiers and not already on the verify author page
+//        if (Auth::user()->missingAllIdentifiers() && $currentRoute !== 'Auth.Verify.Author')
+//            return redirect()->route('Auth.Verify.Author');
+
+        return $next($request);
     }
 }

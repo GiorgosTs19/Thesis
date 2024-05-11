@@ -18,7 +18,6 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
  * @method lastItem()
  */
 class PaginatedWorkCollection extends ResourceCollection {
-
     protected bool $shouldLoadVersions;
 
     public function __construct($resource, bool $loadVersions = true) {

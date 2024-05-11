@@ -3,10 +3,13 @@
 namespace App\Http\Resources;
 
 
+use App\Models\AuthorWork;
+use App\Models\User;
 use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property mixed publication_year
@@ -29,7 +32,6 @@ use Illuminate\Support\Carbon;
  * @method versions()
  */
 class WorkResource extends JsonResource {
-
     private function getSources(): string {
         if ($this->source !== Work::$aggregateSource)
             return $this->source;
@@ -56,6 +58,7 @@ class WorkResource extends JsonResource {
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array {
+        $authenticated_user = User::with('author')->find(Auth::user()->id);
 
         return [
             'id' => $this->id,
@@ -76,13 +79,13 @@ class WorkResource extends JsonResource {
             'statistics' => StatisticResource::collection($this->whenLoaded('statistics')),
             'external_id' => $this->external_id,
             'local_url' => route('Work.Page', ['id' => $this->id]),
-            'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
+//            'concepts' => ConceptResource::collection($this->whenLoaded('concepts')),
             'source' => self::getSources(),
             'versions' => $this->when($this->loadVersions, new WorkCollection($this->versions, false), []),
             'is_aggregated' => $this->source === Work::$aggregateSource,
             'authors_string' => $this->authors_string,
             'authors_as_string' => !!$this->authors_string,
-//            'editable' =>
+            'editable' => Auth::check() && AuthorWork::isAuthor($authenticated_user->author->id, $this->id)
         ];
     }
 }

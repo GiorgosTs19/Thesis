@@ -10,7 +10,7 @@ const NewEmptyGroup = ({ group }) => {
 
     return (
         <Card className={'m-auto flex'}>
-            <div className={'my-2 text-center text-lg font-bold'}> Get Started with your new Group</div>
+            <div className={'my-2 text-center text-lg font-bold'}> Get started with your new group</div>
             <div className={'mx-auto w-8/12 text-wrap text-center text-lg'}>Add authors to your group to keep tabs on works, citation sources, and other key statistics</div>
             <AiOutlineUsergroupAdd className={'mx-auto my-2'} size={42} />
             {open ? (

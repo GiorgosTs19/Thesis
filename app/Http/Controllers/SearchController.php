@@ -3,15 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AuthorResource;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\WorkResource;
 use App\Models\Author;
 use App\Models\Group;
-use App\Models\User;
 use App\Models\Work;
 use App\Utility\Requests;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -51,41 +48,6 @@ class SearchController extends Controller {
             ['searchResults' => $results]);
     }
 
-    public function searchUsers(Request $request): RedirectResponse {
-        $query = $request->input('query');
-        $userResults = User::searchOpenAlex($query)->searchOrcId($query)->searchScopus($query)->searchName($query)->searchEmail($query)->limit(5)->get();
-
-        $results = [
-            'query' => $query,
-            'authors' => [],
-            'works' => [],
-            'users' => UserResource::collection($userResults),
-            'error' => null
-        ];
-
-        return redirect()->back()->with(['searchResults' => $results]);
-    }
-
-    public function searchAuthorUsers(Request $request): RedirectResponse {
-        $query = $request->input('query');
-
-        $authorResults = Author::users()->searchName($query)
-            ->searchOpenAlex($query)
-            ->searchScopus($query)
-            ->searchOrcId($query)->limit(5)
-            ->get();
-
-        $results = [
-            'query' => $query,
-            'authors' => AuthorResource::collection($authorResults),
-            'works' => [],
-            'users' => [],
-            'error' => null
-        ];
-
-        return redirect()->back()->with(['searchResults' => $results]);
-    }
-
     public function searchWhereNotInGroup(Request $request): JsonResponse {
         $query = $request->query('query');
         $group_id = $request->query('group');
@@ -118,3 +80,40 @@ class SearchController extends Controller {
                 ]);
     }
 }
+
+//public function searchUsers(Request $request): JsonResponse {
+//    $query = $request->input('query');
+//    $userResults = User::searchOpenAlex($query)->searchOrcId($query)->searchScopus($query)->searchName($query)->searchEmail($query)->limit(5)->get();
+//
+//    $results = [
+//        'query' => $query,
+//        'authors' => [],
+//        'works' => [],
+//        'users' => UserResource::collection($userResults),
+//        'error' => null
+//    ];
+//
+//    return Requests::success('Success',
+//        ['searchResults' => $results]);
+//}
+//
+//public function searchAuthorUsers(Request $request): JsonResponse {
+//    $query = $request->input('query');
+//
+//    $authorResults = Author::users()->searchName($query)
+//        ->searchOpenAlex($query)
+//        ->searchScopus($query)
+//        ->searchOrcId($query)->limit(5)
+//        ->get();
+//
+//    $results = [
+//        'query' => $query,
+//        'authors' => AuthorResource::collection($authorResults),
+//        'works' => [],
+//        'users' => [],
+//        'error' => null
+//    ];
+//
+//    return Requests::success('Success',
+//        ['searchResults' => $results]);
+//}

@@ -14,6 +14,7 @@ import { Work } from '@/Models/Work/Work.js';
 import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
 import Filters from '@/Components/Filters/Filters.jsx';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
+import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 
 const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
@@ -23,6 +24,7 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const authors = useMemo(() => [authorObject], [authorObject]);
     const { filters, dispatch } = useWorkFilters({ authors: authors });
     const api = useAPI();
+    const { user } = useAuth();
 
     const handleFetchWorks = useCallback(() => {
         return api.works.filterWorks(filters).then((res) => {
@@ -96,7 +98,7 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
 
     const renderWorkItem = useCallback(
         (work, index) => {
-            return <WorkItem work={work} key={work.id} index={index} />;
+            return <WorkItem work={work} key={work.id} index={index} showUserOptions={authorObject.id === user?.author.id} />;
         },
         [authorWorks],
     );

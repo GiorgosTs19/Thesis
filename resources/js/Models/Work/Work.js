@@ -61,6 +61,7 @@ export class Work {
         isAggregated,
         authorsString,
         authorsAsString,
+        editable,
     }) {
         this.title = title;
         this.id = id;
@@ -85,6 +86,7 @@ export class Work {
         this.isAggregated = isAggregated;
         this.authorsString = authorsString;
         this.authorsAsString = authorsAsString;
+        this.editable = editable;
     }
 
     static parseResponseWork({
@@ -111,6 +113,7 @@ export class Work {
         is_aggregated,
         authors_string,
         authors_as_string,
+        editable,
     }) {
         let authorsArray = authors ? authors.map((author) => Author.parseResponseAuthor(author)) : [];
         if (!authorsArray.length && authors_as_string)
@@ -143,6 +146,7 @@ export class Work {
             isAggregated: is_aggregated,
             authorsString: authors_string?.replace(/, (?=$)/, ''),
             authorsAsString: authors_as_string,
+            editable,
         });
     }
 

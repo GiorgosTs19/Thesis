@@ -205,7 +205,7 @@ const styles = {
     addIcon: 'bg-white hover:bg-gray-100 text-gray-800 font-semibold py-1 px-4 border border-gray-400 rounded-full shadow cursor-pointer flex w-fit gap-3 mx-auto',
     modalBody: 'p-3 bg-white rounded-b-2xl',
     searchResultList: 'max-h-[22rem] overflow-y-auto',
-    selectedAuthorBadges: 'flex gap-5 flex-wrap border-b border-b-gray-200 pb-3 max-h-32 overflow-y-auto',
+    selectedAuthorBadges: 'flex gap-5 flex-wrap border-b border-b-gray-200 p-3 max-h-32 overflow-y-auto',
     noAuthorsSelected: 'mx-auto mt-2 mb-4 opacity-90 text-gray-600',
     authorSearchTip: 'text-sm opacity-80 text-gray-700 text-center',
 };

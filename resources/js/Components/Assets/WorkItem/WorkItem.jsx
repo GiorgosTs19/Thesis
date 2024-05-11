@@ -133,7 +133,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 </Modal.Body>
             </Modal>
             <div className={'mb-5 flex h-fit flex-grow list-none '}>
-                {showUserOptions && <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />}
+                {showUserOptions && work.editable && <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />}
                 <div className={styles.index}>
                     {index}
                     {getSourceIcon()}

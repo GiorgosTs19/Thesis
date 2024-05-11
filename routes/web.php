@@ -13,9 +13,13 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/', [HomeController::class, 'index'])->name('Home.Page');
-Route::get('/author/{id}', [AuthorController::class, 'index'])->name('Author.Page');
-Route::get('/work/{id}', [WorkController::class, 'index'])->name('Work.Page');
+
+Route::middleware('identified')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('Home.Page');
+    Route::get('/author/{id}', [AuthorController::class, 'index'])->name('Author.Page');
+    Route::get('/work/{id}', [WorkController::class, 'index'])->name('Work.Page');
+    Route::get('/groups', [GroupController::class, 'index'])->name('Groups.Page');
+});
 
 Route::prefix('search')->group(function () {
     Route::get('/', [SearchController::class, 'search'])->name('Search');
@@ -35,7 +39,7 @@ Route::prefix('search')->group(function () {
 
 // TODO Make sure only admins can access these routes ( when roles are implemented in THESIS-5 )
 Route::prefix('/groups')->group(function () {
-    Route::get('/', [GroupController::class, 'index'])->name('Groups.Page');
+
     Route::get('/all', [GroupController::class, 'getAllGroups'])->name('Group.All');
     Route::get('/{id}', [GroupController::class, 'getGroup'])->name('Groups.Get.Group');
     Route::post('/create', [GroupController::class, 'create'])->name('Group.Create');

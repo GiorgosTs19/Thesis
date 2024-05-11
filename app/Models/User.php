@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\OpenAlexAPI;
 use App\Utility\AuthorUtils;
 use App\Utility\Ids;
 use App\Utility\ULog;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -31,6 +31,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static openAlex(string|null $open_alex_id)
  * @method static searchOpenAlex(mixed $query)
  * @method static firstOrCreate(array $array, array $array1)
+ * @method static find($id)
  */
 class User extends Authenticatable {
     use HasApiTokens, HasFactory, Notifiable;
@@ -244,12 +245,12 @@ class User extends Authenticatable {
         return $user;
     }
 
-    public function author(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
-        return $this->belongsTo('author');
+    public function author(): BelongsTo {
+        return $this->belongsTo(Author::class);
     }
 
     public function missingAllIdentifiers(): bool {
-        if($this->is_admin || !$this->is_staff)
+        if ($this->is_admin || !$this->is_staff)
             return false;
         return is_null($this->orc_id) && is_null($this->open_alex_id) && is_null($this->scopus_id);
     }

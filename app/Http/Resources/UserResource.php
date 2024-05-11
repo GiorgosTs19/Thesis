@@ -35,6 +35,7 @@ class UserResource extends JsonResource {
             'orcId' => $this->orc_id,
             'scopus' => $this->scopus_id,
             'openAlex' => $this->open_alex_id,
+            'author' => $this->author ? new AuthorResource($this->author) : null
         ];
     }
 }

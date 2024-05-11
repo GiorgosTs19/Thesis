@@ -22,7 +22,7 @@ class AuthenticationController extends Controller {
     public function handleIEECallback(): \Illuminate\Foundation\Application|Redirector|RedirectResponse|Application {
         $user = User::createOrUpdate(Socialite::driver('iee')->user()->attributes);
         Auth::login($user, true);
-        if($user->missingAllIdentifiers() && !$user->isAdmin())
+        if ($user->missingAllIdentifiers() && !$user->isAdmin())
             return redirect(route('Auth.Verify.Author'));
         return redirect(route('Success.Authentication'));
     }
@@ -37,7 +37,7 @@ class AuthenticationController extends Controller {
     }
 
     public function check(Request $request): \Illuminate\Foundation\Application|Response|Application|ResponseFactory {
-        return response(['check' => Auth::check(), 'user' => Auth::check() ? new UserResource(Auth::user()) : null]);
+        return response(['check' => Auth::check(), 'user' => Auth::check() ? new UserResource(User::with('author')->find(Auth::user()->id)) : null]);
     }
 
     public function showUserIdentifiers(Request $request) {

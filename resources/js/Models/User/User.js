@@ -1,3 +1,5 @@
+import { Author } from '@/Models/Author/Author.js';
+
 /**
  * Create a new User.
  * @constructor
@@ -14,7 +16,7 @@
 const className = 'User';
 
 export class User {
-    constructor({ displayName, admin = false, openAlex, scopus, orcId, email, staff, id, localUrl }) {
+    constructor({ displayName, admin = false, openAlex, scopus, orcId, email, staff, id, localUrl, author }) {
         this.id = id;
         this.displayName = displayName;
         this.isAdmin = admin;
@@ -25,10 +27,11 @@ export class User {
         this.isStaff = staff;
         this.className = className;
         this.localUrl = localUrl;
+        this.author = Author.parseResponseAuthor(author);
     }
 
     // TODO: Remove local_url empty string initialization ( when the user page is implemented in THESIS-6 )
-    static parseUserResponse({ displayName, admin, email, openAlex, scopus, orcId, staff, id, local_url = '' }) {
+    static parseUserResponse({ displayName, admin, email, openAlex, scopus, orcId, staff, id, local_url = '', author }) {
         return new User({
             id,
             email,
@@ -39,6 +42,7 @@ export class User {
             admin,
             staff,
             localUrl: local_url,
+            author,
         });
     }
 
