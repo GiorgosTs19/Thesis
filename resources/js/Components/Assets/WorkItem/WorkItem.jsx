@@ -12,6 +12,7 @@ import { FaCircleNodes } from 'react-icons/fa6';
 import { OpenAlexSVG } from '@/SVGS/OpenAlexSVG.jsx';
 import { OrcidSVG } from '@/SVGS/OrcidSVG.jsx.jsx';
 import { DoiSVG } from '@/SVGS/DoiSVG.jsx';
+import useAPI from '@/Hooks/useAPI/useAPI.js';
 
 const MAX_VISIBLE_AUTHORS = 4;
 const styles = {
@@ -43,6 +44,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
     const [showAllAuthors, setShowAllAuthors] = useState(false);
     const visibleAuthors = showAllAuthors ? authors : authors.slice(0, MAX_VISIBLE_AUTHORS);
     const filteredAuthors = authorToExclude ? visibleAuthors.filter((author) => author.id !== authorToExclude) : visibleAuthors;
+    const api = useAPI();
 
     const modalRef = useClickAway(() => {
         setVersionsOpen(false);
@@ -80,10 +82,9 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
         </div>
     );
 
-    // TODO implement when authentication is implemented.
-    // const hideWork = () => {
-    //
-    // }
+    const hideWork = () => {
+        api.works.hideWork(work);
+    };
 
     const handleOpenVersions = () => setVersionsOpen(true);
     const getSourceIcon = () => {
@@ -115,7 +116,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 );
         }
     };
-    const dropDownOptions = [{ name: 'Hide Work', value: 1, default: false }];
+    const dropDownOptions = [{ name: 'Hide Work', value: 1, default: false, onClick: hideWork }];
     const [multipleSources, sources] = work.getSources();
     return (
         <li className={styles.li}>

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Utility\Requests;
+use App\Utility\ULog;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * @property mixed $author_id
@@ -35,16 +35,27 @@ class AuthorWork extends Model {
      * @return bool
      */
     public static function isAuthor($author_id, $work_id): bool {
-       return (bool)AuthorWork::where('author_id', $author_id)->where('work_id', $work_id)->exists();
+        return (bool)AuthorWork::where('author_id', $author_id)->where('work_id', $work_id)->exists();
     }
 
     public static function getAuthorWorkRelation($author_id, $work_id) {
-        return AuthorWork::where('author_id',$author_id)->where('work_id', $work_id)->first();
+        return AuthorWork::where('author_id', $author_id)->where('work_id', $work_id)->first();
     }
 
     public static function hideWork($author_id, $work_id): bool {
-        $relation = self::getAuthorWorkRelation($author_id, $work_id);
-        $relation->visibility = false;
-        return $relation->save();
+        try {
+            $versions = Work::where('doi', Work::find($work_id)->doi)->get();
+            foreach ($versions as $version) {
+                $relation = self::getAuthorWorkRelation($author_id, $version->id);
+                if (!$relation)
+                    continue;
+                $relation->visibility = false;
+                $relation->save();
+            }
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            return false;
+        }
+        return true;
     }
 }

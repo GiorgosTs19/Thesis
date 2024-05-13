@@ -26,10 +26,10 @@ class WorkFilterRequest extends FormRequest {
             'type_filter' => $this->query('type_filter'),
             'work_types' => $this->query('work_types'),
             'with' => $this->query('with', ['authors']),
+            'filter_visibility' => (boolean)$this->query('filter_visibility', false),
             'sort_by' => $this->query('sort_by', 'title'),
             'sort_direction' => $this->query('sort_direction', 'asc')]);
     }
-
 
     /**
      * Determine if the user is authorized to make this request.
@@ -57,6 +57,7 @@ class WorkFilterRequest extends FormRequest {
             'type_filter' => ['numeric', 'nullable', 'integer', new ExistsInTable((new Type())->getTable())],
             'work_types' => 'array|nullable',
             'work_types.*' => 'string',
+            'filter_visibility' => '',
             'with' => 'array|nullable',
             'with.*' => ['string', Rule::in(['authors', 'versions', 'statistics'])],
             'sort_by' => ['string', 'nullable', Rule::in(self::WORKS_SORTING_COLS)],
@@ -94,6 +95,7 @@ class WorkFilterRequest extends FormRequest {
             'work_types.*.string' => 'The work_types array must only consist of strings.',
             'type_filter.numeric' => 'The type_filter array must only consist of numbers.',
             'type_filter.integer' => 'The type_filter array must only consist of integers.',
+            'filter_visibility.boolean' => 'The filter_visibility parameter must be a boolean',
             'with' => 'The with parameter must be an array.',
             'with.*.string' => 'The values contained in the with parameter, must be strings.',
             'with.*.in' => "The values contained in the with parameter, must be any of [ $work_relationships ].",
@@ -103,5 +105,4 @@ class WorkFilterRequest extends FormRequest {
             'sort_direction.in' => 'The sort_direction parameter must be one of [asc, desc].',
         ];
     }
-
 }

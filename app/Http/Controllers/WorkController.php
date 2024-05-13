@@ -7,10 +7,12 @@ use App\Http\Resources\PaginatedWorkCollection;
 use App\Http\Resources\WorkResource;
 use App\Models\AuthorWork;
 use App\Models\Type;
+use App\Models\User;
 use App\Models\Work;
-use App\Utility\Auth;
 use App\Utility\Requests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -49,6 +51,7 @@ class WorkController extends Controller {
         $with = array_key_exists('with', $params) ? $params['with'] : [];
         $sort_by = array_key_exists('sort_by', $params) ? $params['sort_by'] : 'title';
         $sort_direction = array_key_exists('sort_direction', $params) ? $params['sort_direction'] : 'asc';
+        $filter_visibility = $params['filter_visibility'];
         // For now, always load the versions
         $with_versions = in_array('versions', $with) || in_array(Work::$aggregateSource, $sources);
 
@@ -59,8 +62,10 @@ class WorkController extends Controller {
         $works_query = Work::with($relationships);
         // Check if the author_ids is set and only get the works that are associated with these authors.
         if (sizeof($authors_ids) > 0)
-            $works_query = $works_query->whereHas('authors', function ($query) use ($authors_ids) {
-                $query->whereIn('author_id', $authors_ids);
+            $works_query = $works_query->whereHas('authors', function ($query) use ($authors_ids, $filter_visibility) {
+                $query->whereIn('author_id', $authors_ids)->when($filter_visibility, function ($query) {
+                    return $query->where('visibility', true);
+                });
             });
 
         $works_query = $works_query->minCitations($min_citations)->maxCitations($max_citations)->fromPublicationYear($from_pub_year)
@@ -80,29 +85,32 @@ class WorkController extends Controller {
             'workTypes' => $work_Types];
     }
 
-    public function hideWork(Request $request): \Illuminate\Http\JsonResponse {
-
-        if(!$request->has('id'))
+    /**
+     * Hides a work and its versions from an author's profile.
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function hideWork(Request $request): JsonResponse {
+        if (!$request->has('id'))
             return Requests::missingParameterError('id');
 
-        $id = $request->only(['id'])['id'];
+        $work_id = $request->only(['id'])['id'];
 
-        if(!$id) {
+        if (!$work_id) {
             return Requests::missingParameterError('id');
         }
 
-        if(!\Illuminate\Support\Facades\Auth::check())
+        if (!Auth::check())
             return Requests::authenticationError();
 
+        $author_id = User::with(['author'])->find(Auth::user()->id)->author->id;
 
         if (!AuthorWork::isAuthor($author_id, $work_id))
             return Requests::authorizationError();
 
-        if(AuthorWork::hideWork($author_id, $work_id))
-            return Requests::success('Work hidden successfully');
+        if (AuthorWork::hideWork($author_id, $work_id))
+            return Requests::success('Works hidden successfully');
 
-        return Requests::serverError('Something went wrong');
+        return Requests::serverError('Something went wrong.');
     }
-
-
 }

@@ -26,7 +26,7 @@ Route::prefix('search')->group(function () {
 
     Route::prefix('authors')->group(function () {
         Route::get('/', [SearchController::class, 'search'])->name('Search.Authors');
-        Route::get('/users', [SearchController::class, 'searchAuthorUsers'])->name('Search.Authors.Users');
+        Route::get('/users', [SearchController::class, 'searchAuthors'])->name('Search.Authors.Users');
         Route::get('/users/group', [SearchController::class, 'searchWhereNotInGroup'])->name('Search.Authors.Users.Group');
 
     });
@@ -39,7 +39,6 @@ Route::prefix('search')->group(function () {
 
 // TODO Make sure only admins can access these routes ( when roles are implemented in THESIS-5 )
 Route::prefix('/groups')->group(function () {
-
     Route::get('/all', [GroupController::class, 'getAllGroups'])->name('Group.All');
     Route::get('/{id}', [GroupController::class, 'getGroup'])->name('Groups.Get.Group');
     Route::post('/create', [GroupController::class, 'create'])->name('Group.Create');

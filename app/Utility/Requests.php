@@ -38,7 +38,7 @@ class Requests {
     }
 
     public static function missingParameterError($parameter): JsonResponse {
-        return response()->json(['ok' => false, 'error' => "Parameter $parameter is marked as required", 'code' => 401, 'data' => []],401);
+        return response()->json(['ok' => false, 'error' => "Parameter $parameter is marked as required", 'code' => 400, 'data' => []], 401);
     }
 
     /**
@@ -46,11 +46,11 @@ class Requests {
      * @return JsonResponse.
      */
     public static function authenticationError(): JsonResponse {
-        return response()->json(['ok' => false, 'error' => 'You need to be logged in to perform this action.', 'code' => 401, 'data' => []],401);
+        return response()->json(['ok' => false, 'error' => 'You need to be logged in to perform this action.', 'code' => 401, 'data' => []], 401);
     }
 
     public static function authorizationError(): JsonResponse {
-        return response()->json(['ok' => false, 'error' => 'You are not authorized to perform this action.', 'code' => 403, 'data' => []],403);
+        return response()->json(['ok' => false, 'error' => 'You are not authorized to perform this action.', 'code' => 403, 'data' => []], 403);
     }
 
 

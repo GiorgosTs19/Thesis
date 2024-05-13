@@ -58,7 +58,7 @@ class WorkResource extends JsonResource {
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array {
-        $authenticated_user = User::with('author')->find(Auth::user()->id);
+        $authenticated_user = Auth::check() ? User::with('author')->find(Auth::user()->id) : null;
 
         return [
             'id' => $this->id,
@@ -85,7 +85,7 @@ class WorkResource extends JsonResource {
             'is_aggregated' => $this->source === Work::$aggregateSource,
             'authors_string' => $this->authors_string,
             'authors_as_string' => !!$this->authors_string,
-            'editable' => Auth::check() && AuthorWork::isAuthor($authenticated_user->author->id, $this->id)
+            'editable' => Auth::check() ? AuthorWork::isAuthor($authenticated_user->author->id, $this->id) : false
         ];
     }
 }

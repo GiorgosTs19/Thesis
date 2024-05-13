@@ -15,6 +15,8 @@ import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
 import Filters from '@/Components/Filters/Filters.jsx';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
 import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
+import { useWorkHiddenEventListener } from '@/Events/WorkEvent/WorkEvent.js';
+import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
 
 const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
@@ -25,12 +27,19 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const { filters, dispatch } = useWorkFilters({ authors: authors });
     const api = useAPI();
     const { user } = useAuth();
+    const { showToast } = useToast();
+    const [refreshWorks, setRefreshWorks] = useState(false);
+
+    useWorkHiddenEventListener((event) => {
+        showToast(event.data.action, ToastTypes.SUCCESS, event.success, 5000);
+        setRefreshWorks((prev) => !prev);
+    });
 
     const handleFetchWorks = useCallback(() => {
-        return api.works.filterWorks(filters).then((res) => {
+        return api.works.filterWorks({ ...filters, filter_visibility: true }).then((res) => {
             setAuthorWorks(res.data);
         });
-    }, [filters]);
+    }, [filters, refreshWorks]);
 
     const { loading } = useAsync(handleFetchWorks);
 

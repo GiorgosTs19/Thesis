@@ -1,9 +1,9 @@
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
 const EVENT_TYPES = {
     AUTHORIZATION_ERROR: 'AUTHORIZATION_ERROR',
     SERVER_ERROR: 'SERVER_ERROR',
-}
+};
 
 class ErrorEvent {
     constructor(type, data) {
@@ -15,15 +15,15 @@ class ErrorEvent {
         const event = new CustomEvent(this.action, {
             detail: this.data,
             bubbles: true,
-            cancelable: true
+            cancelable: true,
         });
         document.dispatchEvent(event);
     }
 }
 
 export function dispatchAuthorizationErrorEvent(eventData) {
-    const groupUpdatedEvent = new ErrorEvent(EVENT_TYPES.AUTHORIZATION_ERROR, eventData);
-    groupUpdatedEvent.dispatch();
+    const authorizationErrorEvent = new ErrorEvent(EVENT_TYPES.AUTHORIZATION_ERROR, eventData);
+    authorizationErrorEvent.dispatch();
 }
 
 export function dispatchServerErrorEvent(eventData) {
@@ -38,14 +38,12 @@ export function useAuthorizationErrorEventListener(callback) {
             if (typeof callback === 'function' && event.type === EVENT_TYPES.AUTHORIZATION_ERROR) {
                 callback(event.detail);
             }
-        }
+        };
 
-        if (callback && typeof callback === 'function')
-            document.addEventListener(EVENT_TYPES.AUTHORIZATION_ERROR, eventListener);
+        if (callback && typeof callback === 'function') document.addEventListener(EVENT_TYPES.AUTHORIZATION_ERROR, eventListener);
 
         return () => {
-            if (callback && typeof callback === 'function')
-                document.removeEventListener(EVENT_TYPES.AUTHORIZATION_ERROR, eventListener);
+            if (callback && typeof callback === 'function') document.removeEventListener(EVENT_TYPES.AUTHORIZATION_ERROR, eventListener);
         };
     }, [callback]);
 }
@@ -56,14 +54,12 @@ export function useServerErrorEventListener(callback) {
             if (typeof callback === 'function' && event.type === EVENT_TYPES.SERVER_ERROR) {
                 callback(event.detail);
             }
-        }
+        };
 
-        if (callback && typeof callback === 'function')
-            document.addEventListener(EVENT_TYPES.SERVER_ERROR, eventListener);
+        if (callback && typeof callback === 'function') document.addEventListener(EVENT_TYPES.SERVER_ERROR, eventListener);
 
         return () => {
-            if (callback && typeof callback === 'function')
-                document.removeEventListener(EVENT_TYPES.SERVER_ERROR, eventListener);
+            if (callback && typeof callback === 'function') document.removeEventListener(EVENT_TYPES.SERVER_ERROR, eventListener);
         };
     }, [callback]);
 }
