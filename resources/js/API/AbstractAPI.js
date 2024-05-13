@@ -6,6 +6,8 @@ const headers = {
 };
 
 export class AbstractAPI {
+    #csrfToken;
+
     parseParameters(params) {
         return `?${Object.entries(params)
             .map(([key, value]) => (Array.isArray(value) ? value.map((val) => `${encodeURIComponent(key)}[]=${encodeURIComponent(val)}`).join('&') : `${key}=${value}`))
@@ -13,7 +15,11 @@ export class AbstractAPI {
     }
 
     async get(endpoint) {
-        return fetch(endpoint, { method: 'GET', headers, credentials:'include' }).then((response) => {
+        return fetch(endpoint, { method: 'GET', headers: { ...headers, 'X-XSRF-TOKEN': this.getCsrfToken() }, credentials: 'include' }).then((response) => {
+            if (response.redirected) {
+                this.handleRedirection(response);
+                return;
+            }
             // * Check if the request was unsuccessful and raise the appropriate error.
             if (!response.ok && response.status !== 422) {
                 return handleAPIError(response);
@@ -27,10 +33,14 @@ export class AbstractAPI {
     async post(endpoint, data) {
         return fetch(endpoint, {
             method: 'POST',
-            headers,
-            credentials:'include',
+            headers: { ...headers, 'X-XSRF-TOKEN': this.getCsrfToken() },
+            credentials: 'include',
             body: JSON.stringify(data),
         }).then((response) => {
+            if (response.redirected) {
+                this.handleRedirection(response);
+                return;
+            }
             // * Check if the request was unsuccessful and raise the appropriate error.
             if (!response.ok && response.status !== 422) {
                 return handleAPIError(response);
@@ -44,10 +54,14 @@ export class AbstractAPI {
     async patch(endpoint, data) {
         return fetch(endpoint, {
             method: 'PATCH',
-            headers,
-            credentials:'include',
+            headers: { ...headers, 'X-XSRF-TOKEN': this.getCsrfToken() },
+            credentials: 'include',
             body: JSON.stringify(data),
         }).then((response) => {
+            if (response.redirected) {
+                this.handleRedirection(response);
+                return;
+            }
             // * Check if the request was unsuccessful and raise the appropriate error.
             if (!response.ok && response.status !== 422) {
                 return handleAPIError(response);
@@ -61,8 +75,13 @@ export class AbstractAPI {
     async delete(endpoint) {
         return fetch(endpoint, {
             method: 'DELETE',
-            credentials:'include',
+            headers: { ...headers, 'X-XSRF-TOKEN': this.getCsrfToken() },
+            credentials: 'include',
         }).then((response) => {
+            if (response.redirected) {
+                this.handleRedirection(response);
+                return;
+            }
             // * Check if the request was unsuccessful and raise the appropriate error.
             if (!response.ok && response.status !== 422) {
                 return handleAPIError(response);
@@ -71,5 +90,26 @@ export class AbstractAPI {
                 return response.json();
             }
         });
+    }
+
+    getCsrfToken() {
+        if (this.#csrfToken) return this.#csrfToken;
+
+        const cookies = document.cookie.split(';');
+
+        for (let cookie of cookies) {
+            let [name, value] = cookie.split('=');
+            name = name.trim(); // Trim whitespace
+            if (name === 'XSRF-TOKEN') {
+                this.#csrfToken = decodeURIComponent(value);
+                return this.#csrfToken; // Return the decoded value of the CSRF token
+            }
+        }
+
+        return null; // Return null if no token found
+    }
+
+    handleRedirection(res) {
+        window.location.href = res.url;
     }
 }

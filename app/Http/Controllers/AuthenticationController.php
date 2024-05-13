@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Utility\Requests;
+use App\Utility\ULog;
+use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\RedirectResponse;
@@ -31,9 +34,15 @@ class AuthenticationController extends Controller {
         return Inertia::render('Routes/SuccessfulLogin/SuccessfulLogin', ['authenticatedUser' => new UserResource(Auth::user())]);
     }
 
-    public function logout(Request $request): RedirectResponse {
-        Auth::logout();
+    public function logout(Request $request) {
+        try {
+            Auth::logout();
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            return Requests::serverError('Something went wrong while trying to log you out.');
+        }
         return to_route('Home.Page');
+//        return Requests::success('Successfully logged out');
     }
 
     public function check(Request $request): \Illuminate\Foundation\Application|Response|Application|ResponseFactory {

@@ -20,9 +20,9 @@ class VerifyAuthorIdentifiers {
         // Get the current route name
         $currentRoute = $request->route()->getName();
 
-        // Check if the user is missing all identifiers and not already on the verify author page
-//        if (Auth::user()->missingAllIdentifiers() && $currentRoute !== 'Auth.Verify.Author')
-//            return redirect()->route('Auth.Verify.Author');
+//         Check if the user is missing all identifiers and not already on the verify author page
+        if (Auth::user()->missingAllIdentifiers() && $currentRoute !== 'Auth.Verify.Author')
+            return redirect()->route('Auth.Verify.Author');
 
         return $next($request);
     }
