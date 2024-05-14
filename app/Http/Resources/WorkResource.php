@@ -85,7 +85,7 @@ class WorkResource extends JsonResource {
             'is_aggregated' => $this->source === Work::$aggregateSource,
             'authors_string' => $this->authors_string,
             'authors_as_string' => !!$this->authors_string,
-            'editable' => Auth::check() ? AuthorWork::isAuthor($authenticated_user->author->id, $this->id) : false
+            'editable' => Auth::check() && $authenticated_user->author && AuthorWork::isAuthor($authenticated_user->author->id, $this->id)
         ];
     }
 }

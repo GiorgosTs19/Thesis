@@ -107,7 +107,7 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
 
     const renderWorkItem = useCallback(
         (work, index) => {
-            return <WorkItem work={work} key={work.id} index={index} showUserOptions={authorObject.id === user?.author.id} />;
+            return <WorkItem work={work} key={work.id} index={index} showUserOptions={authorObject.id === user?.author?.id} />;
         },
         [authorWorks],
     );

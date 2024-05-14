@@ -71,9 +71,9 @@ export function Navigation() {
                                     ) : (
                                         <>
                                             <>{searchVisible && <Search />}</>
-                                            {isLoggedIn ? (
+                                            {isLoggedIn && user ? (
                                                     <Dropdown label="" dismissOnClick={false} renderTrigger={() => <span
-                                                        className={'align-items-center my-auto text-center cursor-pointer'}>{user.displayName}</span>}>
+                                                        className={'align-items-center my-auto text-center cursor-pointer'}>{user?.displayName}</span>}>
                                                         <Dropdown.Item onClick={()=>logout()}>Logout</Dropdown.Item>
                                                     </Dropdown>
                                             ) : (

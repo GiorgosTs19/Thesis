@@ -27,7 +27,7 @@ export class User {
         this.isStaff = staff;
         this.className = className;
         this.localUrl = localUrl;
-        this.author = Author.parseResponseAuthor(author);
+        this.author = author ? Author.parseResponseAuthor(author) : null;
     }
 
     // TODO: Remove local_url empty string initialization ( when the user page is implemented in THESIS-6 )
