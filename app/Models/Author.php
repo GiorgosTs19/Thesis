@@ -8,8 +8,8 @@ use App\Utility\{Ids, ULog, WorkUtils};
 use Exception;
 use Illuminate\Database\{Eloquent\Factories\HasFactory,
     Eloquent\Model,
-    Eloquent\Relations\BelongsTo,
     Eloquent\Relations\BelongsToMany,
+    Eloquent\Relations\HasOne,
     Eloquent\Relations\MorphMany};
 use Illuminate\Support\{Facades\Auth, Facades\Config};
 
@@ -24,6 +24,10 @@ use Illuminate\Support\{Facades\Auth, Facades\Config};
  * @method static where(string $external_id_name, $external_id)
  * @method static count()
  * @method static users()
+ * @method static searchOpenAlex(mixed $open_alex, bool $exactMatch)
+ * @method static searchScopus(mixed $scopus, bool $exactMatch)
+ * @method static searchOrcId(mixed $orc_id, bool $exactMatch)
+ * @method static notClaimed()
  *
  * @property int id
  * @property string orc_id
@@ -287,20 +291,32 @@ class Author extends Model {
     /**
      * A custom scope used to search authors by their Scopus external ids.
      * @param $query
-     * @param $scopus_id
+     * @param $scopus_id - The scopus id to search for.
+     * @param bool $exactMatch - A boolean to indicate whether the query should match the result exactly.
      * @return mixed
      */
-    public function scopeSearchScopus($query, $scopus_id) {
+    public function scopeSearchScopus($query, $scopus_id, bool $exactMatch = false) {
+        if ($exactMatch) {
+            if (empty($scopus_id))
+                return $query;
+            return $query->where(Ids::SCOPUS_ID, $scopus_id);
+        }
         return $query->orWhere(Ids::SCOPUS_ID, $scopus_id)->orWhere('scopus_id', 'LIKE', "%$scopus_id%");
     }
 
     /**
      * A custom scope used to search authors by their OrcId external ids.
      * @param $query
-     * @param $orc_id
+     * @param $orc_id - The ORCID id to search for.
+     * @param bool $exactMatch - A boolean to indicate whether the query should match the result exactly.
      * @return mixed
      */
-    public function scopeSearchOrcId($query, $orc_id) {
+    public function scopeSearchOrcId($query, $orc_id, bool $exactMatch = false) {
+        if ($exactMatch) {
+            if (empty($orc_id))
+                return $query;
+            return $query->where(Ids::ORC_ID_ID, $orc_id);
+        }
         return $query->orWhere(Ids::ORC_ID_ID, $orc_id)->orWhere(Ids::ORC_ID_ID, 'LIKE', "%$orc_id%");
     }
 
@@ -308,10 +324,17 @@ class Author extends Model {
     /**
      * A custom scope used to search authors by their Open Alex external ids.
      * @param $query
-     * @param $open_alex_id
+     * @param $open_alex_id - The OpenAlex id to search for.
+     * @param bool $exactMatch - A boolean to indicate whether the query should match the result exactly.
      * @return mixed
      */
-    public function scopeSearchOpenAlex($query, $open_alex_id) {
+    public function scopeSearchOpenAlex($query, $open_alex_id, bool $exactMatch = false) {
+        if ($exactMatch) {
+            if (empty($open_alex_id)) {
+                return $query;
+            }
+            return $query->where(Ids::OPEN_ALEX_ID, $open_alex_id);
+        }
         return $query->orWhere(Ids::OPEN_ALEX_ID, $open_alex_id)->orWhere(Ids::OPEN_ALEX_ID, 'LIKE', "%$open_alex_id%");
     }
 
@@ -333,7 +356,11 @@ class Author extends Model {
         return $this->belongsToMany(Work::class, 'author_work');
     }
 
-    public function user(): BelongsTo {
-        return $this->belongsTo(User::class);
+    public function user(): HasOne {
+        return $this->hasOne(User::class);
+    }
+
+    public function scopeNotClaimed($query) {
+        return $query->doesntHave('user');
     }
 }

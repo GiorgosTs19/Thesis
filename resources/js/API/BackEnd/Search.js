@@ -15,4 +15,17 @@ export class Search extends AbstractAPI {
             return res.data;
         });
     }
+
+    async searchAuthorsByIdentifiers(params) {
+        if (!params) {
+            throw new Error('At least one identifier is required for searchAuthorsByIdentifiers()');
+        }
+        const urlWithParams = `${route('Search.Authors.Identifiers')}${this.parseParameters(params)}`;
+        return this.get(urlWithParams).then((res) => {
+            if (res.ok) {
+                return res.data.searchResults.authors;
+            }
+            return [];
+        });
+    }
 }

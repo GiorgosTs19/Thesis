@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Models\Author;
 use App\Models\User;
 use App\Utility\Requests;
 use App\Utility\ULog;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -51,5 +53,36 @@ class AuthenticationController extends Controller {
 
     public function showUserIdentifiers(Request $request) {
         return Inertia::render('Routes/SuccessfulLogin/VerifyAuthorIdentifiers');
+    }
+
+    public function claimAuthor(Request $request): RedirectResponse|JsonResponse {
+        $author_id = $request->input(['id']);
+        if (!$author_id) {
+            return Requests::missingParameterError('id');
+        }
+
+        if (!Auth::check()) {
+            return Requests::authenticationError();
+        }
+
+        $user = User::with('author')->find(Auth::user()->id);
+        $author = Author::find($author_id);
+
+        if (!$author) {
+            return Requests::clientError('No author with this id exists.');
+        }
+
+        if (!$user->isStaff()) {
+            return Requests::authorizationError();
+        }
+
+        if ($user->author) {
+            return Requests::authorizationError('This user is already associated with an author.');
+        }
+
+        $user->author_id = $author_id;
+        $user->save();
+
+        return to_route('Author.Page', ['id' => $author->open_alex_id]);
     }
 }

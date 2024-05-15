@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const algorithm = {
-    name: "AES-GCM",
-    length: 256
+    name: 'AES-GCM',
+    length: 256,
 };
-const keyUsages = ["encrypt", "decrypt"];
+const keyUsages = ['encrypt', 'decrypt'];
 const keyStorageName = 'encryptionKey';
 
 async function generateKey() {
@@ -14,13 +14,7 @@ async function generateKey() {
 async function getKey() {
     let storedKey = localStorage.getItem(keyStorageName);
     if (storedKey) {
-        return await crypto.subtle.importKey(
-            'jwk',
-            JSON.parse(storedKey),
-            algorithm,
-            true,
-            keyUsages
-        );
+        return await crypto.subtle.importKey('jwk', JSON.parse(storedKey), algorithm, true, keyUsages);
     } else {
         const newKey = await generateKey();
         const exportedKey = await crypto.subtle.exportKey('jwk', newKey);
@@ -39,7 +33,7 @@ async function encryptData(data) {
             iv: iv,
         },
         key,
-        encodedData
+        encodedData,
     );
     return { iv, encrypted };
 }
@@ -52,13 +46,14 @@ async function decryptData(iv, encrypted) {
             iv: iv,
         },
         key,
-        encrypted
+        encrypted,
     );
     return new TextDecoder().decode(decrypted);
 }
 
 function useEncryptedLocalStorage(key, initialValue) {
     const [storedValue, setStoredValue] = useState(initialValue);
+
     useEffect(() => {
         // Retrieve and decrypt the value from local storage on mount
         const fetchData = async () => {
@@ -85,8 +80,8 @@ function useEncryptedLocalStorage(key, initialValue) {
                 key,
                 JSON.stringify({
                     iv: Array.from(iv),
-                    encrypted: Array.from(new Uint8Array(encrypted))
-                })
+                    encrypted: Array.from(new Uint8Array(encrypted)),
+                }),
             );
             setStoredValue(valueToStore);
         } catch (error) {

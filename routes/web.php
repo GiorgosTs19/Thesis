@@ -1,6 +1,11 @@
 <?php /** @noinspection ALL */
 
-use App\Http\Controllers\{AuthorController, GroupController, HomeController, SearchController, WorkController};
+use App\Http\Controllers\{AuthenticationController,
+    AuthorController,
+    GroupController,
+    HomeController,
+    SearchController,
+    WorkController};
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,8 +30,7 @@ Route::prefix('search')->group(function () {
     Route::get('/', [SearchController::class, 'search'])->name('Search');
 
     Route::prefix('authors')->group(function () {
-        Route::get('/', [SearchController::class, 'search'])->name('Search.Authors');
-        Route::get('/users', [SearchController::class, 'searchAuthors'])->name('Search.Authors.Users');
+        Route::get('/identifiers', [SearchController::class, 'searchAuthorsByIdentifiers'])->name('Search.Authors.Identifiers');
         Route::get('/users/group', [SearchController::class, 'searchWhereNotInGroup'])->name('Search.Authors.Users.Group');
 
     });
@@ -62,15 +66,16 @@ Route::prefix('works')->group(function () {
 });
 
 Route::prefix('/auth')->group(function () {
-    Route::get('/iee', [\App\Http\Controllers\AuthenticationController::class, 'toIEELogin'])->name('Auth.Login');
-    Route::get('/verify/link-author', [\App\Http\Controllers\AuthenticationController::class, 'showUserIdentifiers'])->name('Auth.Verify.Author');
-    Route::get('/sign-in/iee/redirect', [\App\Http\Controllers\AuthenticationController::class, 'handleIEECallback'])->name('Auth.Callback');
-    Route::get('/check', [\App\Http\Controllers\AuthenticationController::class, 'check'])->name('Auth.Check');
-    Route::post('/logout', [\App\Http\Controllers\AuthenticationController::class, 'logout'])->name('Auth.Logout');
+    Route::get('/iee', [AuthenticationController::class, 'toIEELogin'])->name('Auth.Login');
+    Route::get('/verify/link-author', [AuthenticationController::class, 'showUserIdentifiers'])->name('Auth.Verify.Author');
+    Route::get('/sign-in/iee/redirect', [AuthenticationController::class, 'handleIEECallback'])->name('Auth.Callback');
+    Route::get('/check', [AuthenticationController::class, 'check'])->name('Auth.Check');
+    Route::post('/logout', [AuthenticationController::class, 'logout'])->name('Auth.Logout');
+    Route::post('/claim-author', [AuthenticationController::class, 'claimAuthor'])->name('Auth.Claim');
 });
 
 Route::prefix('/success')->group(function () {
-    Route::get('/authenticated', [\App\Http\Controllers\AuthenticationController::class, 'success'])->name('Success.Authentication');
+    Route::get('/authenticated', [AuthenticationController::class, 'success'])->name('Success.Authentication');
 });
 
 Route::prefix('/test')->group(function () {

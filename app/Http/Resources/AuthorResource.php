@@ -23,12 +23,6 @@ use Illuminate\Support\Carbon;
  * @property mixed $biography
  */
 class  AuthorResource extends JsonResource {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-
     public function toArray(Request $request): array {
         $statistics = $this->whenLoaded('statistics');
 
@@ -78,6 +72,7 @@ class  AuthorResource extends JsonResource {
             'statistics' => $statisticsAreValid ? StatisticResource::collection($statistics) : [],
             'local_url' => route('Author.Page', ['id' => $this->open_alex_id]),
             'biography' => $this->biography,
+            'claimed' => !!$this->user()->first(),
         ];
     }
 }

@@ -49,8 +49,8 @@ class Requests {
         return response()->json(['ok' => false, 'error' => 'You need to be logged in to perform this action.', 'code' => 401, 'data' => []], 401);
     }
 
-    public static function authorizationError(): JsonResponse {
-        return response()->json(['ok' => false, 'error' => 'You are not authorized to perform this action.', 'code' => 403, 'data' => []], 403);
+    public static function authorizationError($message = null): JsonResponse {
+        return response()->json(['ok' => false, 'error' => $message ?? 'You are not authorized to perform this action.', 'code' => 403, 'data' => $data], 403);
     }
 
 

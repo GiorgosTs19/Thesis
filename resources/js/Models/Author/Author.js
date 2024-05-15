@@ -20,7 +20,7 @@ import { numberToDotNotation } from '@/Utility/Numbers/Utils.js';
 const className = 'Author';
 
 export class Author {
-    constructor({ name, isUser, citationCount, worksCount, openAlexId, scopusId, orcId, works, statistics, updatedAt, id, localUrl, biography }) {
+    constructor({ name, isUser, citationCount, worksCount, openAlexId, scopusId, orcId, works, statistics, updatedAt, id, localUrl, biography, claimed }) {
         this.id = id;
         this.name = name;
         this.isUser = isUser;
@@ -35,23 +35,10 @@ export class Author {
         this.className = className;
         this.localUrl = localUrl;
         this.biography = biography;
+        this.claimed = claimed;
     }
 
-    static parseResponseAuthor({
-        name,
-        is_user,
-        citation_count,
-        works_count,
-        open_alex_id,
-        scopus_id,
-        orc_id,
-        works = [],
-        statistics,
-        updated_at,
-        id,
-        local_url,
-        biography,
-    }) {
+    static parseResponseAuthor({ name, is_user, citation_count, works_count, open_alex_id, scopus_id, orc_id, works = [], statistics, updated_at, id, local_url, biography, claimed }) {
         return new Author({
             id,
             name,
@@ -76,6 +63,7 @@ export class Author {
                   )
                 : [],
             localUrl: local_url,
+            claimed,
         });
     }
 
