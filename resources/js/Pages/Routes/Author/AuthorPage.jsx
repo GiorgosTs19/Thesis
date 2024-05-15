@@ -17,8 +17,8 @@ import useAsync from '@/Hooks/useAsync/useAsync.js';
 import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 import { useWorkVisibilityChangedEventListener } from '@/Events/WorkEvent/WorkEvent.js';
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
-import {Checkbox, Label} from "flowbite-react";
-import HiddenWorks from "@/Pages/Routes/Author/HiddenWorks.jsx";
+import { Checkbox, Label } from 'flowbite-react';
+import HiddenWorks from '@/Pages/Routes/Author/HiddenWorks.jsx';
 
 const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
@@ -39,8 +39,8 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
     }, false);
 
     const handleFetchWorks = useCallback(() => {
-        if(showHiddenWorks) {
-            return ;
+        if (showHiddenWorks) {
+            return;
         }
         return api.works.filterWorks({ ...filters, filter_visibility: true }).then((res) => {
             setAuthorWorks(res.data);
@@ -183,31 +183,34 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
                 </div>
             </div>
             <div className={styles.listsContainer}>
-                <div className={'flex space-x-4 justify-center'}>
-                    {authorObject.id === user?.author?.id && <div className="flex items-center gap-2">
-                        <Checkbox id="showHiddenWorks" checked={showHiddenWorks}
-                                  onChange={() => setShowHiddenWorks(prev => !prev)}/>
-                        <Label htmlFor="showHiddenWorks" className="flex">
-                            Show Hidden Works
-                        </Label>
-                    </div>}
-                    <Filters authors={[authorObject]} filters={filters} dispatch={dispatch}/>
+                <div className={'flex justify-center space-x-4'}>
+                    {authorObject.id === user?.author?.id && (
+                        <div className="flex items-center gap-2">
+                            <Checkbox id="showHiddenWorks" checked={showHiddenWorks} onChange={() => setShowHiddenWorks((prev) => !prev)} />
+                            <Label htmlFor="showHiddenWorks" className="flex">
+                                Show Hidden Works
+                            </Label>
+                        </div>
+                    )}
+                    <Filters authors={[authorObject]} filters={filters} dispatch={dispatch} />
                 </div>
-                {showHiddenWorks ? <HiddenWorks author={authorObject}/>
-                    :<PaginatedList
-                    response={authorWorks}
-                    renderFn={renderWorkItem}
-                    parser={Work.parseResponseWork}
-                    collapsable={width <= 765}
-                    className={'order-2 w-full xl:order-none xl:border-r xl:border-r-gray-300'}
-                    title={`Works`}
-                    header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}
-                    gap={7}
-                    loading={loading}
-                    onLinkClick={handleGetPage}
-                    perPage={filters.per_page ?? 10}
-                />}
-
+                {showHiddenWorks ? (
+                    <HiddenWorks author={authorObject} />
+                ) : (
+                    <PaginatedList
+                        response={authorWorks}
+                        renderFn={renderWorkItem}
+                        parser={Work.parseResponseWork}
+                        collapsable={width <= 765}
+                        className={'order-2 w-full xl:order-none xl:border-r xl:border-r-gray-300'}
+                        title={`Works`}
+                        header={isUser ? '' : `( Only works co-authored with registered users appear in the list )`}
+                        gap={7}
+                        loading={loading}
+                        onLinkClick={handleGetPage}
+                        perPage={filters.per_page ?? 10}
+                    />
+                )}
             </div>
         </div>
     );
