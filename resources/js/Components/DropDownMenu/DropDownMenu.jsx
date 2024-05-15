@@ -53,7 +53,7 @@ const DropdownMenu = ({ options = [], onSelect, className, label, defaultOption 
                 {dotsButton ? (
                     <TbDots
                         className={`${verticalDots ? 'rotate-90' : ''} cursor-pointer rounded-full hover:bg-gray-300`}
-                        size={smallDots ? 15 : 30}
+                        size={smallDots ? 20 : 30}
                         onClick={() => {
                             setMenuOpen((prev) => !prev);
                         }}

@@ -4,7 +4,7 @@ import { arrayOf, bool, func, number, shape, string } from 'prop-types';
 import PaginationLink from '@/Components/Pagination/PaginationLink.jsx';
 
 const STYLES = {
-    BUTTON: 'text-white w-fit h-fit p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:shadow-outline-gray active:bg-gray-800',
+    BUTTON: 'text-white w-fit h-fit py-2 px-3 rounded-md hover:bg-gray-700 focus:outline-none focus:shadow-outline-gray active:bg-gray-800',
     CURRENT_BG: 'bg-gray-700',
     DEFAULT_BG: 'bg-gray-500',
     DISABLED: 'cursor-not-allowed opacity-50',

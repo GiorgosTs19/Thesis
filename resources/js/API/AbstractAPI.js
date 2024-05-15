@@ -110,6 +110,7 @@ export class AbstractAPI {
     }
 
     handleRedirection(res) {
-        window.location.href = res.url;
+        if(window.location.href !== res.url)
+            window.location.href = res.url;
     }
 }

@@ -70,7 +70,7 @@ const PaginatedList = ({
         <div className={clsx(`${rounded ? 'rounded-lg' : ''} flex h-full flex-col p-2`, className)}>
             <div className={'mb-3 flex justify-between'}>
                 <div className={clsx(` ${collapsable ? 'cursor-pointer' : ''}`, styles.title)} onClick={() => collapsable && setListCollapsed((prev) => !prev)}>
-                    {title}
+                    {title} {response?.meta?.total && `(${response?.meta?.total})`}
                     {collapsable && <span className={'ml-3 mt-1.5 flex'}>{listCollapsed ? <BsChevronRight /> : <BsChevronDown />}</span>}
                 </div>
                 {!listCollapsed && sortingOptions && (

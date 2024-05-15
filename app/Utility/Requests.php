@@ -38,7 +38,7 @@ class Requests {
     }
 
     public static function missingParameterError($parameter): JsonResponse {
-        return response()->json(['ok' => false, 'error' => "Parameter $parameter is marked as required", 'code' => 400, 'data' => []], 401);
+        return response()->json(['ok' => false, 'error' => "Parameter $parameter is marked as required", 'code' => 400, 'data' => []], 400);
     }
 
     /**

@@ -250,7 +250,7 @@ class User extends Authenticatable {
     }
 
     public function missingAllIdentifiers(): bool {
-        if ($this->is_admin || !$this->is_staff)
+        if ($this->is_admin || !$this->is_staff || $this->author()->exists())
             return false;
         return is_null($this->orc_id) && is_null($this->open_alex_id) && is_null($this->scopus_id);
     }

@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static min(string $string)
  * @method static max(string $string)
  * @method static distinct()
+ * @method static whereHas(string $string, \Closure $param)
  */
 class Work extends Model {
     use HasFactory;

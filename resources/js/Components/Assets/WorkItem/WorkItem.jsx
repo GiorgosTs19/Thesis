@@ -38,7 +38,7 @@ export const PROPERTIES = {
     CITATIONS: 'citations',
 };
 
-export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, highlightUserAuthors, showUserOptions = false }) => {
+export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, highlightUserAuthors, showUserOptions = false, hidden = false }) => {
     const { doi, title, authors, type, isOA, publicationYear, referencedByCount, language, localUrl, versions } = work;
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [showAllAuthors, setShowAllAuthors] = useState(false);
@@ -83,7 +83,10 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
     );
 
     const hideWork = () => {
-        api.works.hideWork(work);
+        api.works.toggleWorkVisibility(work, false).then();
+    };
+    const showWork = () => {
+        api.works.toggleWorkVisibility(work, true).then();
     };
 
     const handleOpenVersions = () => setVersionsOpen(true);
@@ -116,7 +119,8 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 );
         }
     };
-    const dropDownOptions = [{ name: 'Hide Work', value: 1, default: false, onClick: hideWork }];
+    const dropDownOptions = [hidden ? { name: 'Show in profile', value: 1, default: false, onClick: showWork }
+        : { name: 'Hide from profile', value: 1, default: false, onClick: hideWork }];
     const [multipleSources, sources] = work.getSources();
     return (
         <li className={styles.li}>
@@ -134,7 +138,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 </Modal.Body>
             </Modal>
             <div className={'mb-5 flex h-fit flex-grow list-none '}>
-                {showUserOptions && work.editable && <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} />}
+                {showUserOptions && work.editable && <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} className={'my-auto'}/>}
                 <div className={styles.index}>
                     {index}
                     {getSourceIcon()}

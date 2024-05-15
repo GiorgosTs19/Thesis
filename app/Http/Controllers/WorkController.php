@@ -90,14 +90,22 @@ class WorkController extends Controller {
      * @param Request $request
      * @return JsonResponse
      */
-    public function hideWork(Request $request): JsonResponse {
+    public function toggleWorkVisibility(Request $request): JsonResponse {
         if (!$request->has('id'))
             return Requests::missingParameterError('id');
+        if(!$request->has('visibility')) {
+            return Requests::missingParameterError('visibility');
+        }
 
         $work_id = $request->only(['id'])['id'];
+        $visibility = $request->only(['visibility'])['visibility'];
 
-        if (!$work_id) {
+        if (empty($work_id)) {
             return Requests::missingParameterError('id');
+        }
+
+        if (is_null($visibility)) {
+            return Requests::missingParameterError('visibility');
         }
 
         if (!Auth::check())
@@ -108,9 +116,26 @@ class WorkController extends Controller {
         if (!AuthorWork::isAuthor($author_id, $work_id))
             return Requests::authorizationError();
 
-        if (AuthorWork::hideWork($author_id, $work_id))
-            return Requests::success('Works hidden successfully');
+        if (AuthorWork::toggleWorkVisibility($author_id, $work_id, $visibility))
+            return Requests::success('Operation successful.');
 
         return Requests::serverError('Something went wrong.');
+    }
+
+    public function getHiddenAuthorWorks(Request $request) {
+        if(!Auth::check()) {
+            return Requests::authenticationError();
+        }
+
+        $user = User::with('author')->find(Auth::user()->id);
+
+        if(!$user->author) {
+            return Requests::authorizationError();
+        }
+
+        return Requests::success('Hidden Works retrieved successfully', ['works'=>
+            new PaginatedWorkCollection(Work::source(Work::$aggregateSource)->whereHas('authors', function ($query) use ($user) {
+            $query->where('author_id', $user->author->id)->where('visibility', false);
+        })->paginate(10))]);
     }
 }

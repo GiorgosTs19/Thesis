@@ -119,7 +119,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                     <div className={styles.timeLineCardInnerContainer}>
                         <RiNumber2 className={styles.timelineStepNumber} />
                         <div className={'flex w-full flex-col'}>
-                            <div className={styles.timelineText}>Tell us who you are by providing your unique identifiers, along with some essential details.</div>
+                            <div className={styles.timelineText}>Tell us who you are by providing one of your unique identifiers.</div>
                             <div className={'mx-auto mt-2 flex gap-4'}>
                                 <OrcidSVG height={24} width={24} />
                                 <OpenAlexSVG height={24} width={24} />

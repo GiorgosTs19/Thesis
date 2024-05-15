@@ -15,8 +15,10 @@ import PaginatedList from '@/Components/PaginatedList/PaginatedList.jsx';
 import Filters from '@/Components/Filters/Filters.jsx';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
 import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
-import { useWorkHiddenEventListener } from '@/Events/WorkEvent/WorkEvent.js';
+import { useWorkVisibilityChangedEventListener } from '@/Events/WorkEvent/WorkEvent.js';
 import { ToastTypes, useToast } from '@/Contexts/ToastContext.jsx';
+import {Checkbox, Label} from "flowbite-react";
+import HiddenWorks from "@/Pages/Routes/Author/HiddenWorks.jsx";
 
 const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const authorObject = useMemo(() => Author.parseResponseAuthor(author), [author]);
@@ -29,17 +31,21 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
     const { user } = useAuth();
     const { showToast } = useToast();
     const [refreshWorks, setRefreshWorks] = useState(false);
+    const [showHiddenWorks, setShowHiddenWorks] = useState(false);
 
-    useWorkHiddenEventListener((event) => {
+    useWorkVisibilityChangedEventListener((event) => {
         showToast(event.data.action, ToastTypes.SUCCESS, event.success, 5000);
         setRefreshWorks((prev) => !prev);
-    });
+    }, false);
 
     const handleFetchWorks = useCallback(() => {
+        if(showHiddenWorks) {
+            return ;
+        }
         return api.works.filterWorks({ ...filters, filter_visibility: true }).then((res) => {
             setAuthorWorks(res.data);
         });
-    }, [filters, refreshWorks]);
+    }, [filters, refreshWorks, showHiddenWorks]);
 
     const { loading } = useAsync(handleFetchWorks);
 
@@ -177,8 +183,18 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
                 </div>
             </div>
             <div className={styles.listsContainer}>
-                <Filters authors={[authorObject]} filters={filters} dispatch={dispatch} />
-                <PaginatedList
+                <div className={'flex space-x-4 justify-center'}>
+                    {authorObject.id === user?.author?.id && <div className="flex items-center gap-2">
+                        <Checkbox id="showHiddenWorks" checked={showHiddenWorks}
+                                  onChange={() => setShowHiddenWorks(prev => !prev)}/>
+                        <Label htmlFor="showHiddenWorks" className="flex">
+                            Show Hidden Works
+                        </Label>
+                    </div>}
+                    <Filters authors={[authorObject]} filters={filters} dispatch={dispatch}/>
+                </div>
+                {showHiddenWorks ? <HiddenWorks author={authorObject}/>
+                    :<PaginatedList
                     response={authorWorks}
                     renderFn={renderWorkItem}
                     parser={Work.parseResponseWork}
@@ -190,7 +206,8 @@ const AuthorPage = ({ author, uniqueWorksCounts }) => {
                     loading={loading}
                     onLinkClick={handleGetPage}
                     perPage={filters.per_page ?? 10}
-                />
+                />}
+
             </div>
         </div>
     );

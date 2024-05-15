@@ -42,14 +42,14 @@ class AuthorWork extends Model {
         return AuthorWork::where('author_id', $author_id)->where('work_id', $work_id)->first();
     }
 
-    public static function hideWork($author_id, $work_id): bool {
+    public static function toggleWorkVisibility($author_id, $work_id, $visibility): bool {
         try {
             $versions = Work::where('doi', Work::find($work_id)->doi)->get();
             foreach ($versions as $version) {
                 $relation = self::getAuthorWorkRelation($author_id, $version->id);
                 if (!$relation)
                     continue;
-                $relation->visibility = false;
+                $relation->visibility = $visibility;
                 $relation->save();
             }
         } catch (Exception $error) {
