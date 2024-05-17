@@ -145,7 +145,7 @@ class GroupController extends Controller {
             });
 
             $max_allowed = Work::max('publication_year');
-            $min_allowed = $max_allowed - 5;
+            $min_allowed = $max_allowed - 15;
 
             $min_pub_year = !is_null($min) ? max($min, $min_allowed) : $min_allowed;
             $max_pub_year = !is_null($max) ? min($max, $max_allowed) : $max_allowed;

@@ -31,6 +31,16 @@ const styles = {
     chartDisclaimer: 'text-gray-500 opacity-75 italic m-auto text-center',
     deleteButton: 'p-2 rounded-full w-fit',
 };
+
+/**
+ * ActiveGroup component renders the detailed view of a group, including its members,
+ * statistics, and charts. It also provides functionality to delete the group and
+ * remove members if the user is an admin.
+ *
+ * @param {Object} group - The group object containing its details and members.
+ * @param {function} setSelectedGroup - The function to set the selected group.
+ * @returns {JSX.Element} The rendered ActiveGroup component.
+ */
 export const ActiveGroup = ({ group, setSelectedGroup }) => {
     const api = useAPI();
     const { width } = useWindowSize();
@@ -38,7 +48,6 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
     const { filters, filtersHaveChanged, dispatch } = useWorkFilters({ authors: group.members });
     // Cache the total amount of works, so it doesn't change when we filter out works.
     const totalWorksRef = useRef(null);
-    const [statisticsModalOpen, setStatisticsModalOpen] = useState(false);
     const { isAdmin } = useAuth();
 
     const handleFetchGroup = useCallback(() => {
@@ -94,7 +103,6 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
                     return accumulator + currentValue.citation_count;
                 }, 0),
             },
-            { name: 'Click for more Statistics', value: 'OMEA, Authors', onClick: () => handleOpenStatisticsModal() },
         ],
         [group, groupWorks],
     );
@@ -206,8 +214,6 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
     );
 
     const handleDelete = async () => api.groups.deleteGroup(group);
-    const handleOpenStatisticsModal = () => setStatisticsModalOpen(true);
-    const handleCloseStatisticsModal = () => setStatisticsModalOpen(false);
 
     const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
 
@@ -229,11 +235,11 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
                         {isAdmin && <DropDownMenu dotsButton options={dropDownOptions} position={'right'} />}
                     </div>
                     <p className={styles.groupDescription}>{group.description}</p>
-                    <OmeaStats statisticsModalOpen={statisticsModalOpen} handleCloseStatisticsModal={handleCloseStatisticsModal} group={group.id} />
                     <div className={'flex w-full flex-col'}>
                         <div className={'mb-3 flex justify-center'}>
                             <RowOfProperties properties={properties} grow={false} />
                         </div>
+                        <OmeaStats group={group.id} />
                         <CompactGroupInfo
                             setSelectedGroup={setSelectedGroup}
                             group={group}

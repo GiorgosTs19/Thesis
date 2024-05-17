@@ -4,14 +4,24 @@ import { Card } from 'flowbite-react';
 import { shape } from 'prop-types';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
 
+/**
+ * SuccessfulLogin component handles the actions after a user has been successfully authenticated.
+ *
+ * @param {Object} authenticatedUser - The authenticated user object.
+ * @returns {JSX.Element} The rendered SuccessfulLogin component.
+ */
 const SuccessfulLogin = ({ authenticatedUser }) => {
-    const { user, login } = useAuth();
+    const { login } = useAuth();
     const api = useAPI();
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             api.auth.goHome();
         }, 5000);
+
+        return () => {
+            clearTimeout(timeout);
+        };
     }, []);
 
     useEffect(() => {

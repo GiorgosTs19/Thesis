@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }) => {
         api.auth.logout().then(() => {
             setUser(null);
             setIsLoggedIn(false);
+            setIsAdmin(false);
             removeUserDetails();
         });
     };

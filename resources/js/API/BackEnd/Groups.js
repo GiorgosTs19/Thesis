@@ -9,6 +9,14 @@ export const EVENT_TYPES = {
 };
 
 export class Groups extends AbstractAPI {
+    /**
+     * Adds members to a group.
+     *
+     * @param {Object} group - The group to which authors will be added.
+     * @param {Array} authors - The authors to be added to the group.
+     * @returns {Promise<Object>} The response from the server.
+     * @throws {Error} If the authors or group parameters are not provided.
+     */
     async addMembers(group, authors) {
         if (!authors || !group.id) {
             throw new Error('The authors and group parameters are marked as required for addMember()');
@@ -33,6 +41,14 @@ export class Groups extends AbstractAPI {
         });
     }
 
+    /**
+     * Removes a member from a group.
+     *
+     * @param {Object} group - The group from which the author will be removed.
+     * @param {Object} author - The author to be removed from the group.
+     * @returns {Promise<Object>} The response from the server.
+     * @throws {Error} If the author or group parameters are not provided.
+     */
     async removeMember(group, author) {
         if (!author.id || !group.id) {
             throw new Error('The author and group parameters are marked as required for removeMember()');
@@ -58,6 +74,15 @@ export class Groups extends AbstractAPI {
         });
     }
 
+    /**
+     * Creates a new group.
+     *
+     * @param {string} name - The name of the group.
+     * @param {string} description - The description of the group.
+     * @param {Object} parent - The parent group (optional).
+     * @returns {Promise<Object>} The response from the server.
+     * @throws {Error} If the name or description parameters are not provided.
+     */
     async createGroup(name, description, parent) {
         if (!name || !description) {
             throw new Error('The name and description parameters are marked as required for createGroup()');
@@ -84,6 +109,13 @@ export class Groups extends AbstractAPI {
         });
     }
 
+    /**
+     * Deletes a group.
+     *
+     * @param {Object} group - The group to be deleted.
+     * @returns {Promise<Object>} The response from the server.
+     * @throws {Error} If the group parameter is not provided.
+     */
     async deleteGroup(group) {
         if (!group.id) {
             throw new Error('id parameter is marked as required for createGroup()');
@@ -107,6 +139,13 @@ export class Groups extends AbstractAPI {
         });
     }
 
+    /**
+     * Fetches the details of a group.
+     *
+     * @param {number} id - The ID of the group.
+     * @returns {Promise<Object>} The response from the server.
+     * @throws {Error} If the id parameter is not provided.
+     */
     async getGroup(id) {
         if (!id) {
             throw new Error('id parameter is marked as required for getGroup()');
@@ -115,14 +154,31 @@ export class Groups extends AbstractAPI {
         return this.get(url);
     }
 
+    /**
+     * Fetches minimal information of all groups.
+     *
+     * @returns {Promise<Object>} The response from the server.
+     */
     async getGroupsMinInfo() {
         return this.get(route('Group.Minimal.Info'));
     }
 
+    /**
+     * Fetches all groups.
+     *
+     * @returns {Promise<Object>} The response from the server.
+     */
     async getAllGroups() {
         return this.get(route('Group.All'));
     }
 
+    /**
+     * Fetches Omea author statistics for a group.
+     *
+     * @param {number} id - The ID of the group.
+     * @returns {Promise<Object>} The response from the server.
+     * @throws {Error} If the id parameter is not provided.
+     */
     async getOmeaAuthorStats(id) {
         if (!id) {
             throw new Error('id parameter is marked as required for getOmeaAuthorStats()');
@@ -131,6 +187,15 @@ export class Groups extends AbstractAPI {
         return this.get(url);
     }
 
+    /**
+     * Fetches Omea type statistics for a group.
+     *
+     * @param {number} id - The ID of the group.
+     * @param {number} minYear - The minimum year for the statistics.
+     * @param {number} maxYear - The maximum year for the statistics.
+     * @returns {Promise<Object>} The response from the server.
+     * @throws {Error} If the id parameter is not provided.
+     */
     async getOmeaTypeStats(id, minYear, maxYear) {
         if (!id) {
             throw new Error('id parameter is marked as required for getOmeaTypeStats()');

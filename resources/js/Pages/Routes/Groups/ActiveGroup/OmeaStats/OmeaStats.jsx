@@ -1,11 +1,17 @@
-import { Modal, Spinner, Table, Tabs } from 'flowbite-react';
+import { Spinner, Table, Tabs } from 'flowbite-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useClickAway } from '@uidotdev/usehooks';
-import { bool, func, number } from 'prop-types';
+import { number } from 'prop-types';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
+import Collapsible from '@/Components/Collapsible/Collapsible.jsx';
 
-const OmeaStats = ({ handleCloseStatisticsModal, statisticsModalOpen, group }) => {
+/**
+ * OmeaStats component fetches and displays OMEA statistics for a given group.
+ *
+ * @param {number} group - The ID of the group for which statistics are fetched.
+ * @returns {JSX.Element} The rendered OmeaStats component.
+ */
+const OmeaStats = ({ group }) => {
     const [countsPerAuthor, setCountsPerAuthor] = useState([]);
     const [typeStatistics, setTypeStatistics] = useState([]);
     const [yearLabels, setYearLabels] = useState([]);
@@ -13,7 +19,8 @@ const OmeaStats = ({ handleCloseStatisticsModal, statisticsModalOpen, group }) =
     const api = useAPI();
 
     const handleFetchTypeStats = useCallback(() => {
-        api.groups.getOmeaTypeStats(group).then((res) => {
+        const currentYear = new Date().getFullYear();
+        api.groups.getOmeaTypeStats(group, currentYear - 15, currentYear).then((res) => {
             setTypeStatistics(res.data.typeStatistics);
             const labels = [];
 
@@ -32,80 +39,69 @@ const OmeaStats = ({ handleCloseStatisticsModal, statisticsModalOpen, group }) =
 
     const { loading } = useAsync(handleFetchTypeStats);
 
-    const statisticsModalRef = useClickAway(() => {
-        handleCloseStatisticsModal();
-    });
-
     return (
-        <Modal onClose={handleCloseStatisticsModal} show={statisticsModalOpen}>
-            <div className={'overflow-hidden p-1'} ref={statisticsModalRef}>
-                <Modal.Header>More Statistics</Modal.Header>
-                <Modal.Body>
-                    <Tabs style={'fullWidth'} className={'max-h-96'}>
-                        <Tabs.Item active title="Works per Author">
-                            <div className={'overflow-x-auto'}>
+        <Collapsible title={'OMEA Stats'} initiallyCollapsed>
+            <div className={'overflow-auto p-1'}>
+                <Tabs style={'fullWidth'} className={'max-h-96'}>
+                    <Tabs.Item active title="Works per Author">
+                        <Table>
+                            <Table.Head className={'text-center'}>
+                                <Table.HeadCell>Author</Table.HeadCell>
+                                <Table.HeadCell>OpenAlex</Table.HeadCell>
+                                <Table.HeadCell>ORCID</Table.HeadCell>
+                                <Table.HeadCell>Crossref</Table.HeadCell>
+                            </Table.Head>
+                            <Table.Body>
+                                {countsPerAuthor.map((t) => (
+                                    <Table.Row key={t.name} className={'border-b border-b-gray-200'}>
+                                        <Table.Cell>{t.name}</Table.Cell>
+                                        <Table.Cell className={'border-x border-x-gray-100 text-center'}>{t.counts.OpenAlex ?? '-'}</Table.Cell>
+                                        <Table.Cell className={'border-r border-r-gray-100 text-center'}>{t.counts.ORCID ?? '-'}</Table.Cell>
+                                        <Table.Cell className={'border-r border-r-gray-100 text-center'}>{t.counts.Crossref ?? '-'}</Table.Cell>
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
+                    </Tabs.Item>
+                    <Tabs.Item active title="Works per OMEA Type">
+                        <div className={'my-3 text-center text-gray-400'}>Showing data for the last 15 years.</div>
+                        <div className={'overflow-auto'}>
+                            {loading ? (
+                                <div className={'flex'}>
+                                    <Spinner className={'m-auto'} size={30} />
+                                </div>
+                            ) : (
                                 <Table>
-                                    <Table.Head>
-                                        <Table.HeadCell>Author</Table.HeadCell>
-                                        <Table.HeadCell>OpenAlex</Table.HeadCell>
-                                        <Table.HeadCell>ORCID</Table.HeadCell>
-                                        <Table.HeadCell>Crossref</Table.HeadCell>
+                                    <Table.Head className={'text-center'}>
+                                        <Table.HeadCell>Type</Table.HeadCell>
+                                        {yearLabels.map((item) => (
+                                            <Table.HeadCell key={item}>{`'${item % 100}`}</Table.HeadCell>
+                                        ))}
                                     </Table.Head>
                                     <Table.Body>
-                                        {countsPerAuthor.map((t) => (
-                                            <Table.Row key={t.name}>
-                                                <Table.Cell>{t.name}</Table.Cell>
-                                                <Table.Cell className={'text-center'}>{t.counts.OpenAlex ?? '-'}</Table.Cell>
-                                                <Table.Cell className={'text-center'}>{t.counts.ORCID ?? '-'}</Table.Cell>
-                                                <Table.Cell className={'text-center'}>{t.counts.Crossref ?? '-'}</Table.Cell>
+                                        {Object.values(typeStatistics).map(({ name, worksPerYear }) => (
+                                            <Table.Row key={name} className={'border-b border-b-gray-200'}>
+                                                <Table.Cell>{name}</Table.Cell>
+                                                {Object.entries(worksPerYear).map(([year, count]) => (
+                                                    <Table.Cell key={year} className={'border-x border-x-gray-100 text-center'}>
+                                                        {count}
+                                                    </Table.Cell>
+                                                ))}
                                             </Table.Row>
                                         ))}
                                     </Table.Body>
                                 </Table>
-                            </div>
-                        </Tabs.Item>
-                        <Tabs.Item active title="Works per OMEA Type">
-                            <div className={'my-3 text-center text-gray-400'}>Only showing data for the last 6 years.</div>
-                            <div className={'overflow-x-auto'}>
-                                {loading ? (
-                                    <div className={'flex'}>
-                                        <Spinner className={'m-auto'} size={30} />
-                                    </div>
-                                ) : (
-                                    <Table>
-                                        <Table.Head>
-                                            <Table.HeadCell>Type</Table.HeadCell>
-                                            {yearLabels.map((item) => (
-                                                <Table.HeadCell key={item}>{`'${item % 100}`}</Table.HeadCell>
-                                            ))}
-                                        </Table.Head>
-                                        <Table.Body>
-                                            {Object.values(typeStatistics).map(({ name, worksPerYear }) => (
-                                                <Table.Row key={name}>
-                                                    <Table.Cell>{name}</Table.Cell>
-                                                    {Object.entries(worksPerYear).map(([year, count]) => (
-                                                        <Table.Cell key={year} className={'text-center'}>
-                                                            {count}
-                                                        </Table.Cell>
-                                                    ))}
-                                                </Table.Row>
-                                            ))}
-                                        </Table.Body>
-                                    </Table>
-                                )}
-                            </div>
-                        </Tabs.Item>
-                    </Tabs>
-                </Modal.Body>
+                            )}
+                        </div>
+                    </Tabs.Item>
+                </Tabs>
             </div>
-        </Modal>
+        </Collapsible>
     );
 };
 
 export default OmeaStats;
 
 OmeaStats.propTypes = {
-    handleCloseStatisticsModal: func.isRequired,
-    statisticsModalOpen: bool.isRequired,
     group: number.isRequired,
 };
