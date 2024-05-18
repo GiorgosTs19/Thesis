@@ -80,6 +80,9 @@ class AuthenticationController extends Controller {
             return Requests::authorizationError('This user is already associated with an author.');
         }
 
+        $user->orc_id = $author->orc_id;
+        $user->open_alex_id = $author->open_alex_id;
+        $user->scopus_id = $author->scopus_id;
         $user->author_id = $author_id;
         $user->save();
 
