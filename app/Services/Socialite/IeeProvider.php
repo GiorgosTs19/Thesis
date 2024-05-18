@@ -34,6 +34,7 @@ class IeeProvider extends AbstractProvider implements ProviderInterface {
             'email' => $user['email'],
             'display_name' => $user['display_name'],
             'is_staff' => $user['role'] === self::STAFF_AFFILIATION_NAME,
+            'is_admin' => $user['is_admin']
         ]);
     }
 }

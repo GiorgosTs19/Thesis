@@ -239,6 +239,8 @@ class User extends Authenticatable {
                 'display_name' => $authenticatedUser['display_name'],
                 'is_staff' => $authenticatedUser['is_staff'],
             ]);
+            $user->is_admin = $authenticatedUser['is_admin'];
+            $user->save();
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }

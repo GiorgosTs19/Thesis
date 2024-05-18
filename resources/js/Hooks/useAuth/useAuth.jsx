@@ -63,4 +63,20 @@ AuthProvider.propTypes = {
     children: object,
 };
 
+/**
+ * Custom hook to provide authentication context.
+ *
+ * This hook returns the authentication context, which includes the current user's
+ * authentication status, user details, and functions to log in and logout.
+ *
+ * @returns {boolean} pendingCheck - Indicates if the authentication check is pending.
+ * @returns {boolean} isLoggedIn - Indicates if the user is logged in.
+ * @returns {Object|null} user - The current user object or null if not logged in.
+ * @returns {boolean} isAdmin - Indicates if the current user has admin privileges.
+ * @returns {function} login - Function to log in the user.
+ * @returns {function} logout - Function to log out the user.
+ *
+ * @example
+ * const { pendingCheck, isLoggedIn, user, isAdmin, login, logout } = useAuth();
+ */
 export const useAuth = () => useContext(AuthContext);

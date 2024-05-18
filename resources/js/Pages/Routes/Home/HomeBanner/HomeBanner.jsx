@@ -7,13 +7,13 @@ import { Card } from 'flowbite-react';
 import { ScopusSVG } from '@/SVGS/ScopusSVG.jsx';
 import { OpenAlexSVG } from '@/SVGS/OpenAlexSVG.jsx';
 import { OrcidSVG } from '@/SVGS/OrcidSVG.jsx.jsx';
-import './styles.css';
 import { RiNumber1, RiNumber2, RiNumber3 } from 'react-icons/ri';
 import List from '@/Components/List/List.jsx';
 import { renderAuthorItem } from '@/Models/Author/Utils.jsx';
 import { Author } from '@/Models/Author/Author.js';
 import { renderWorkItem } from '@/Models/Work/Utils.jsx';
 import { Work } from '@/Models/Work/Work.js';
+import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 
 /**
  * HomeBanner Component
@@ -32,6 +32,7 @@ import { Work } from '@/Models/Work/Work.js';
  * @returns The rendered HomeBanner component.
  */
 const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) => {
+    const { isLoggedIn } = useAuth();
     const renderWork = (work, index) =>
         renderWorkItem(
             work,
@@ -54,15 +55,6 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                         <div className={'m-auto'}>
                             <AuthorSVG width={64} height={64} className={styles.image} />
                             <div className={styles.text}>Explore a vast collection of renowned authors. Uncover insights, and statistical data for each literary figure.</div>
-                            {/*<button*/}
-                            {/*    className={clsx(*/}
-                            {/*        styles.button,*/}
-                            {/*        styles.disabledButton,*/}
-                            {/*    )}*/}
-                            {/*    disabled*/}
-                            {/*>*/}
-                            {/*    Explore Authors*/}
-                            {/*</button>*/}
                         </div>
                     </div>
                     <div className={clsx('flex flex-col gap-5 md:flex-row', styles.listWrapper)}>
@@ -92,15 +84,6 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                         <div className={'m-auto'}>
                             <WorksSVG width={64} height={64} className={styles.image} />
                             <div className={styles.text}>Search through an extensive catalog of papers, discover details about each piece, and explore statistical analyses.</div>
-                            {/*<button*/}
-                            {/*    className={clsx(*/}
-                            {/*        styles.button,*/}
-                            {/*        styles.disabledButton,*/}
-                            {/*    )}*/}
-                            {/*    disabled*/}
-                            {/*>*/}
-                            {/*    Explore Works*/}
-                            {/*</button>*/}
                         </div>
                     </div>
                     <div className={styles.listWrapper}>
@@ -108,7 +91,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                     </div>
                 </div>
             </div>
-            <div className={styles.timelineWrapper}>
+            <div className={clsx(styles.timelineWrapper, isLoggedIn ? 'invisible' : '')}>
                 <Card className={styles.timeLineCard}>
                     <div className={styles.timeLineCardInnerContainer}>
                         <RiNumber1 className={styles.timelineStepNumber} />

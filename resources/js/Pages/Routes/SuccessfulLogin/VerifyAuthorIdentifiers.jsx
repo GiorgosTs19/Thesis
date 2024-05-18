@@ -56,6 +56,7 @@ const VerifyAuthorIdentifiers = () => {
                 setError('No authors were found with the provided identifiers.');
                 return;
             }
+            if (error) setError(null);
             setResult(res.map(Author.parseResponseAuthor));
             setShowResults(true);
         });
@@ -67,20 +68,20 @@ const VerifyAuthorIdentifiers = () => {
     };
 
     return (
-        <Card className={'mx-auto my-auto w-10/12 md:w-7/12 lg:w-4/12'}>
+        <Card className={styles.card}>
             {!showResults && (
-                <div className={'flex flex-col gap-5'}>
-                    <h5 className={'text-center text-lg'}>Welcome to MyPubsV2</h5>
-                    <div className={'text-center text-sm'}>
+                <div className={styles.container}>
+                    <h5 className={styles.header}>Welcome to MyPubsV2</h5>
+                    <div className={styles.text}>
                         {/* eslint-disable-next-line react/no-unescaped-entities */}
                         To ensure seamless access to our platform's resources and optimize your experience, it is essential that you provide one of the following unique identifiers to build your
                         profile.
                     </div>
                     <div>
-                        <Label htmlFor="OpenAlex" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                        <Label htmlFor="OpenAlex" className={styles.label}>
                             OpenAlex
                         </Label>
-                        <div className="relative">
+                        <div className={styles.relative}>
                             <TextInput
                                 icon={OpenAlexSVG}
                                 id="OpenAlex"
@@ -90,42 +91,35 @@ const VerifyAuthorIdentifiers = () => {
                                 disabled={!!(ids.scopus.length || ids.orc_id.length)}
                             />
                         </div>
-                        <div className={'ml-2 mt-2 text-xs text-gray-500'}>e.g {OpenAlexExample}</div>
+                        <div className={styles.exampleText}>e.g {OpenAlexExample}</div>
                     </div>
                     <div>
-                        <Label htmlFor="Scopus" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                        <Label htmlFor="Scopus" className={styles.label}>
                             Scopus
                         </Label>
-                        <div className="relative">
+                        <div className={styles.relative}>
                             <TextInput icon={ScopusSVG} id="Scopus" value={ids.scopus} placeholder="Scopus" onChange={handleChangeScopus} disabled={!!(ids.orc_id.length || ids.open_alex.length)} />
                         </div>
-                        <div className={'ml-2 mt-2 text-xs text-gray-500'}>e.g {ScopusExample}</div>
+                        <div className={styles.exampleText}>e.g {ScopusExample}</div>
                     </div>
                     <div>
-                        <Label htmlFor="ORCID" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                        <Label htmlFor="ORCID" className={styles.label}>
                             ORCID
                         </Label>
-                        <div className="relative">
-                            <TextInput
-                                icon={OrcidSVG}
-                                id="ORCID"
-                                value={ids.orc_id}
-                                // className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 ps-10 text-sm text-gray-900"
-                                placeholder="ORCID"
-                                onChange={handleChangeOrcID}
-                                disabled={!!(ids.scopus.length || ids.open_alex.length)}
-                            />
+                        <div className={styles.relative}>
+                            <TextInput icon={OrcidSVG} id="ORCID" value={ids.orc_id} placeholder="ORCID" onChange={handleChangeOrcID} disabled={!!(ids.scopus.length || ids.open_alex.length)} />
                         </div>
-                        <div className={'ml-2 mt-2 text-xs text-gray-500'}>e.g {OrcIdExample}</div>
+                        <div className={styles.exampleText}>e.g {OrcIdExample}</div>
                     </div>
-                    <Button className={'mx-auto'} onClick={handleSubmit}>
+                    <div className={`${styles.errorText} ${error ? 'visible' : 'invisible'}`}>{error}</div>
+                    <Button className={styles.button} onClick={handleSubmit}>
                         Submit
                     </Button>
                 </div>
             )}
             {showResults && (
-                <div className={'flex flex-col gap-5'}>
-                    <Button className={'mx-auto mb-5'} onClick={handleBack}>
+                <div className={styles.container}>
+                    <Button className={styles.backButton} onClick={handleBack}>
                         Back
                     </Button>
                     <AuthorsList authors={result} />
@@ -133,6 +127,19 @@ const VerifyAuthorIdentifiers = () => {
             )}
         </Card>
     );
+};
+
+const styles = {
+    card: 'mx-auto my-auto w-10/12 md:w-7/12 lg:w-4/12',
+    container: 'flex flex-col gap-5',
+    header: 'text-center text-lg',
+    text: 'text-center text-sm',
+    label: 'mb-2 block text-sm font-medium text-gray-900 dark:text-white',
+    relative: 'relative',
+    exampleText: 'ml-2 mt-2 text-xs text-gray-500',
+    errorText: 'my-3 text-center text-red-400',
+    button: 'mx-auto',
+    backButton: 'mx-auto mb-5',
 };
 
 export default VerifyAuthorIdentifiers;
