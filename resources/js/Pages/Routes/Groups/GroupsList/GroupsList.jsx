@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { RichTreeView, TreeItem2, useTreeItem2Utils } from '@mui/x-tree-view';
 import useAPI from '@/Hooks/useAPI/useAPI.js';
 import { Spinner } from 'flowbite-react';
-import { useGroupCreatedEventListener } from '@/Events/GroupEvent/GroupEvent.js';
+import { useGroupCreatedEventListener, useGroupDeletedEventListener } from '@/Events/GroupEvent/GroupEvent.js';
 import { arrayOf, func, node, string } from 'prop-types';
 import './style.css';
 import OffCanvas from '@/Components/OffCanvas/OffCanvas.jsx';
@@ -51,12 +51,18 @@ const GroupsList = ({ setSelectedGroup }) => {
         api.groups.getAllGroups().then((res) => setGroupsList(res.data.groups));
     }, []);
 
+    const updateGroupsList = useCallback(
+        () =>
+            api.groups.getAllGroups().then((res) => {
+                setGroupsList(res.data.groups);
+            }),
+        [],
+    );
+
     // Listen for Group Created Events
-    useGroupCreatedEventListener(() => {
-        api.groups.getAllGroups().then((res) => {
-            setGroupsList(res.data.groups);
-        });
-    });
+    useGroupCreatedEventListener(updateGroupsList);
+
+    useGroupDeletedEventListener(updateGroupsList);
 
     const generateTreeViewItems = (groups) => {
         return groups.map((group) => ({

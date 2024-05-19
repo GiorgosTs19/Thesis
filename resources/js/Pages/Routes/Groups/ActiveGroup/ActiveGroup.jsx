@@ -213,7 +213,7 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
         </>
     );
 
-    const handleDelete = async () => api.groups.deleteGroup(group);
+    const handleDelete = useCallback(async () => api.groups.deleteGroup(group), [group]);
 
     const dropDownOptions = [{ name: 'Delete Group', value: 0, onClick: deleteModalRef?.current?.open, default: false }];
 
