@@ -42,7 +42,7 @@ class WorkUtils {
 
     public static function getCustomType(string $type): int {
         if (strstr($type, self::ARTICLE)) {
-            return 1;
+            return 5;
         } elseif (strstr($type, self::BOOK)) {
             return 3;
         } elseif (strstr($type, self::EDITORIAL)) {
@@ -195,8 +195,8 @@ class WorkUtils {
             // Associate the "aggregated" version of the work with the same authors.
             WorkUtils::createAggregatedWork($new_work)->parseAuthors($work->authorships);
 
-        //  Disable the generation of Concepts since they are not to be used in the upcoming release.
-        //  $new_work->generateConcepts($work->concepts);
+            //  Disable the generation of Concepts since they are not to be used in the upcoming release.
+            //  $new_work->generateConcepts($work->concepts);
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }

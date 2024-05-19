@@ -60,12 +60,6 @@ const OffCanvas = forwardRef(function OffCanvas({ isOpen, position, onClose = ()
         </>
     );
 });
-const styles = {
-    backDrop: 'fixed top-0 left-0 z-20 w-full h-full bg-black opacity-50',
-    closeButton: 'w-24 py-1 bg-gray-200 rounded-3xl mx-auto mt-5',
-    childrenWrapper: 'my-auto flex w-full px-4 py-10 overflow-y-auto h-full',
-    offCanvas: 'fixed z-30 flex flex-col max-w-full bg-white shadow-lg duration-300 transition-all',
-};
 
 OffCanvas.propTypes = {
     header: string,

@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\{Author, Work};
-use App\Utility\SystemManager;
 use App\Utility\ULog;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -16,6 +15,28 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public int $timeout = 7200; // 2 hours
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public int $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     *
+     * @var int
+     */
+    public int $retryAfter = 7200; // 2 hours
+
+
+    /**
      * Create a new job instance.
      */
     public function __construct() {
@@ -26,14 +47,14 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
      */
     public function handle(): void {
         try {
-            SystemManager::enableMaintenanceMode();
+//            SystemManager::enableMaintenanceMode();
 
             $started_time = date("H:i:s");
             ULog::log("Database Update started at $started_time");
 
             DB::transaction(function () {
                 $this->updateAuthors();
-//                $this->updateWorks();
+                $this->updateWorks();
             });
 
             $ended_time = date("H:i:s");
@@ -41,9 +62,10 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
 
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
-        } finally {
-            SystemManager::disableMaintenanceMode();
         }
+//        finally {
+//            SystemManager::disableMaintenanceMode();
+//        }
     }
 
     /**

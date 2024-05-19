@@ -46,7 +46,7 @@ const CompactGroupInfo = ({ visibleWidth = 1100, group, groupWorks, charts, load
                 </Button>
                 <PaginatedList
                     response={groupWorks}
-                    title={`Group Works ( ${groupWorks?.meta?.total ?? 0} )`}
+                    title={`Group Works`}
                     renderFn={renderWorkItem}
                     emptyListPlaceholder={'This list is empty'}
                     parser={Work.parseResponseWork}

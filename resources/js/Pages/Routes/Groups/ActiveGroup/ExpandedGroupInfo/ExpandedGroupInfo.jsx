@@ -49,7 +49,7 @@ const ExpandedGroupInfo = ({ visibleWidth = 1100, charts, loading, groupWorks, h
                             parser={Work.parseResponseWork}
                             emptyListPlaceholder={'This list is empty'}
                             onLinkClick={handleLinkClick}
-                            title={`Group Works ( ${groupWorks?.meta?.total ?? 0} )`}
+                            title={`Group Works`}
                             gap={6}
                             loading={loading}
                             perPage={filters.per_page ?? 10}

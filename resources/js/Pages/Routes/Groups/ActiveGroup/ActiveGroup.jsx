@@ -96,9 +96,9 @@ export const ActiveGroup = ({ group, setSelectedGroup }) => {
         () => [
             group.parent && { name: 'Parent Group', value: group.parent.name, onClick: () => setSelectedGroup(group.parent.id) },
             { name: 'Number of Authors', value: group?.members.length },
-            { name: 'Total Number of Works', value: totalWorksRef.current ?? 0 },
+            { name: 'Number of Works', value: totalWorksRef.current ?? 0 },
             {
-                name: 'Total Amount of Citations',
+                name: 'Number of Citations',
                 value: group?.members.reduce((accumulator, currentValue) => {
                     return accumulator + currentValue.citation_count;
                 }, 0),
