@@ -12,7 +12,7 @@ import DropDownMenu from '@/Components/DropDownMenu/DropDownMenu.jsx';
 import useAsync from '@/Hooks/useAsync/useAsync.js';
 import CompactGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/CompactGroupInfo/CompactGroupInfo.jsx';
 import ExpandedGroupInfo from '@/Pages/Routes/Groups/ActiveGroup/ExpandedGroupInfo/ExpandedGroupInfo.jsx';
-import NewEmptyGroup from '@/Pages/Routes/Groups/ActiveGroup/NewEmptyGroup/NewEmptyGroup.jsx';
+import NewEmptyGroup from '@/Pages/Routes/Groups/NewEmptyGroup/NewEmptyGroup.jsx';
 import useWorkFilters from '@/Hooks/useWorkFilters/useWorkFilters.jsx';
 import OmeaStats from '@/Pages/Routes/Groups/ActiveGroup/OmeaStats/OmeaStats.jsx';
 import { useWindowSize } from '@uidotdev/usehooks';

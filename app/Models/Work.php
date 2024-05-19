@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\DOIAPI;
 use App\Http\Controllers\OpenAlexAPI;
 use App\Utility\AuthorUtils;
 use App\Utility\Ids;
 use App\Utility\ULog;
+use App\Utility\WorkUtils;
+use Closure;
 use Exception;
 use Illuminate\Database\Eloquent\{Factories\HasFactory, Model, Relations\BelongsToMany, Relations\MorphMany};
 use Illuminate\Support\Collection;
@@ -44,7 +47,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static min(string $string)
  * @method static max(string $string)
  * @method static distinct()
- * @method static whereHas(string $string, \Closure $param)
+ * @method static whereHas(string $string, Closure $param)
  */
 class Work extends Model {
     use HasFactory;
@@ -167,8 +170,31 @@ class Work extends Model {
      * @return void
      */
     public function updateSelf(): void {
-        if ($this->source !== self::$openAlexSource)
+        $this->type = WorkUtils::getCustomType($this->type);
+
+        if ($this->source === self::$aggregateSource)
             return;
+
+        match ($this->source) {
+            self::$openAlexSource => $this->updateSelfOpenAlex(),
+            self::$orcIdSource => $this->updateSelfORCID(),
+            self::$crossRefSource => $this->updateSelfCrossref()
+        };
+    }
+
+    /**
+     * Updates the current instance with data from the OpenAlex API.
+     *
+     * This function fetches updated work data from the OpenAlex API using the
+     * instance's external ID. If the data has been updated since the last check,
+     * it updates the local instance with the new citation count, open access status,
+     * and last updated date. It also handles the statistics for the current year,
+     * ensuring they are up-to-date.
+     *
+     * @return void
+     * @throws Exception If there is an error during the API call or data update process.
+     */
+    private function updateSelfOpenAlex() {
         $request_work = OpenAlexAPI::workUpdateRequest($this->external_id);
 
         $should_update = $request_work->updated_date !== $this->last_updated_date;
@@ -180,33 +206,69 @@ class Work extends Model {
             $this->is_oa = $request_work->open_access->is_oa;
             $this->last_updated_date = $request_work->updated_date;
             $this->save();
-        } catch (Exception $error) {
-            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
-        }
-        // Retrieve the current year
-        $year_to_update = date('Y');
+            // Retrieve the current year
+            $year_to_update = date('Y');
 
-        // Check local db for the work's statistics for the current year
-        $db_statistic = $this->statistics()
-            ->where('year', $year_to_update)
-            ->first();
+            // Check local db for the work's statistics for the current year
+            $db_statistic = $this->statistics()
+                ->where('year', $year_to_update)
+                ->first();
 
-        // If there's no local record for this year's statistics for the current work,
-        // make the api call to ensure it doesn't exist on OpenAlex as well.
-        if (!$db_statistic) {
-            $req_statistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $request_work->counts_by_year);
-            // It seems like for some works there has not been any documented citations for the current year, or for years now,
-            // so checking if the record we need exists in the first place
-            if (!$req_statistic) {
-                ULog::log("No statistics were found for $this->id for the year $year_to_update ");
+            // If there's no local record for this year's statistics for the current work,
+            // make the api call to ensure it doesn't exist on OpenAlex as well.
+            if (!$db_statistic) {
+                $req_statistic = Statistic::getCurrentYearsOpenAlexStatistic(Author::class, $request_work->counts_by_year);
+                // It seems like for some works there has not been any documented citations for the current year, or for years now,
+                // so checking if the record we need exists in the first place
+                if (!$req_statistic) {
+                    ULog::log("No statistics were found for $this->id for the year $year_to_update ");
+                    return;
+                }
+                // If there is, and for some reason it has not been parsed on a previous update, create the new statistic for the current year.
+                Statistic::generateStatistic($this->id, $req_statistic, Auth::class);
                 return;
             }
-            // If there is, and for some reason it has not been parsed on a previous update, create the new statistic for the current year.
-            Statistic::generateStatistic($this->id, $req_statistic, Auth::class);
-            return;
+            // If there is a local record check for any changes and update accordingly.
+            $db_statistic->updateStatistic($this, $request_work->counts_by_year);
+        } catch (Exception $error) {
+            ULog::error("Failed to updated Work $this->id from OPENALEX" . $error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
-        // If there is a local record check for any changes and update accordingly.
-        $db_statistic->updateStatistic($this, $request_work->counts_by_year);
+    }
+
+    /**
+     * Updates the current instance with data from the ORCID API.
+     *
+     * This function is intended to fetch and update work data from the ORCID API using the
+     * instance's external ID. The implementation is currently commented out and needs to be
+     * completed.
+     *
+     * @return void
+     */
+    private function updateSelfORCID(): void {
+        try {
+//        $orc_id_work = OrcIdAPI::workRequest($this->external_id);
+        } catch (Exception $error) {
+            ULog::error("Failed to updated Work $this->id from ORCID" . $error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+        }
+    }
+
+    /**
+     * Updates the current instance with data from the Crossref API.
+     *
+     * This function fetches updated work data from the Crossref API using the
+     * instance's DOI. It updates the local instance with the new citation count.
+     *
+     * @return void
+     * @throws Exception If there is an error during the API call or data update process.
+     */
+    private function updateSelfCrossref(): void {
+        try {
+            $doi_work = DOIAPI::workRequest($this->doi);
+            $this->is_referenced_by_count = data_get($doi_work, 'is-referenced-by-count') ?? null;
+            $this->save();
+        } catch (Exception $error) {
+            ULog::error("Failed to updated Work $this->id from Crossref" . $error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+        }
     }
 
     /**

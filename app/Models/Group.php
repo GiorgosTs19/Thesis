@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static find(int $id)
  * @method static name(mixed $name)
  * @method static noParent()
+ * @method static noMembers()
  */
 class Group extends Model {
     use HasFactory;

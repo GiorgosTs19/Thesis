@@ -44,7 +44,6 @@ class SearchController extends Controller {
                 'query' => $query,
                 'authors' => AuthorResource::collection($author_results),
                 'works' => WorkResource::collection($work_results),
-                'error' => null
             ];
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
@@ -82,7 +81,7 @@ class SearchController extends Controller {
                 'orc_id' => $orc_id,
                 'open_alex' => $open_alex,
                 'scopus' => $scopus,
-                'authors' => AuthorResource::collection($author_results),
+                'authors' => AuthorResource::collection($author_results)
             ];
         } catch (Exception $error) {
             ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
@@ -124,9 +123,7 @@ class SearchController extends Controller {
             Requests::success('Group retrieved successfully',
                 ['searchResults' => [
                     'query' => $query,
-                    'authors' => AuthorResource::collection($author_results),
-                    'error' => null
-                ]
+                    'authors' => AuthorResource::collection($author_results)]
                 ]);
     }
 }

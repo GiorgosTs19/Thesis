@@ -31,7 +31,7 @@ Route::prefix('search')->group(function () {
 
     Route::prefix('authors')->group(function () {
         Route::get('/identifiers', [SearchController::class, 'searchAuthorsByIdentifiers'])->name('Search.Authors.Identifiers');
-        Route::get('/users/group', [SearchController::class, 'searchWhereNotInGroup'])->name('Search.Authors.Users.Group');
+        Route::get('/not-in-group', [SearchController::class, 'searchWhereNotInGroup'])->name('Search.Authors.Users.Group');
 
     });
 
@@ -43,13 +43,18 @@ Route::prefix('search')->group(function () {
 
 // TODO Make sure only admins can access these routes ( when roles are implemented in THESIS-5 )
 Route::prefix('/groups')->group(function () {
-    Route::get('/all', [GroupController::class, 'getAllGroups'])->name('Group.All');
+    Route::prefix('/all')->group(function () {
+        Route::get('/', [GroupController::class, 'getAllGroups'])->name('Group.All');
+        Route::get('/minimal-info', [GroupController::class, 'getGroupsMinInfo'])->name('Group.Minimal.Info');
+
+    });
     Route::get('/{id}', [GroupController::class, 'getGroup'])->name('Groups.Get.Group');
     Route::post('/create', [GroupController::class, 'create'])->name('Group.Create');
     Route::post('/delete', [GroupController::class, 'destroy'])->name('Group.Delete');
-    Route::post('/add/member', [GroupController::class, 'addMember'])->name('Group.Add.Member');
-    Route::post('/remove/member', [GroupController::class, 'removeMember'])->name('Group.Remove.Member');
-    Route::get('/get/all/info/minimal', [GroupController::class, 'getGroupMinInfo'])->name('Group.Minimal.Info');
+    Route::prefix('/members')->group(function () {
+        Route::post('/add', [GroupController::class, 'addMember'])->name('Group.Add.Member');
+        Route::post('/remove', [GroupController::class, 'removeMember'])->name('Group.Remove.Member');
+    });
 
     Route::prefix('/omea')->group(function () {
         Route::prefix('/stats')->group(function () {

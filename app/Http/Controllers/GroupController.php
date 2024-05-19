@@ -15,7 +15,6 @@ use App\Models\Work;
 use App\Utility\Requests;
 use App\Utility\ULog;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -28,12 +27,24 @@ class GroupController extends Controller {
         return GroupResource::collection(Group::all());
     }
 
-    public function getGroupMinInfo(Request $request): Collection {
-        return Group::all(['id', 'name']);
+    public function getGroupsMinInfo(Request $request): AnonymousResourceCollection|JsonResponse {
+        try {
+            return Requests::success('Groups retrieved successfully',
+                ['groups' => Group::all(['id', 'name'])]);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            return Requests::serverError('Something went wrong');
+        }
     }
 
-    public function getAllGroups(Request $request): AnonymousResourceCollection {
-        return GroupResource::collection(Group::noParent()->noMembers()->with(['childrenRecursive'])->get());
+    public function getAllGroups(Request $request): AnonymousResourceCollection|JsonResponse {
+        try {
+            return Requests::success('Groups retrieved successfully',
+                ['groups' => GroupResource::collection(Group::noParent()->noMembers()->with(['childrenRecursive'])->get())]);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            return Requests::serverError('Something went wrong');
+        }
     }
 
     /**
@@ -128,7 +139,7 @@ class GroupController extends Controller {
 
     public function getOmeaTypeStats(Request $request, $id, $min = null, $max = null): JsonResponse {
         if (!isset($id)) {
-            return Requests::clientError('The id parameter is marked as required');
+            return Requests::missingParameterError('id');
         }
 
         $group = Group::with('members', 'parent', 'members.statistics')->withCount('members')->find($id);

@@ -47,7 +47,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
      */
     public function handle(): void {
         try {
-//            SystemManager::enableMaintenanceMode();
+//          SystemManager::enableMaintenanceMode();
 
             $started_time = date("H:i:s");
             ULog::log("Database Update started at $started_time");

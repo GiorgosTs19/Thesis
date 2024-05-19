@@ -26,7 +26,7 @@ const NewGroupModal = () => {
     useEffect(() => {
         if (openModal) {
             api.groups.getGroupsMinInfo().then((res) => {
-                setGroups(res);
+                setGroups(res.data.groups);
             });
         }
     }, [openModal]);

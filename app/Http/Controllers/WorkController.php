@@ -10,6 +10,8 @@ use App\Models\Type;
 use App\Models\User;
 use App\Models\Work;
 use App\Utility\Requests;
+use App\Utility\ULog;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,17 +29,26 @@ class WorkController extends Controller {
     }
 
     /**
-     * Params : author_ids - Array of author ids to filter works by authorships,
-     * sources - Array of source strings to filter works by their source,
-     * from_pub_year, to_pub_year - Numbers used to filter works by their publication year,
-     * min_citations, max_citations - Numbers used to filter works by their citations count,
-     * work_types - Array of type strings to filter works by their type ( journals, articles, etc. )
-     * type_filter - Array of custom_types ids to filter works by their custom type,
-     * with_versions - A boolean to indicate whether the works should also have their versions loaded.
-     * @param WorkFilterRequest $request
-     * @return PaginatedWorkCollection
+     * Filters works based on various criteria provided in the request.
+     *
+     * @param WorkFilterRequest $request The request object containing filter criteria.
+     *
+     * @param array $author_ids An array of author IDs to filter works by authorship.
+     * @param array $sources An array of source strings to filter works by their source.
+     * @param int $from_pub_year The starting publication year to filter works by.
+     * @param int $to_pub_year The ending publication year to filter works by.
+     * @param int $min_citations The minimum number of citations to filter works by.
+     * @param int $max_citations The maximum number of citations to filter works by.
+     * @param array $work_types An array of type strings to filter works by their type (journals, articles, etc.).
+     * @param array $type_filter An array of custom type IDs to filter works by their custom type.
+     * @param bool $with_versions Indicates whether to include work versions in the results.
+     * @param string $sort_by The attribute to sort the results by.
+     * @param string $sort_direction The direction to sort the results in ('asc' or 'desc').
+     * @param bool $filter_visibility Filter works based on their visibility status.
+     *
+     * @return PaginatedWorkCollection|JsonResponse
      */
-    public function filterWorks(WorkFilterRequest $request): PaginatedWorkCollection {
+    public function filterWorks(WorkFilterRequest $request) {
         $params = $request->safe()->all();
         $per_page = array_key_exists('per_page', $params) ? $params['per_page'] : 10;
         $authors_ids = array_key_exists('author_ids', $params) ? $params['author_ids'] : [];
@@ -57,43 +68,71 @@ class WorkController extends Controller {
 
         $relationships = in_array('versions', $with) ? array_diff($with, ['versions']) : $with;
 
-
-        // Load the relationships that were requested
-        $works_query = Work::with($relationships);
-        // Check if the author_ids is set and only get the works that are associated with these authors.
-        if (sizeof($authors_ids) > 0)
-            $works_query = $works_query->whereHas('authors', function ($query) use ($authors_ids, $filter_visibility) {
-                $query->whereIn('author_id', $authors_ids)->when($filter_visibility, function ($query) {
-                    return $query->where('visibility', true);
+        try {
+            // Load the relationships that were requested
+            $works_query = Work::with($relationships);
+            // Check if the author_ids is set and only get the works that are associated with these authors.
+            if (sizeof($authors_ids) > 0)
+                $works_query = $works_query->whereHas('authors', function ($query) use ($authors_ids, $filter_visibility) {
+                    $query->whereIn('author_id', $authors_ids)->when($filter_visibility, function ($query) {
+                        return $query->where('visibility', true);
+                    });
                 });
-            });
 
-        $works_query = $works_query->minCitations($min_citations)->maxCitations($max_citations)->fromPublicationYear($from_pub_year)
-            ->toPublicationYear($to_pub_year)->sources($sources)->types($work_types)->customType($type_filter)->order($sort_by, $sort_direction);
+            $works_query = $works_query->minCitations($min_citations)->maxCitations($max_citations)->fromPublicationYear($from_pub_year)
+                ->toPublicationYear($to_pub_year)->sources($sources)->types($work_types)->customType($type_filter)->order($sort_by, $sort_direction);
 
-        return new PaginatedWorkCollection($works_query->paginate($per_page)->appends(request()->query()), $with_versions);
-    }
-
-    public function getMetadata(Request $request) {
-        $work_Types = array_map(function ($string) {
-            return ucwords(str_replace('-', ' ', $string));
-        }, Work::distinct()->pluck('type')->toArray());
-
-        return ['minYear' => Work::min('publication_year'), 'maxYear' => Work::max('publication_year'),
-            'minCitations' => Work::min('is_referenced_by_count'), 'maxCitations' => Work::max('is_referenced_by_count'),
-            'customTypes' => Type::all(['name', 'id']),
-            'workTypes' => $work_Types];
+            return new PaginatedWorkCollection($works_query->paginate($per_page)->appends(request()->query()), $with_versions);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            return Requests::serverError("Something went wrong");
+        }
     }
 
     /**
-     * Hides a work and its versions from an author's profile.
-     * @param Request $request
-     * @return JsonResponse
+     * Retrieves metadata related to works, including min/max publication year,
+     * min/max citations, custom types, and work types.
+     *
+     * @param Request $request The request object.
+     *
+     * @return array|JsonResponse
+     * @return int $minYear The minimum publication year of works.
+     * @return int $maxYear The maximum publication year of works.
+     * @return int $minCitations The minimum number of citations a work has received.
+     * @return int $maxCitations The maximum number of citations a work has received.
+     * @return array $customTypes An array of custom types with their names and IDs.
+     * @return array $workTypes An array of distinct work types.
+     */
+    public function getMetadata(Request $request) {
+        try {
+            $work_Types = array_map(function ($string) {
+                return ucwords(str_replace('-', ' ', $string));
+            }, Work::distinct()->pluck('type')->toArray());
+
+            return ['minYear' => Work::min('publication_year'), 'maxYear' => Work::max('publication_year'),
+                'minCitations' => Work::min('is_referenced_by_count'), 'maxCitations' => Work::max('is_referenced_by_count'),
+                'customTypes' => Type::all(['name', 'id']),
+                'workTypes' => $work_Types];
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            return Requests::serverError('Something went wrong.');
+        }
+    }
+
+    /**
+     * Toggles the visibility of a work and its versions for an author's profile.
+     *
+     * @param Request $request The request object containing the work ID and visibility status.
+     *
+     * @param int $id The ID of the work to toggle visibility for.
+     * @param bool $visibility The visibility status to set for the work (true or false).
+     *
+     * @return JsonResponse A JSON response indicating the result of the operation.
      */
     public function toggleWorkVisibility(Request $request): JsonResponse {
         if (!$request->has('id'))
             return Requests::missingParameterError('id');
-        if(!$request->has('visibility')) {
+        if (!$request->has('visibility')) {
             return Requests::missingParameterError('visibility');
         }
 
@@ -122,20 +161,32 @@ class WorkController extends Controller {
         return Requests::serverError('Something went wrong.');
     }
 
-    public function getHiddenAuthorWorks(Request $request) {
-        if(!Auth::check()) {
+    /**
+     * Retrieves hidden works for the authenticated author.
+     *
+     * @param Request $request The request object.
+     *
+     * @return JsonResponse A JSON response containing a paginated collection of hidden works.
+     */
+    public function getHiddenAuthorWorks(Request $request): JsonResponse {
+        if (!Auth::check()) {
             return Requests::authenticationError();
         }
 
         $user = User::with('author')->find(Auth::user()->id);
 
-        if(!$user->author) {
+        if (!$user->author) {
             return Requests::authorizationError();
         }
 
-        return Requests::success('Hidden Works retrieved successfully', ['works'=>
-            new PaginatedWorkCollection(Work::source(Work::$aggregateSource)->whereHas('authors', function ($query) use ($user) {
-            $query->where('author_id', $user->author->id)->where('visibility', false);
-        })->paginate(10))]);
+        try {
+            return Requests::success('Hidden Works retrieved successfully', ['works' =>
+                new PaginatedWorkCollection(Work::source(Work::$aggregateSource)->whereHas('authors', function ($query) use ($user) {
+                    $query->where('author_id', $user->author->id)->where('visibility', false);
+                })->paginate(10))]);
+        } catch (Exception $error) {
+            ULog::error($error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
+            return Requests::serverError('Something went wrong.');
+        }
     }
 }

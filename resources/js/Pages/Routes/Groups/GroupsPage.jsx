@@ -46,6 +46,7 @@ const GroupsPage = () => {
             showToast(e.data.action, e.data.toastType, e.success);
             setWorksShouldRefresh((prev) => !prev);
             // * Add the new group to the list of groups.
+            console.log('🚀 ~ GroupsPage.jsx 49', e.data.group);
             setSelectedGroup(e.data.group.id);
         } else if (e.error) {
             showToast(e.error, ToastTypes.ERROR, 'Error', 5000);

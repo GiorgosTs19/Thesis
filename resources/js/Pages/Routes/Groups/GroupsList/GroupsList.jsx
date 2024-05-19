@@ -48,12 +48,14 @@ const GroupsList = ({ setSelectedGroup }) => {
 
     const api = useAPI();
     useEffect(() => {
-        api.groups.getAllGroups().then((res) => setGroupsList(res));
+        api.groups.getAllGroups().then((res) => setGroupsList(res.data.groups));
     }, []);
 
     // Listen for Group Created Events
     useGroupCreatedEventListener(() => {
-        api.groups.getAllGroups().then((res) => setGroupsList(res));
+        api.groups.getAllGroups().then((res) => {
+            setGroupsList(res.data.groups);
+        });
     });
 
     const generateTreeViewItems = (groups) => {

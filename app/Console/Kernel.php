@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel {
     protected function schedule(Schedule $schedule): void {
         $schedule->job(new UpdateDatabaseJob)
             ->sundays()
-            ->cron('0 1-2 */14 * *');
+            ->cron('0 5-6 */14 * *');
     }
 
     /**
