@@ -48,6 +48,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static max(string $string)
  * @method static distinct()
  * @method static whereHas(string $string, Closure $param)
+ * @method static notFromSource(string $aggregateSource)
  */
 class Work extends Model {
     use HasFactory;
@@ -67,8 +68,6 @@ class Work extends Model {
     ];
 
     const AUTHOR_WORKS_TABLE = 'author_work';
-
-    public static array $updateFields = ['id', 'open_alex_id', 'last_updated_date', 'is_oa', 'cited_by_count'];
 
     protected $fillable = ['doi', 'title', 'publication_year', 'language', 'type',
         'subtype', 'abstract', 'source_title', 'source_url', 'external_id', 'event',
@@ -121,6 +120,10 @@ class Work extends Model {
         if (!in_array($source, [Work::$openAlexSource, Work::$orcIdSource, Work::$crossRefSource, Work::$aggregateSource]))
             return $query;
         return $or ? $query->orWhere('source', $source) : $query->where('source', $source);
+    }
+
+    public function scopeNotFromSource($query, $source) {
+        return $query->whereNotIn('source', [$source]);
     }
 
     /**

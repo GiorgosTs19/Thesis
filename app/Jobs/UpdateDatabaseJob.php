@@ -96,7 +96,7 @@ class UpdateDatabaseJob implements ShouldQueue, ShouldBeUnique {
         ULog::log('Starting Works update');
         DB::transaction(function () {
             // An array of the ids of the authors to be updated.
-            $works = Work::all(Work::$updateFields);
+            $works = Work::notFromSource(Work::$aggregateSource)->get();
             $length = sizeof($works);
             $completed = 0;
             foreach ($works as $work) {

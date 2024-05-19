@@ -11,8 +11,8 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder {
 
     public function run(): void {
-        self::initDatabase();
-//        self::UpdateDatabase();
+//        self::initDatabase();
+        self::UpdateDatabase();
     }
 
     private function initDatabase(): void {
