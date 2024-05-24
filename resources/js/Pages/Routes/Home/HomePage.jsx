@@ -10,7 +10,7 @@ const HomePage = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) =>
             <div className={styles.innerContainer}>
                 <div className={styles.wrapper}>
                     <div className={styles.header}>
-                        <img src={logo} alt={'MyPubsV2'} className={'mx-auto my-5'} width={550} height={550} />
+                        <img src={logo} alt={'MyPubsV2'} className={'mx-auto my-5'} width={400} height={400} />
                     </div>
                     <div className={'my-7 flex'}>
                         <Search isHomeScreen />
