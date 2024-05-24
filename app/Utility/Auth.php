@@ -11,7 +11,7 @@ class Auth {
     public static function resourceToArray($authenticatedUser): array {
         return [
             'id' => $authenticatedUser->am,
-            'display_name' => $authenticatedUser->displayName,
+            'display_name' => property_exists($authenticatedUser,'displayName') ?  $authenticatedUser->displayName : $authenticatedUser->cn,
             'first_name' => $authenticatedUser->cn,
             'last_name' => $authenticatedUser->sn,
             'role' => $authenticatedUser->eduPersonAffiliation,
