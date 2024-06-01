@@ -66,6 +66,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                             parser={Author.parseResponseAuthor}
                             wrapperClassName={styles.list}
                             rounded
+                            listClassName={'pl-5'}
                         />
 
                         <List
@@ -76,6 +77,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                             parser={Author.parseResponseAuthor}
                             wrapperClassName={styles.list}
                             rounded
+                            listClassName={'pl-5'}
                         />
                     </div>
                 </div>
@@ -87,7 +89,16 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
                         </div>
                     </div>
                     <div className={styles.listWrapper}>
-                        <List data={mostCitationsWorks} renderFn={renderWork} vertical title={'Most Cited Works'} parser={Work.parseResponseWork} wrapperClassName={styles.list} rounded />
+                        <List
+                            data={mostCitationsWorks}
+                            renderFn={renderWork}
+                            vertical
+                            title={'Most Cited Works'}
+                            parser={Work.parseResponseWork}
+                            wrapperClassName={styles.list}
+                            rounded
+                            listClassName={'pl-2'}
+                        />
                     </div>
                 </div>
             </div>
@@ -125,7 +136,7 @@ const HomeBanner = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) 
 const styles = {
     wrapperDiv: 'col-span-3 flex flex-col xl:flex-row text-center h-full min-h-96',
     statistics: 'col-span-3 flex flex-col text-center h-full',
-    card: 'shadow-lg border border-gray-200 rounded-xl h-full w-full xl:w-5/12 p-3 flex',
+    card: 'shadow-lg border border-gray-200 rounded-xl h-full w-full xl:w-5/12 p-1 flex',
     timeLineCard: 'w-full mx-auto border border-gray-200',
     timeLineCardInnerContainer: 'w-full text-center flex gap-3',
     statisticsCard: 'shadow-lg h-full w-full xl:w-4/12 mx-auto',
@@ -146,10 +157,6 @@ const styles = {
     timelineWrapper: 'flex flex-col xl:flex-row gap-5 w-full mt-20',
     timelineStepNumber: 'my-auto text-2xl',
     banner: 'text-center mt-20 mb-3 rounded-xl col-span-5',
-    bannerInnerContainer: 'flex flex-col justify-between rounded-lg border-t-0 border border-background shadow-lg rounded-t-none bg-accent p-4 md:flex-row w-fit mx-auto',
-    bannerTextContainer: 'mb-3 mr-4 flex flex-col items-start md:mb-0 md:flex-row md:items-center',
-    bannerButtonContainer: 'flex flex-shrink-0 items-center',
-    bannerText: 'flex items-center text-xl 4xl:text-2xl font-normal text-background',
 };
 
 HomeBanner.propTypes = {

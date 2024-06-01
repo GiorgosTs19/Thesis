@@ -165,7 +165,7 @@ class WorkUtils {
     public static function createNewOAWork($work): void {
         $work_open_access = $work->open_access;
         $work_url = $work->ids->doi ?? $work_open_access->oa_url;
-        if (Work::doi($work_url)->exists())
+        if (Work::doi($work_url)->source(Work::$openAlexSource)->exists())
             return;
 
         $new_work = new Work;
@@ -209,11 +209,11 @@ class WorkUtils {
      * @param int $author_id - The author with whom the work will be associated.
      * @return Work|null - The newly created work if doi was defined and the work was successfully created, otherwise null.
      */
-    public static function createDOIWork(string $doi, int $author_id): ?Work {
+    public static function createDOIWork(string $doi, int $author_id): void {
         $doi_object = DOIAPI::workRequest($doi);
 
-        if (!$doi_object)
-            return null;
+        if (!$doi_object || Work::doi($doi)->source(Work::$crossRefSource)->exists())
+            return;
 
         $new_work = new Work();
         $new_work->doi = $doi;
@@ -239,8 +239,6 @@ class WorkUtils {
         $aggregated_work->abstract = isset($doi_object->abstract) ? (string)simplexml_load_string($doi_object->abstract, null, LIBXML_NOERROR, 'jats', true) : null;
         $aggregated_work->subtype = $doi_object->type ?? null;
         $aggregated_work->save();
-
-        return $new_work;
     }
 
     public static function parseCRefAuthors($doi_object, $work) {

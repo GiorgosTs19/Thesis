@@ -49,6 +49,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static distinct()
  * @method static whereHas(string $string, Closure $param)
  * @method static notFromSource(string $aggregateSource)
+ * @method static externalId($orc_id_path)
  */
 class Work extends Model {
     use HasFactory;
@@ -377,5 +378,9 @@ class Work extends Model {
 
             (new WorkConcept(['work_id' => $this->id, 'concept_id' => $database_concept->id]))->save();
         }
+    }
+
+    public function scopeExternalId($query, $id) {
+        return $query->where('external_id', $id);
     }
 }

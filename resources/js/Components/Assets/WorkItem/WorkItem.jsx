@@ -119,8 +119,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 );
         }
     };
-    const dropDownOptions = [hidden ? { name: 'Show in profile', value: 1, default: false, onClick: showWork }
-        : { name: 'Hide from profile', value: 1, default: false, onClick: hideWork }];
+    const dropDownOptions = [hidden ? { name: 'Show in profile', value: 1, default: false, onClick: showWork } : { name: 'Hide from profile', value: 1, default: false, onClick: hideWork }];
     const [multipleSources, sources] = work.getSources();
     return (
         <li className={styles.li}>
@@ -138,10 +137,13 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 </Modal.Body>
             </Modal>
             <div className={'mb-5 flex h-fit flex-grow list-none '}>
-                {showUserOptions && work.editable && <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} className={'my-auto'}/>}
+                {showUserOptions && work.editable && <DropDownMenu dotsButton smallDots verticalDots options={dropDownOptions} className={'my-auto'} />}
                 <div className={styles.index}>
                     {index}
                     {getSourceIcon()}
+                    <a href={doi} title={'Go to source'} className={'mx-auto mt-2'}>
+                        <ExternalSVG width={26} height={26} />
+                    </a>
                 </div>
                 <div className={styles.infoContainer}>
                     <div className={styles.innerInfoContainer}>
@@ -167,9 +169,6 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                     {!containsKey(hiddenProperties, PROPERTIES.AUTHORS) && authorsToShow}
                 </div>
             </div>
-            <a href={doi} title={'Go to source'} className={'mt-2'}>
-                <ExternalSVG width={26} height={26} />
-            </a>
         </li>
     );
 };
@@ -189,4 +188,5 @@ WorkItem.propTypes = {
         versions: bool,
     }),
     showUserOptions: bool,
+    hidden: bool,
 };

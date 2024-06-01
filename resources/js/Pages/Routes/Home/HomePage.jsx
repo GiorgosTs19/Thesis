@@ -25,7 +25,7 @@ const HomePage = ({ mostCitationsUsers, mostWorksUsers, mostCitationsWorks }) =>
 const styles = {
     header: 'text-4xl xl:text-6xl text-gray-500 mb-6',
     container: 'items-center h-full rounded-lg',
-    innerContainer: 'w-full px-6 py-3 flex flex-col h-full rounded-lg',
+    innerContainer: 'w-full p-2 md:p-4 flex flex-col h-full rounded-lg',
     wrapper: 'md:p-4 flex flex-col text-center mb-5',
 };
 

@@ -15,7 +15,7 @@ import { useAuth } from '@/Hooks/useAuth/useAuth.jsx';
 const ExpandedGroupInfo = ({ visibleWidth = 1100, charts, loading, groupWorks, handleLinkClick, dispatch, filtersHaveChanged, filters, group, renderAuthorItem }) => {
     const { width } = useWindowSize();
     const [authorsOpen, setAuthorsOpen] = useState(false);
-    const handleDrawerOpen = () => setAuthorsOpen(true);
+    const handleDrawerOpen = () => setAuthorsOpen((prev) => !prev);
     const handleDrawerClose = () => setAuthorsOpen(false);
     const { isAdmin } = useAuth();
 

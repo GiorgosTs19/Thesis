@@ -101,6 +101,7 @@ const CompactGroupInfo = ({ visibleWidth = 1100, group, groupWorks, charts, load
                                     title={`Group Members ${group.members.length ? ` ( ${group.members.length} )` : 0}`}
                                     parser={Author.parseResponseAuthor}
                                     emptyListPlaceholder={'This group has no members'}
+                                    listClassName={'pl-4'}
                                 ></List>
                             </Tabs.Item>
                             <Tabs.Item title="Works" icon={MdDashboard}>

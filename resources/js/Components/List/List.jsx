@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {array, arrayOf, bool, func, node, oneOfType, string} from "prop-types";
-import clsx from "clsx";
-import {themeStyles} from "@/Theme/Theme.js";
-import {BsChevronDown, BsChevronRight} from "react-icons/bs";
+import React, { useEffect, useState } from 'react';
+import { array, arrayOf, bool, func, node, oneOfType, string } from 'prop-types';
+import clsx from 'clsx';
+import { themeStyles } from '@/Theme/Theme.js';
+import { BsChevronDown, BsChevronRight } from 'react-icons/bs';
 
 /**
  * PaginatedList Component.
@@ -39,54 +39,63 @@ import {BsChevronDown, BsChevronRight} from "react-icons/bs";
  * <List data={data} renderFunc={()=>{}} parser={()=>{}}/>
  */
 const List = ({
-                  data, title, renderFn, parser, vertical = false, wrapperClassName = '', listClassName = '', header, footer,
-                  emptyListPlaceholder = 'The list is empty', scrollable = true, rounded = false,
-                  collapsable = false, initiallyCollapsed = false, children
-              }) => {
+    data,
+    title,
+    renderFn,
+    parser,
+    vertical = false,
+    wrapperClassName = '',
+    listClassName = '',
+    header,
+    footer,
+    emptyListPlaceholder = 'The list is empty',
+    scrollable = true,
+    rounded = false,
+    collapsable = false,
+    initiallyCollapsed = false,
+    children,
+}) => {
     const items = parser ? data.map(parser) : data;
     const [listCollapsed, setListCollapsed] = useState(collapsable && initiallyCollapsed);
 
     useEffect(() => {
-        if (!collapsable)
-            setListCollapsed(false);
+        if (!collapsable) setListCollapsed(false);
     }, [collapsable]);
 
-    return <div className={clsx(wrapperClassName, styles.wrapper, scrollable ? (vertical ? 'overflow-y-auto' : 'overflow-x-auto') : '', rounded ? 'rounded-lg' : '')}>
-        <div className={clsx(header ? 'mb-2' : 'mb-6', styles.title, collapsable ? 'cursor-pointer' : '')} onClick={() => collapsable && setListCollapsed(prev => !prev)}>
-            {title}
-            {children}
-            {
-                collapsable && <span className={'ml-3 mt-1.5 flex'}>{listCollapsed ? <BsChevronRight/>
-                    : <BsChevronDown/>}</span>
-            }
-        </div>
-        {!listCollapsed ? <>
-            {header && <div className={styles.header}>
-                {header}
-            </div>}
-            {items.length ?
-                <ul
-                    className={`overflow-hidden list-disc pl-2 gap-8 ${listClassName} ${vertical ? styles.verticalList : styles.horizontalList}`}>
-                    {items.map((item, index) =>
-                        renderFn(item, index)
+    return (
+        <div className={clsx(wrapperClassName, styles.wrapper, scrollable ? (vertical ? 'overflow-y-auto' : 'overflow-x-auto') : '', rounded ? 'rounded-lg' : '')}>
+            <div className={clsx(header ? 'mb-2' : 'mb-6', styles.title, collapsable ? 'cursor-pointer' : '')} onClick={() => collapsable && setListCollapsed((prev) => !prev)}>
+                {title}
+                {children}
+                {collapsable && <span className={'ml-3 mt-1.5 flex'}>{listCollapsed ? <BsChevronRight /> : <BsChevronDown />}</span>}
+            </div>
+            {!listCollapsed ? (
+                <>
+                    {header && <div className={styles.header}>{header}</div>}
+                    {items.length ? (
+                        <ul className={`list-disc gap-8 overflow-hidden ${listClassName} ${vertical ? styles.verticalList : styles.horizontalList}`}>
+                            {items.map((item, index) => renderFn(item, index))}
+                        </ul>
+                    ) : (
+                        <h4 className={'m-auto text-xl'}>{emptyListPlaceholder}</h4>
                     )}
-                </ul>
-                : <h4 className={'text-xl m-auto'}>{emptyListPlaceholder}</h4>}
-            {footer && <div className={styles.footer}>
-                {footer}
-            </div>}
-        </> : <span className={'text-base text-gray-500 opacity-85 m-auto'}>List Collapsed</span>}
-    </div>
-}
+                    {footer && <div className={styles.footer}>{footer}</div>}
+                </>
+            ) : (
+                <span className={'m-auto text-base text-gray-500 opacity-85'}>List Collapsed</span>
+            )}
+        </div>
+    );
+};
 
 const styles = {
-    wrapper: `p-4 flex flex-col h-full`,
+    wrapper: `p-2 md:p-4 flex flex-col h-full`,
     title: themeStyles.listTitle,
     header: 'text-gray-500 text-sm 2xl:text-base mb-3',
     verticalList: 'md:grid-cols-2 lg:grid-cols-3',
     horizontalList: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-    footer: 'text-gray-500 text-sm mt-2'
-}
+    footer: 'text-gray-500 text-sm mt-2',
+};
 List.propTypes = {
     title: string,
     header: string,
@@ -102,6 +111,6 @@ List.propTypes = {
     wrapperClassName: string,
     listClassName: string,
     emptyListPlaceholder: string,
-    children: oneOfType([node, arrayOf(node)])
-}
+    children: oneOfType([node, arrayOf(node)]),
+};
 export default List;
