@@ -21,7 +21,7 @@ const styles = {
     li: 'flex justify-between',
     index: 'top-0 left-0 pr-2 text-black text-sm lg:text-base 2xl:text-lg flex flex-col gap-2 text-center h-fit',
     infoContainer: 'flex flex-col border-l-2 border-l-blue-700',
-    innerInfoContainer: 'flex flex-wrap ',
+    innerInfoContainer: 'flex flex-wrap my-auto',
     infoProperty: 'text-gray-600 pl-3 text-xs md:text-sm',
     title: 'text-black text-sm lg:text-base font-bold truncate whitespace-pre-wrap hover:underline',
     authorsList: 'pl-3',
@@ -141,7 +141,7 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                 <div className={styles.index}>
                     {index}
                     {getSourceIcon()}
-                    <a href={doi} title={'Go to source'} className={'mx-auto mt-2'}>
+                    <a href={doi} title={'Go to source'} className={'mx-auto mt-2 md:hidden'}>
                         <ExternalSVG width={26} height={26} />
                     </a>
                 </div>
@@ -169,6 +169,9 @@ export const WorkItem = ({ work, index, authorToExclude, hiddenProperties = {}, 
                     {!containsKey(hiddenProperties, PROPERTIES.AUTHORS) && authorsToShow}
                 </div>
             </div>
+            <a href={doi} title={'Go to source'} className={'mx-auto mt-2 hidden md:block'}>
+                <ExternalSVG width={26} height={26} />
+            </a>
         </li>
     );
 };
