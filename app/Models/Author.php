@@ -353,7 +353,7 @@ class Author extends Model {
      * All the works associated with the author.
      */
     public function works(): BelongsToMany {
-        return $this->belongsToMany(Work::class, 'author_work');
+        return $this->belongsToMany(Work::class, 'author_work')->wherePivot('visibility', 1);
     }
 
     public function user(): HasOne {

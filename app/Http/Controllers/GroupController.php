@@ -77,21 +77,11 @@ class GroupController extends Controller {
 
         $success = !!$group;
 
-        $authors_ids = $group->members->map(function (Author $author) {
-            return $author->id;
-        });
+        $orc_id_works = $group->works()->source(Work::$orcIdSource)->count();
 
-        $orc_id_works = Work::whereHas('authors', function ($query) use ($authors_ids) {
-            $query->whereIn('author_id', $authors_ids);
-        })->source(Work::$orcIdSource)->count();
+        $open_alex_works = $group->works()->source(Work::$openAlexSource)->count();
 
-        $open_alex_works = Work::whereHas('authors', function ($query) use ($authors_ids) {
-            $query->whereIn('author_id', $authors_ids);
-        })->source(Work::$openAlexSource)->count();
-
-        $crossref_works = Work::whereHas('authors', function ($query) use ($authors_ids) {
-            $query->whereIn('author_id', $authors_ids);
-        })->source(Work::$crossRefSource)->count();
+        $crossref_works = $group->works()->source(Work::$crossRefSource)->count();
 
 
         return $success ? Requests::success('Group retrieved successfully',
@@ -119,8 +109,8 @@ class GroupController extends Controller {
 
         try {
             $source_counts = $group->members->map(function (Author $author) {
-                return ['name' => $author->display_name, 'counts' => Work::whereHas('authors', function ($query) use ($author) {
-                    $query->whereIn('author_id', [$author->id]);
+                return ['name' => $author->display_name, 'url' => route('Author.Page', ['id' => $author->open_alex_id]), 'counts' => Work::whereHas('authors', function ($query) use ($author) {
+                    $query->whereIn('author_id', [$author->id])->where('visibility', 1);
                 })->whereNotIn('source', [Work::$aggregateSource])
                     ->selectRaw('source, COUNT(*) as source_count')
                     ->groupBy('source')
@@ -164,7 +154,7 @@ class GroupController extends Controller {
             // Retrieve types with works filtered by authors and source
             $type_counts = Type::with(['works' => function ($query) use ($authors_ids) {
                 $query->whereHas('authors', function ($query) use ($authors_ids) {
-                    $query->whereIn('author_id', $authors_ids);
+                    $query->whereIn('author_id', $authors_ids)->where('visibility', 1);
                 })->where('source', Work::$aggregateSource);
             }])->get()->map(function ($type) use ($min_pub_year, $max_pub_year) {
                 $works_per_year = $type->works->groupBy('publication_year')->map->count();

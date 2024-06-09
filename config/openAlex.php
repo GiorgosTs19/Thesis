@@ -41,6 +41,7 @@ return [
     'required_work_update_fields' => [
         'id',
         'title',
+        'type',
         'open_access',
         'authorships',
         'updated_date',

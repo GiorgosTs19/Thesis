@@ -75,7 +75,7 @@ class WorkController extends Controller {
             if (sizeof($authors_ids) > 0)
                 $works_query = $works_query->whereHas('authors', function ($query) use ($authors_ids, $filter_visibility) {
                     $query->whereIn('author_id', $authors_ids)->when($filter_visibility, function ($query) {
-                        return $query->where('visibility', true);
+                        return $query->where('visibility', 1);
                     });
                 });
 

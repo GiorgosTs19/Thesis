@@ -54,7 +54,11 @@ const OmeaStats = ({ group }) => {
                             <Table.Body>
                                 {countsPerAuthor.map((t) => (
                                     <Table.Row key={t.name} className={'border-b border-b-gray-200'}>
-                                        <Table.Cell>{t.name}</Table.Cell>
+                                        <Table.Cell>
+                                            <a href={t.url} className={'hover:text-blue-500 hover:underline'}>
+                                                {t.name}
+                                            </a>
+                                        </Table.Cell>
                                         <Table.Cell className={'border-x border-x-gray-100 text-center'}>{t.counts.OpenAlex ?? '-'}</Table.Cell>
                                         <Table.Cell className={'border-r border-r-gray-100 text-center'}>{t.counts.ORCID ?? '-'}</Table.Cell>
                                         <Table.Cell className={'border-r border-r-gray-100 text-center'}>{t.counts.Crossref ?? '-'}</Table.Cell>

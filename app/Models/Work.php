@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\DOIAPI;
 use App\Http\Controllers\OpenAlexAPI;
+use App\Http\Controllers\OrcIdAPI;
 use App\Utility\AuthorUtils;
 use App\Utility\Ids;
 use App\Utility\ULog;
@@ -174,7 +175,8 @@ class Work extends Model {
      * @return void
      */
     public function updateSelf(): void {
-        $this->type = WorkUtils::getCustomType($this->type);
+        $this->type_id = WorkUtils::getCustomType($this->type);
+        $this->save();
 
         if ($this->source === self::$aggregateSource)
             return;
@@ -200,6 +202,11 @@ class Work extends Model {
      */
     private function updateSelfOpenAlex() {
         $request_work = OpenAlexAPI::workUpdateRequest($this->external_id);
+
+        if ($this->type == 1) {
+            $this->type = $request_work->type;
+            $this->save();
+        }
 
         $should_update = $request_work->updated_date !== $this->last_updated_date;
         if (!$should_update)
@@ -250,7 +257,11 @@ class Work extends Model {
      */
     private function updateSelfORCID(): void {
         try {
-//        $orc_id_work = OrcIdAPI::workRequest($this->external_id);
+            if ($this->type == 1) {
+                $orc_id_work = OrcIdAPI::workRequest($this->external_id);
+                $this->type = property_exists($orc_id_work, 'type') ? $orc_id_work->type : 'Unknown';
+                $this->save();
+            }
         } catch (Exception $error) {
             ULog::error("Failed to updated Work $this->id from ORCID" . $error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());
         }
@@ -269,6 +280,7 @@ class Work extends Model {
         try {
             $doi_work = DOIAPI::workRequest($this->doi);
             $this->is_referenced_by_count = data_get($doi_work, 'is-referenced-by-count') ?? null;
+            $this->type = $doi_work->type;
             $this->save();
         } catch (Exception $error) {
             ULog::error("Failed to updated Work $this->id from Crossref" . $error->getMessage() . ", file: " . $error->getFile() . ", line: " . $error->getLine());

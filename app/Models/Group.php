@@ -64,13 +64,13 @@ class Group extends Model {
         return $newMember->save();
     }
 
-    public function works($source = 'Aggregate') {
+    public function works() {
         return Work::whereHas('authors', function ($query) {
             $members = $this->members->map(function (Author $author) {
                 return $author->id;
             });
-            $query->whereIn('author_id', $members);
-        })->source($source)->get();
+            $query->whereIn('author_id', $members)->where('visibility', 1);
+        });
     }
 
     public function countWorkSources() {
