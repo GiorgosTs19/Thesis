@@ -88,7 +88,7 @@ const AddGroupMembers = ({ group, noModal }) => {
                 message = 'No available authors to add to this group';
                 break;
             default:
-                message = 'No available authors to add to this group';
+                message = '';
         }
         return <h4 className={styles.noResults}>{message}</h4>;
     };
