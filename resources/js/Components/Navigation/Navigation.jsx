@@ -11,7 +11,7 @@ export function Navigation() {
     const navigation = [
         { name: 'Authors', href: '#', current: false, disabled: true, visible: false },
         { name: 'Works', href: '#', current: false, disabled: true, visible: false },
-        { name: 'Groups', href: route('Groups.Page'), current: window.location.href === route('Groups.Page'), disabled: false, visible: isLoggedIn },
+        { name: 'Groups', href: route('Groups.Page'), current: window.location.href === route('Groups.Page'), disabled: false, visible: true },
     ];
 
     const logo = (
@@ -55,7 +55,7 @@ export function Navigation() {
                                     <button type="button" className={styles.notificationsButton}>
                                         <span className="absolute -inset-1.5" />
                                         <span className="sr-only">View notifications</span>
-                                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                                        <BellIcon className="h-6 w-6" />
                                     </button>
                                 </div>
                             </div>
